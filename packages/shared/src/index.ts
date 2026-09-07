@@ -1,5 +1,7 @@
 // @lithos/shared — общие для клиента и воркера схемы, enum'ы и таблицы score.
-// Заполняется в T1.1. Здесь — только то, что нужно каркасу (T0.1).
+export * from './enums.js';
+export * from './scan-result.js';
+export * from './geo.js';
 
 export const SCAN_QUEUES = ['scan_interactive', 'scan_dispute', 'scan_batch'] as const;
 export type ScanQueue = (typeof SCAN_QUEUES)[number];
