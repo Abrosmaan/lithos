@@ -31,7 +31,11 @@ export function createPhotoStore(url: string, serviceKey: string, o: PhotoStoreO
   const sleep = o.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
   const baseFetch = o.fetch ?? fetch;
   // supabase-js не принимает AbortSignal в download(): таймаут ставим на уровне fetch.
-  const timedFetch: typeof fetch = (input, init) => baseFetch(input, { ...init, signal: AbortSignal.timeout(timeoutMs) });
+  const timedFetch: typeof fetch = (input, init) => {
+    const timeout = AbortSignal.timeout(timeoutMs);
+    const signal = init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
+    return baseFetch(input, { ...init, signal });
+  };
   const client = createClient(url, serviceKey, {
     db: { schema: 'lithos' },
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },

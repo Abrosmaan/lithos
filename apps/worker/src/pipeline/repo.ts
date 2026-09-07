@@ -72,6 +72,11 @@ function toCardRow(r: Record<string, unknown>): CardRow {
   };
 }
 
+/** Пространство advisory-lock'ов проекта: 'LITH' как int32 (общий Postgres — не пересекаемся с соседями). */
+export const LOCK_CLASS = 0x4c495448;
+/** Стабильный int32 от scan_id (uuid → md5 → первые 32 бита); hashtext() не гарантирует стабильность между версиями. */
+const SCAN_LOCK_KEY = "('x' || substr(md5($1), 1, 8))::bit(32)::int";
+
 const SCAN_COLUMNS = 'id, user_id, lat, lng, accuracy_m, user_tests, parent_card_id, stage, attempt, cost_usd, error, created_at';
 const CARD_COLUMNS =
   'id, scan_id, user_id, rock_class, tier, score, score_breakdown, inclusions, shape, lore, name, user_name, state, parent_card_id, verification, provisional, hidden, cell_id, lat, lng';
@@ -229,11 +234,15 @@ export class PgPipelineRepo implements PipelineRepo {
     });
   }
 
-  /** Сессионный advisory lock на выделенном соединении; держится до release() (весь runScan). */
+  /**
+   * Сессионный advisory lock (classid = LOCK_CLASS 'LITH', objid = стабильный int32 от scan_id) на выделенном
+   * соединении; держится до release() (весь runScan). Работает через session-mode pooler (одна сессия = одно соединение
+   * на всё время); в transaction-mode pooler'е сессионный lock жить не будет — тогда переходить на xact-lock + тело в tx.
+   */
   async tryLockScan(scanId: string): Promise<ScanLock | null> {
     const c = await this.pool.connect();
     try {
-      const { rows } = await c.query<{ ok: boolean }>('select pg_try_advisory_lock(hashtext($1)) as ok', [`lithos.scan:${scanId}`]);
+      const { rows } = await c.query<{ ok: boolean }>(`select pg_try_advisory_lock(${LOCK_CLASS}, ${SCAN_LOCK_KEY}) as ok`, [scanId]);
       if (!rows[0]?.ok) {
         c.release();
         return null;
@@ -248,7 +257,7 @@ export class PgPipelineRepo implements PipelineRepo {
         if (released) return;
         released = true;
         try {
-          await c.query('select pg_advisory_unlock(hashtext($1))', [`lithos.scan:${scanId}`]);
+          await c.query(`select pg_advisory_unlock(${LOCK_CLASS}, ${SCAN_LOCK_KEY})`, [scanId]);
           c.release();
         } catch {
           c.release(true); // соединение в неизвестном состоянии — выбросить из пула, lock снимется с ним
@@ -259,6 +268,9 @@ export class PgPipelineRepo implements PipelineRepo {
 
   async dlqScan(scanId: string): Promise<DlqOutcome> {
     return this.tx(async (c) => {
+      // Скан прямо сейчас обрабатывает другой процесс (дубликат сообщения после deferred) — его не трогаем.
+      const busy = await c.query<{ ok: boolean }>(`select pg_try_advisory_xact_lock(${LOCK_CLASS}, ${SCAN_LOCK_KEY}) as ok`, [scanId]);
+      if (!busy.rows[0]?.ok) return 'busy';
       const { rows } = await c.query<{ stage: ScanStage; has_card: boolean }>(
         `select s.stage, exists(select 1 from lithos.cards k where k.scan_id = s.id) as has_card
            from lithos.scans s where s.id = $1 for update`,

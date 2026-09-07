@@ -117,8 +117,8 @@ export interface ScanLock {
   release(): Promise<void>;
 }
 
-/** Результат DLQ-обработки: карточка уже есть → скан закрыт как done, иначе failed/dlq. */
-export type DlqOutcome = 'failed' | 'done_with_card' | 'noop';
+/** Результат DLQ-обработки: карточка уже есть → done; иначе failed/dlq; busy — скан держит другой процесс, не трогаем. */
+export type DlqOutcome = 'failed' | 'done_with_card' | 'noop' | 'busy';
 
 /** Репозиторий конвейера. Реализация на pg — pipeline/repo.ts; в тестах — in-memory. */
 export interface PipelineRepo {

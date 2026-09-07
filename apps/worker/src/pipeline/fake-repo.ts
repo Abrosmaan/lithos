@@ -127,6 +127,7 @@ export class FakeRepo implements PipelineRepo {
   }
   async dlqScan(scanId: string): Promise<DlqOutcome> {
     this.hook('dlqScan');
+    if (this.locks.has(scanId)) return 'busy';
     const s = this.scans.get(scanId);
     if (!s || s.stage === 'done' || s.stage === 'failed') return 'noop';
     const card = [...this.cards.values()].find((c) => c.scan_id === scanId);

@@ -624,14 +624,55 @@ describe('consumer', () => {
     expect(c.inflightCount()).toBe(0);
   });
 
-  it('deferred (скан занят) → set_vt на retry, без ack', async () => {
+  it('DLQ-чтение дубликата, пока скан держит другой процесс → archive, скан не тронут (busy)', async () => {
+    const repo = new FakeRepo();
+    seedScan(repo, { stage: 'main' });
+    repo.locks.add('scan-1');
+    const q = fakeQueue({ scan_interactive: [msg('scan-1', 4, '14')] });
+    const c = createConsumer({ queue: q, repo, runScan: vi.fn(), log: silent, now: Date.now, setTimer: () => ({ clear() {} }) });
+    await c.tick();
+    expect(q.archive).toHaveBeenCalledWith('scan_interactive', '14');
+    expect(repo.scans.get('scan-1')).toMatchObject({ stage: 'main', error: null });
+  });
+
+  it('(n6) слот освобождается через tick(): при inflight=max tick ждёт завершения, затем читает следующее', async () => {
+    const repo = new FakeRepo();
+    const q = fakeQueue({ scan_interactive: [msg('a', 1, '1'), msg('b', 1, '2'), msg('c', 1, '3')] });
+    const finish: Record<string, () => void> = {};
+    const runScan = vi.fn((id: string) => new Promise<RunOutcome>((r) => { finish[id] = () => r({ status: 'done', scanId: id, queue: 'scan_interactive', reason: null, cardId: null, ms: 1 }); }));
+    const setTimer = (fn: () => void, ms: number) => {
+      if (ms === PIPELINE.chainTimeoutMs) queueMicrotask(fn); // цепочка «долгая» → сразу в фон
+      return { clear() {} };
+    };
+    const c = createConsumer({ queue: q, repo, runScan, log: silent, now: Date.now, setTimer });
+    await c.tick();
+    await c.tick();
+    expect(c.inflightCount()).toBe(PIPELINE.maxInflight);
+    let third: 'pending' | 'done' = 'pending';
+    const t3 = c.tick().then(() => (third = 'done'));
+    await Promise.resolve();
+    expect(third).toBe('pending'); // слотов нет — ждём, сообщение 'c' не читается
+    expect(runScan).toHaveBeenCalledTimes(2);
+    finish.a!();
+    await t3;
+    expect(c.inflightCount()).toBe(1);
+    expect(q.ack).toHaveBeenCalledWith('scan_interactive', '1');
+    await c.tick();
+    expect(runScan).toHaveBeenLastCalledWith('c', 'scan_interactive');
+    finish.b!();
+    finish.c!();
+    await c.drain();
+    expect(c.inflightCount()).toBe(0);
+  });
+
+  it('deferred (скан занят) → set_vt на полный lease, без ack', async () => {
     const repo = new FakeRepo();
     const q = fakeQueue({ scan_interactive: [msg('busy', 2, '13')] });
     const runScan = vi.fn().mockResolvedValue({ status: 'deferred', scanId: 'busy', queue: 'scan_interactive', reason: 'locked', cardId: null, ms: 1 });
     const c = createConsumer({ queue: q, repo, runScan, log: silent, now: Date.now, setTimer: () => ({ clear() {} }) });
     await c.tick();
     expect(q.ack).not.toHaveBeenCalled();
-    expect(q.extendLease).toHaveBeenCalledWith('scan_interactive', '13', PIPELINE.retryDelaySeconds);
+    expect(q.extendLease).toHaveBeenCalledWith('scan_interactive', '13', PIPELINE.leaseSeconds);
   });
 
   it('chain timeout: tick возвращается, обработка продолжается в фоне и завершается ack', async () => {

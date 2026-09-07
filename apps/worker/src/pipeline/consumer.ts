@@ -108,7 +108,9 @@ export function createConsumer(deps: ConsumerDeps) {
         return { kind: 'abandoned', scanId };
       }
       if (outcome.status === 'deferred') {
-        await deps.queue.extendLease(queue, msg.msgId, PIPELINE.retryDelaySeconds).catch(() => undefined);
+        // Скан держит другой процесс: вернуть через полный lease (он успеет доделать → следующее чтение будет no-op/ack).
+        // pgmq считает read_ct и на это чтение; если дубликат дойдёт до DLQ, dlqScan увидит lock → 'busy' и скан не тронет.
+        await deps.queue.extendLease(queue, msg.msgId, PIPELINE.leaseSeconds).catch(() => undefined);
         deps.log.info('scan deferred', { ...base, reason: outcome.reason });
         return { kind: 'deferred', scanId };
       }

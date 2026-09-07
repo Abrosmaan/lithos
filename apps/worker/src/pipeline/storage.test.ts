@@ -21,6 +21,16 @@ describe('photo store', () => {
     expect(init?.signal).toBeInstanceOf(AbortSignal); // таймаут на каждом запросе
   });
 
+  it('(n5) внешний signal объединяется с таймаутом (AbortSignal.any)', async () => {
+    const f = vi.fn(async (_i: FetchArgs[0], init?: FetchArgs[1]) => {
+      expect(init?.signal).toBeInstanceOf(AbortSignal);
+      return new Response(Buffer.from([1]), { status: 200 });
+    });
+    // supabase-js download() не передаёт signal, но timedFetch обязан не терять чужой, если он появится.
+    await store(f).download('u/s/1.jpg');
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+
   it('404 → PhotoUnavailableError без retry', async () => {
     const f = vi.fn(async () => new Response(JSON.stringify({ statusCode: '404', error: 'not_found', message: 'Object not found' }), { status: 404, headers: { 'content-type': 'application/json' } }));
     await expect(store(f).download('u/s/1.jpg')).rejects.toBeInstanceOf(PhotoUnavailableError);
