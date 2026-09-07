@@ -35,8 +35,14 @@ export const config = {
     return process.env.WORKER_DB_URL ?? process.env.SUPABASE_DB_POOLER_URL ?? req('SUPABASE_DB_URL');
   },
   dbSchema: process.env.DB_SCHEMA ?? 'lithos',
+  // T2.1: Storage под service-ключом (только воркер; в лог и клиент не попадает). Ленивые getter'ы — как dbUrl.
+  get supabaseUrl(): string {
+    return req('SUPABASE_URL');
+  },
+  get supabaseServiceKey(): string {
+    return process.env.SUPABASE_SERVICE_KEY ?? req('SUPABASE_SERVICE_ROLE_KEY');
+  },
   pollIntervalMs: Number(process.env.POLL_INTERVAL_MS ?? 1000),
-  leaseSeconds: 60,
   logLevel: process.env.LOG_LEVEL ?? 'info',
 
   // ---- Модели (T1.3) ----

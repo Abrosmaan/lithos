@@ -117,6 +117,9 @@ importers:
       '@lithos/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@supabase/supabase-js':
+        specifier: ^2.115.0
+        version: 2.115.0
       ai:
         specifier: ^7.0.93
         version: 7.0.93(zod@3.25.76)

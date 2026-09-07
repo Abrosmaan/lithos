@@ -1,36 +1,51 @@
 import { SCAN_QUEUES } from '@lithos/shared';
 import { config } from './config.js';
 import { closeDb, pool } from './db.js';
+import { getGeoContext } from './geo.js';
+import { callModel } from './llm/index.js';
 import { log } from './log.js';
-import { readOne, ack } from './queue.js';
+import { createPipeline } from './pipeline.js';
+import { createConsumer } from './pipeline/consumer.js';
+import { PIPELINE } from './pipeline/constants.js';
+import { PgPipelineRepo } from './pipeline/repo.js';
+import { createPhotoStore } from './pipeline/storage.js';
+import { ack, archive, extendLease, readOne } from './queue.js';
 
-// T0.1: hello-цикл. Читает очереди в порядке приоритета, логирует сообщение и подтверждает.
-// Настоящий конвейер (S0–S4) появится в T2.1 и заменит handle().
+// T2.1: конвейер S0–S4 (pipeline.ts) за потребителем очередей (pipeline/consumer.ts).
 
 let running = true;
 
-async function handle(queue: string, scanId: string): Promise<void> {
-  log.info('scan received (no pipeline yet)', { queue, scan_id: scanId });
-}
-
-async function tick(): Promise<boolean> {
-  for (const queue of SCAN_QUEUES) {
-    const msg = await readOne(queue, config.leaseSeconds);
-    if (!msg) continue;
-    await handle(queue, msg.payload.scan_id);
-    await ack(queue, msg.msgId);
-    return true;
-  }
-  return false;
-}
-
 async function main() {
   await pool.query('select 1');
-  log.info('worker started', { schema: config.dbSchema, queues: SCAN_QUEUES });
+  const repo = new PgPipelineRepo(pool);
+  const pipeline = createPipeline({
+    repo,
+    photos: createPhotoStore(config.supabaseUrl, config.supabaseServiceKey),
+    callModel,
+    getGeoContext,
+    log,
+    now: Date.now,
+  });
+  const consumer = createConsumer({
+    queue: { readOne, ack, archive, extendLease },
+    repo,
+    runScan: pipeline.runScan,
+    log,
+    now: Date.now,
+  });
+
+  log.info('worker started', {
+    schema: config.dbSchema,
+    queues: SCAN_QUEUES,
+    stages: { gate: config.stageGate, main: config.stageMain, escalation: config.stageEscalation },
+    fallback: config.fallbackProvider,
+    lease_s: PIPELINE.leaseSeconds,
+    chain_timeout_ms: PIPELINE.chainTimeoutMs,
+  });
   let idleTicks = 0;
   while (running) {
     try {
-      const busy = await tick();
+      const busy = await consumer.tick();
       if (busy) {
         idleTicks = 0;
         continue;
@@ -42,6 +57,8 @@ async function main() {
     }
     await new Promise((r) => setTimeout(r, config.pollIntervalMs));
   }
+  if (consumer.inflightCount() > 0) log.info('waiting for in-flight scans', { inflight: consumer.inflightCount() });
+  await consumer.drain();
   await closeDb();
   log.info('worker stopped');
 }

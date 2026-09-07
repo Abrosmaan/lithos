@@ -22,6 +22,11 @@ export async function ack(queue: ScanQueue, msgId: string): Promise<void> {
   await pool.query('select pgmq.delete($1, $2::bigint)', [queue, msgId]);
 }
 
+/** Продлить lease (pgmq.set_vt): сообщение снова видно через seconds. Используется и как heartbeat, и для короткого retry. */
+export async function extendLease(queue: ScanQueue, msgId: string, seconds: number): Promise<void> {
+  await pool.query('select pgmq.set_vt($1, $2::bigint, $3::int)', [queue, msgId, seconds]);
+}
+
 export async function archive(queue: ScanQueue, msgId: string): Promise<void> {
   await pool.query('select pgmq.archive($1, $2::bigint)', [queue, msgId]);
 }
