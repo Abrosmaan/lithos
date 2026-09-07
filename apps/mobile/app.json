@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Lithos",
+    "slug": "lithos",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.abrosmaan.lithos",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Камера нужна, чтобы сфотографировать камень для определения породы.",
+        "NSLocationWhenInUseUsageDescription": "Геопозиция нужна, чтобы сопоставить камень с геологией места и поставить точку на карте."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.abrosmaan.lithos",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "lithos",
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Камера нужна, чтобы сфотографировать камень для определения породы."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Геопозиция нужна, чтобы сопоставить камень с геологией места."
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+# Lithos worker на общем Hetzner VPS (INFRA.md §4).
+# network_mode: host обязателен — Supabase free-tier direct = IPv6-only. Портов наружу нет.
+services:
+  worker:
+    build: { context: ., dockerfile: apps/worker/Dockerfile }
+    image: lithos-worker:latest
+    container_name: lithos-worker
+    network_mode: host
+    restart: unless-stopped
+    env_file: .env
+    mem_limit: 512m

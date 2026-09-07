@@ -1,0 +1,36 @@
+# Секреты — только на VPS и локально, никогда в git
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Node / pnpm
+node_modules/
+dist/
+build/
+.expo/
+.turbo/
+*.tsbuildinfo
+coverage/
+
+# Expo / EAS
+ios/
+android/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# Runbook state (маркер зелёных тестов)
+.claude/state/tests-green
+
+# Прочее
+.DS_Store
+*.log
+test-results/
+
+# Expo
+.expo/
+expo-env.d.ts
+web-build/
