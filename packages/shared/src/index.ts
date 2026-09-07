@@ -2,6 +2,7 @@
 export * from './enums.js';
 export * from './scan-result.js';
 export * from './geo.js';
+export * from './score.js';
 
 export const SCAN_QUEUES = ['scan_interactive', 'scan_dispute', 'scan_batch'] as const;
 export type ScanQueue = (typeof SCAN_QUEUES)[number];
