@@ -34,3 +34,7 @@ test-results/
 .expo/
 expo-env.d.ts
 web-build/
+
+# Golden set: сырые ответы моделей и per-item метрики прогонов не в git, только report.md (T2.4)
+supabase/seed/golden/runs/*/*
+!supabase/seed/golden/runs/*/report.md

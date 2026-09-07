@@ -1,0 +1,1625 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "vc-01",
+      "file": "vc-01.jpg",
+      "is_rock": true,
+      "rock_class": "basalt",
+      "acceptable_alternatives": [],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 64.13,
+      "lng": -21.9,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Basalt_1_(16540710327).jpg",
+        "title": "File:Basalt 1 (16540710327).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "ручной образец, мелкозернистый"
+    },
+    {
+      "id": "vc-02",
+      "file": "vc-02.jpg",
+      "is_rock": true,
+      "rock_class": "basalt",
+      "acceptable_alternatives": [
+        "diabase"
+      ],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 64.13,
+      "lng": -21.9,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Basalt_8_(48674617291).jpg",
+        "title": "File:Basalt 8 (48674617291).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "второй базальт, другой образец"
+    },
+    {
+      "id": "vc-03",
+      "file": "vc-03.jpg",
+      "is_rock": true,
+      "rock_class": "vesicular_basalt",
+      "acceptable_alternatives": [
+        "basalt",
+        "scoria"
+      ],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 64.13,
+      "lng": -21.9,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Vesicular_basalt_(Quaternary;_Snake_River_Plain,_Idaho,_USA)_2.jpg",
+        "title": "File:Vesicular basalt (Quaternary; Snake River Plain, Idaho, USA) 2.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "крупные пузыри, граница со шлаком"
+    },
+    {
+      "id": "vc-04",
+      "file": "vc-04.jpg",
+      "is_rock": true,
+      "rock_class": "amygdaloidal_basalt",
+      "acceptable_alternatives": [
+        "basalt",
+        "vesicular_basalt"
+      ],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 64.13,
+      "lng": -21.9,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Amygdaloidal_basalt_1.jpg",
+        "title": "File:Amygdaloidal basalt 1.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "миндалины заполнены вторичными минералами (минерал не указан автором)"
+    },
+    {
+      "id": "vc-05",
+      "file": "vc-05.jpg",
+      "is_rock": true,
+      "rock_class": "scoria",
+      "acceptable_alternatives": [
+        "vesicular_basalt",
+        "basalt"
+      ],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 64.13,
+      "lng": -21.9,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Scoria_(Pacaya_Volcano,_Guatemala)_1.jpg",
+        "title": "File:Scoria (Pacaya Volcano, Guatemala) 1.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "свежий шлак Пакая"
+    },
+    {
+      "id": "vc-06",
+      "file": "vc-06.jpg",
+      "is_rock": true,
+      "rock_class": "pumice",
+      "acceptable_alternatives": [
+        "scoria"
+      ],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 64.13,
+      "lng": -21.9,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Pumice_(GeoDIL_number_-_415).jpg",
+        "title": "File:Pumice (GeoDIL number - 415).jpg",
+        "license": "CC0",
+        "author": "Mike Davis"
+      },
+      "notes": "GeoDIL; на исландском берегу — дрейфовая пемза (странник drift_pumice)"
+    },
+    {
+      "id": "vc-07",
+      "file": "vc-07.jpg",
+      "is_rock": true,
+      "rock_class": "obsidian",
+      "acceptable_alternatives": [],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 64.13,
+      "lng": -21.9,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Golden-sheen_obsidian_(Mexico)_16.jpg",
+        "title": "File:Golden-sheen obsidian (Mexico) 16.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "крупный план поверхности излома с золотистым отливом"
+    },
+    {
+      "id": "vc-08",
+      "file": "vc-08.jpg",
+      "is_rock": true,
+      "rock_class": "andesite",
+      "acceptable_alternatives": [
+        "dacite",
+        "basalt"
+      ],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 41.57,
+      "lng": 41.57,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Andesite_2013.jpg",
+        "title": "File:Andesite 2013.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "Гонио: андезит есть в геоконтексте"
+    },
+    {
+      "id": "vc-09",
+      "file": "vc-09.jpg",
+      "is_rock": true,
+      "rock_class": "tuff",
+      "acceptable_alternatives": [
+        "ignimbrite",
+        "sandstone"
+      ],
+      "inclusions": [
+        {
+          "mineral": "quartz",
+          "extent": "traces"
+        },
+        {
+          "mineral": "feldspar",
+          "extent": "traces"
+        }
+      ],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 41.57,
+      "lng": 41.57,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Tuff_(GeoDIL_number_-_463).jpg",
+        "title": "File:Tuff (GeoDIL number - 463).jpg",
+        "license": "CC0",
+        "author": "Darla Sondrol"
+      },
+      "notes": "GeoDIL, Тусон; слоистый пепел"
+    },
+    {
+      "id": "vc-10",
+      "file": "vc-10.jpg",
+      "is_rock": true,
+      "rock_class": "rhyolite",
+      "acceptable_alternatives": [
+        "dacite",
+        "trachyte"
+      ],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 64.13,
+      "lng": -21.9,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Rhyolite_2013.jpg",
+        "title": "File:Rhyolite 2013.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "ручной образец"
+    },
+    {
+      "id": "vc-11",
+      "file": "vc-11.jpg",
+      "is_rock": true,
+      "rock_class": "volcanic_breccia",
+      "acceptable_alternatives": [
+        "breccia",
+        "tuff"
+      ],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 64.13,
+      "lng": -21.9,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Volcanic_breccia_(GeoDIL_number_-_469).jpg",
+        "title": "File:Volcanic breccia (GeoDIL number - 469).jpg",
+        "license": "CC0",
+        "author": "Darla Sondrol"
+      },
+      "notes": "GeoDIL, Колорадо; угловатые обломки"
+    },
+    {
+      "id": "vc-12",
+      "file": "vc-12.jpg",
+      "is_rock": true,
+      "rock_class": "dacite",
+      "acceptable_alternatives": [
+        "andesite",
+        "rhyolite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "plagioclase",
+          "extent": "noticeable"
+        },
+        {
+          "mineral": "quartz",
+          "extent": "traces"
+        },
+        {
+          "mineral": "biotite",
+          "extent": "traces"
+        }
+      ],
+      "geology_type": "volcanic_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 41.57,
+      "lng": 41.57,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Dacite_(Tertiary;_Mt._General,_San_Bernardino_County,_California,_USA)_1.jpg",
+        "title": "File:Dacite (Tertiary; Mt. General, San Bernardino County, California, USA) 1.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "вкрапленники кварц/плагиоклаз/биотит"
+    },
+    {
+      "id": "lc-01",
+      "file": "lc-01.jpg",
+      "is_rock": true,
+      "rock_class": "limestone",
+      "acceptable_alternatives": [
+        "dolomite"
+      ],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Glacially_scratched_&_faceted_limestone_pebble_from_Pleistocene_glacial_till_(Granville,_Ohio,_USA)_(31253354871).jpg",
+        "title": "File:Glacially scratched & faceted limestone pebble from Pleistocene glacial till (Granville, Ohio, USA) (31253354871).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "серая галька с ледниковыми штрихами, 3.3 см"
+    },
+    {
+      "id": "lc-02",
+      "file": "lc-02.jpg",
+      "is_rock": true,
+      "rock_class": "limestone",
+      "acceptable_alternatives": [
+        "coquina",
+        "fossiliferous_limestone"
+      ],
+      "inclusions": [
+        {
+          "mineral": "fossil_fragment",
+          "extent": "traces"
+        }
+      ],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 41.57,
+      "lng": 41.57,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Homotrema_rubrum-encrusted_aragonitic_limestone_pebble_(modern)_(North_Point_Peninsula,_San_Salvador_Island,_Bahamas)_(15786818899).jpg",
+        "title": "File:Homotrema rubrum-encrusted aragonitic limestone pebble (modern) (North Point Peninsula, San Salvador Island, Bahamas) (15786818899).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "пляжная галька с красной коркой фораминифер; 1122 px"
+    },
+    {
+      "id": "lc-03",
+      "file": "lc-03.jpg",
+      "is_rock": true,
+      "rock_class": "fossiliferous_limestone",
+      "acceptable_alternatives": [
+        "limestone",
+        "fossil"
+      ],
+      "inclusions": [
+        {
+          "mineral": "fossil_fragment",
+          "extent": "noticeable"
+        }
+      ],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Fossiliferous_limestone_(Columbus_Limestone,_Middle_Devonian;_Sullivant_Quarry,_Columbus,_Ohio,_USA)_35_(41394336644).jpg",
+        "title": "File:Fossiliferous limestone (Columbus Limestone, Middle Devonian; Sullivant Quarry, Columbus, Ohio, USA) 35 (41394336644).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "коралл в известняке"
+    },
+    {
+      "id": "lc-04",
+      "file": "lc-04.jpg",
+      "is_rock": true,
+      "rock_class": "coquina",
+      "acceptable_alternatives": [
+        "fossiliferous_limestone",
+        "limestone"
+      ],
+      "inclusions": [
+        {
+          "mineral": "fossil_fragment",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 41.57,
+      "lng": 41.57,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Coquina_(Anastasia_Formation,_Quaternary;_St._Augustine,_Florida,_USA)_1_(49136182942).jpg",
+        "title": "File:Coquina (Anastasia Formation, Quaternary; St. Augustine, Florida, USA) 1 (49136182942).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "ракушечник"
+    },
+    {
+      "id": "lc-05",
+      "file": "lc-05.jpg",
+      "is_rock": true,
+      "rock_class": "chalk",
+      "acceptable_alternatives": [
+        "limestone"
+      ],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Chalk_(Annona_Chalk,_Upper_Cretaceous;_White_Cliffs_of_the_Little_River,_Arkansas,_USA)_(40795385595).jpg",
+        "title": "File:Chalk (Annona Chalk, Upper Cretaceous; White Cliffs of the Little River, Arkansas, USA) (40795385595).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "Дорсет: мел 0.5 в геоконтексте"
+    },
+    {
+      "id": "lc-06",
+      "file": "lc-06.jpg",
+      "is_rock": true,
+      "rock_class": "flint",
+      "acceptable_alternatives": [
+        "chert",
+        "chalk"
+      ],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Chert_nodule_in_chalk_(Upper_Cretaceous;_White_Cliffs_of_Dover,_England,_Britain)_(16617660887).jpg",
+        "title": "File:Chert nodule in chalk (Upper Cretaceous; White Cliffs of Dover, England, Britain) (16617660887).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "кремнёвая конкреция в мелу Дувра (на Commons названа chert)"
+    },
+    {
+      "id": "lc-07",
+      "file": "lc-07.jpg",
+      "is_rock": true,
+      "rock_class": "chert",
+      "acceptable_alternatives": [
+        "flint",
+        "jasper"
+      ],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Dover_Chert_(St._Louis_Limestone,_Middle_Mississippian;_Tennessee,_USA)_1_(31156608914).jpg",
+        "title": "File:Dover Chert (St. Louis Limestone, Middle Mississippian; Tennessee, USA) 1 (31156608914).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "Dover Chert, Теннесси, 9.8 см"
+    },
+    {
+      "id": "lc-08",
+      "file": "lc-08.jpg",
+      "is_rock": true,
+      "rock_class": "dolomite",
+      "acceptable_alternatives": [
+        "limestone"
+      ],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 41.57,
+      "lng": 41.57,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Dolostone_(Rockford_Limestone,_Lower_Mississippian;_Burkesville_West_Rt._90_roadcut,_Kentucky,_USA)_3_(46570338852).jpg",
+        "title": "File:Dolostone (Rockford Limestone, Lower Mississippian; Burkesville West Rt. 90 roadcut, Kentucky, USA) 3 (46570338852).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "доломит с выветренной и свежей поверхностью"
+    },
+    {
+      "id": "lc-09",
+      "file": "lc-09.jpg",
+      "is_rock": true,
+      "rock_class": "marl",
+      "acceptable_alternatives": [
+        "concretion",
+        "limestone",
+        "claystone"
+      ],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Marlstone_aggregate_concretion_(Windsor,_Connecticut,_USA)_3.jpg",
+        "title": "File:Marlstone aggregate concretion (Windsor, Connecticut, USA) 3.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "мергелистая конкреция (музейная); слабое совпадение, кандидат на замену своим фото"
+    },
+    {
+      "id": "lc-10",
+      "file": "lc-10.jpg",
+      "is_rock": true,
+      "rock_class": "fossil",
+      "acceptable_alternatives": [
+        "fossiliferous_limestone",
+        "mudstone"
+      ],
+      "inclusions": [
+        {
+          "mineral": "fossil_fragment",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Lyme_Regis_ammonite_MRD.jpg",
+        "title": "File:Lyme Regis ammonite MRD.jpg",
+        "license": "CC BY-SA 4.0",
+        "author": "Mike Dickison"
+      },
+      "notes": "аммонит в расколотом валуне, Лайм-Реджис"
+    },
+    {
+      "id": "lc-11",
+      "file": "lc-11.jpg",
+      "is_rock": true,
+      "rock_class": "travertine",
+      "acceptable_alternatives": [
+        "limestone"
+      ],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 41.57,
+      "lng": 41.57,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Hot_springs_travertine_(Holocene;_Rattlesnake_Mountain_Uplift,_west_of_Cody,_Wyoming,_USA)_1_(31196110071).jpg",
+        "title": "File:Hot springs travertine (Holocene; Rattlesnake Mountain Uplift, west of Cody, Wyoming, USA) 1 (31196110071).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "травертин с отпечатком растения, 6.6 см"
+    },
+    {
+      "id": "lc-12",
+      "file": "lc-12.jpg",
+      "is_rock": true,
+      "rock_class": "mudstone",
+      "acceptable_alternatives": [
+        "shale",
+        "siltstone",
+        "claystone"
+      ],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": null,
+      "decoy": null,
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Mudstone_(Graneros_Formation,_Upper_Cretaceous;_Ponca_State_Park,_Nebraska,_USA).jpg",
+        "title": "File:Mudstone (Graneros Formation, Upper Cretaceous; Ponca State Park, Nebraska, USA).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "тёмно-серый аргиллит"
+    },
+    {
+      "id": "gr-01",
+      "file": "gr-01.jpg",
+      "is_rock": true,
+      "rock_class": "granite",
+      "acceptable_alternatives": [
+        "granodiorite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "feldspar",
+          "extent": "dominant"
+        },
+        {
+          "mineral": "quartz",
+          "extent": "noticeable"
+        },
+        {
+          "mineral": "biotite",
+          "extent": "traces"
+        },
+        {
+          "mineral": "hornblende",
+          "extent": "traces"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Hornblende_granite_(GeoDIL_number_-_373).jpg",
+        "title": "File:Hornblende granite (GeoDIL number - 373).jpg",
+        "license": "CC0",
+        "author": "Mike Davis"
+      },
+      "notes": "GeoDIL, 9.5 см"
+    },
+    {
+      "id": "gr-02",
+      "file": "gr-02.jpg",
+      "is_rock": true,
+      "rock_class": "granite",
+      "acceptable_alternatives": [
+        "granodiorite",
+        "gneiss"
+      ],
+      "inclusions": [
+        {
+          "mineral": "feldspar",
+          "extent": "noticeable"
+        },
+        {
+          "mineral": "quartz",
+          "extent": "noticeable"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Granite_River_Cobble.jpg",
+        "title": "File:Granite River Cobble.jpg",
+        "license": "CC0",
+        "author": "Wxao Zexw"
+      },
+      "notes": "речная окатанная галька, Little Wabash River"
+    },
+    {
+      "id": "gr-03",
+      "file": "gr-03.jpg",
+      "is_rock": true,
+      "rock_class": "granodiorite",
+      "acceptable_alternatives": [
+        "granite",
+        "diorite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "plagioclase",
+          "extent": "noticeable"
+        },
+        {
+          "mineral": "quartz",
+          "extent": "noticeable"
+        },
+        {
+          "mineral": "hornblende",
+          "extent": "traces"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Granodiorite_(Giant_Forest_Granodiorite,_mid-Cretaceous,_97-102_Ma;_Moro_Rock,_Sequoia_National_Park,_California,_USA)_1_(16773715466).jpg",
+        "title": "File:Granodiorite (Giant Forest Granodiorite, mid-Cretaceous, 97-102 Ma; Moro Rock, Sequoia National Park, California, USA) 1 (16773715466).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "Сьерра-Невада — та же батолитовая провинция, что и точка Йосемити"
+    },
+    {
+      "id": "gr-04",
+      "file": "gr-04.jpg",
+      "is_rock": true,
+      "rock_class": "diorite",
+      "acceptable_alternatives": [
+        "granodiorite",
+        "gabbro"
+      ],
+      "inclusions": [
+        {
+          "mineral": "hornblende",
+          "extent": "noticeable"
+        },
+        {
+          "mineral": "plagioclase",
+          "extent": "noticeable"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Diorite_(GeoDIL_number_-_35).jpg",
+        "title": "File:Diorite (GeoDIL number - 35).jpg",
+        "license": "CC0",
+        "author": "Joseph H. Hartman"
+      },
+      "notes": "GeoDIL"
+    },
+    {
+      "id": "gr-05",
+      "file": "gr-05.jpg",
+      "is_rock": true,
+      "rock_class": "gabbro",
+      "acceptable_alternatives": [
+        "diorite",
+        "diabase"
+      ],
+      "inclusions": [
+        {
+          "mineral": "plagioclase",
+          "extent": "noticeable"
+        },
+        {
+          "mineral": "pyroxene",
+          "extent": "noticeable"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Gabbro_(GeoDIL_number_-_94).jpg",
+        "title": "File:Gabbro (GeoDIL number - 94).jpg",
+        "license": "CC0",
+        "author": "Darla Sondrol"
+      },
+      "notes": "GeoDIL, Дулут"
+    },
+    {
+      "id": "gr-06",
+      "file": "gr-06.jpg",
+      "is_rock": true,
+      "rock_class": "diabase",
+      "acceptable_alternatives": [
+        "gabbro",
+        "basalt"
+      ],
+      "inclusions": [],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Diabase_(GeoDIL_number_-_137).jpg",
+        "title": "File:Diabase (GeoDIL number - 137).jpg",
+        "license": "CC0",
+        "author": "Mike Davis"
+      },
+      "notes": "GeoDIL"
+    },
+    {
+      "id": "gr-07",
+      "file": "gr-07.jpg",
+      "is_rock": true,
+      "rock_class": "pegmatite",
+      "acceptable_alternatives": [
+        "granite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "quartz",
+          "extent": "noticeable"
+        },
+        {
+          "mineral": "feldspar",
+          "extent": "noticeable"
+        },
+        {
+          "mineral": "muscovite",
+          "extent": "traces"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Pegmatite_with_arsenopyrite_(GeoDIL_number_-_1128).jpg",
+        "title": "File:Pegmatite with arsenopyrite (GeoDIL number - 1128).jpg",
+        "license": "CC0",
+        "author": "Darla Sondrol"
+      },
+      "notes": "арсенопирит не в enum — металлический блеск может уйти в pyrite/chalcopyrite, это не ошибка разметки"
+    },
+    {
+      "id": "gr-08",
+      "file": "gr-08.jpg",
+      "is_rock": true,
+      "rock_class": "quartz_vein",
+      "acceptable_alternatives": [
+        "quartzite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "quartz",
+          "extent": "dominant"
+        },
+        {
+          "mineral": "limonite",
+          "extent": "traces"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Large_quartz_pebble_(Black_Hand_Sandstone,_Lower_MIssissippian;_Hanover,_Ohio,_USA)_2_(44442283264).jpg",
+        "title": "File:Large quartz pebble (Black Hand Sandstone, Lower MIssissippian; Hanover, Ohio, USA) 2 (44442283264).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "жильный кварц, галька 54 мм в руке"
+    },
+    {
+      "id": "gr-09",
+      "file": "gr-09.jpg",
+      "is_rock": true,
+      "rock_class": "gneiss",
+      "acceptable_alternatives": [
+        "migmatite",
+        "schist"
+      ],
+      "inclusions": [],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Rocky_Mountain_National_Park_in_September_2011_-_banded_gneiss_rock_near_Bear_Lake.JPG",
+        "title": "File:Rocky Mountain National Park in September 2011 - banded gneiss rock near Bear Lake.JPG",
+        "license": "CC BY-SA 3.0",
+        "author": "Daniel Mayer (Mav)"
+      },
+      "notes": "полосчатый гнейс"
+    },
+    {
+      "id": "gr-10",
+      "file": "gr-10.jpg",
+      "is_rock": true,
+      "rock_class": "schist",
+      "acceptable_alternatives": [
+        "phyllite",
+        "gneiss"
+      ],
+      "inclusions": [
+        {
+          "mineral": "mica",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Mica_schist_(GeoDIL_number_-_425).jpg",
+        "title": "File:Mica schist (GeoDIL number - 425).jpg",
+        "license": "CC0",
+        "author": "Mike Davis"
+      },
+      "notes": "GeoDIL, слюдяной сланец"
+    },
+    {
+      "id": "gr-11",
+      "file": "gr-11.jpg",
+      "is_rock": true,
+      "rock_class": "quartzite",
+      "acceptable_alternatives": [
+        "quartz_vein",
+        "sandstone"
+      ],
+      "inclusions": [
+        {
+          "mineral": "quartz",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Quartzite_(GeoDIL_number_-_328).jpg",
+        "title": "File:Quartzite (GeoDIL number - 328).jpg",
+        "license": "CC0",
+        "author": "Mike Davis"
+      },
+      "notes": "GeoDIL"
+    },
+    {
+      "id": "gr-12",
+      "file": "gr-12.jpg",
+      "is_rock": true,
+      "rock_class": "syenite",
+      "acceptable_alternatives": [
+        "granite",
+        "diorite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "feldspar",
+          "extent": "dominant"
+        },
+        {
+          "mineral": "hornblende",
+          "extent": "noticeable"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": null,
+      "decoy": null,
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Syenite_(GeoDIL_number_-_417).jpg",
+        "title": "File:Syenite (GeoDIL number - 417).jpg",
+        "license": "CC0",
+        "author": "Mike Davis"
+      },
+      "notes": "GeoDIL, Magnet Cove, 10 см"
+    },
+    {
+      "id": "gl-01",
+      "file": "gl-01.jpg",
+      "is_rock": true,
+      "rock_class": "granite",
+      "acceptable_alternatives": [
+        "granodiorite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "feldspar",
+          "extent": "dominant"
+        },
+        {
+          "mineral": "quartz",
+          "extent": "noticeable"
+        }
+      ],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Baltic_Brown_Granite_(rapakivi_granite)_(wiborgite)_(Wiborg_Batholith,_1.615-1.645_Ga,_Paleoproterozoic;_Husu_Quarry,_Kymi_Province,_Finland)_2_(25472675572).jpg",
+        "title": "File:Baltic Brown Granite (rapakivi granite) (wiborgite) (Wiborg Batholith, 1.615-1.645 Ga, Paleoproterozoic; Husu Quarry, Kymi Province, Finland) 2 (25472675572).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "рапакиви — типичный балтийский эрратик; образец из карьера"
+    },
+    {
+      "id": "gl-02",
+      "file": "gl-02.jpg",
+      "is_rock": true,
+      "rock_class": "gneiss",
+      "acceptable_alternatives": [
+        "schist",
+        "migmatite"
+      ],
+      "inclusions": [],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Pleistocene_glacial_erratic_composed_of_Precambrian_gneiss_(Mt._Pleasant,_Lancaster,_Ohio,_USA)_3_(27171209383).jpg",
+        "title": "File:Pleistocene glacial erratic composed of Precambrian gneiss (Mt. Pleasant, Lancaster, Ohio, USA) 3 (27171209383).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "ледниковый эрратик"
+    },
+    {
+      "id": "gl-03",
+      "file": "gl-03.jpg",
+      "is_rock": true,
+      "rock_class": "gneiss",
+      "acceptable_alternatives": [
+        "migmatite",
+        "granite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "feldspar",
+          "extent": "noticeable"
+        }
+      ],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Augen_gneiss_1.jpg",
+        "title": "File:Augen gneiss 1.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "очковый гнейс"
+    },
+    {
+      "id": "gl-04",
+      "file": "gl-04.jpg",
+      "is_rock": true,
+      "rock_class": "amphibolite",
+      "acceptable_alternatives": [
+        "gabbro",
+        "diorite",
+        "greenstone"
+      ],
+      "inclusions": [
+        {
+          "mineral": "hornblende",
+          "extent": "dominant"
+        },
+        {
+          "mineral": "plagioclase",
+          "extent": "noticeable"
+        }
+      ],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Amphibolite_(GeoDIL_number_-_433).jpg",
+        "title": "File:Amphibolite (GeoDIL number - 433).jpg",
+        "license": "CC0",
+        "author": "Nessa Eull"
+      },
+      "notes": "GeoDIL, 10 см"
+    },
+    {
+      "id": "gl-05",
+      "file": "gl-05.jpg",
+      "is_rock": true,
+      "rock_class": "greenstone",
+      "acceptable_alternatives": [
+        "basalt",
+        "amphibolite",
+        "serpentinite"
+      ],
+      "inclusions": [],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Greenstone_(GeoDIL_number_-_436).jpg",
+        "title": "File:Greenstone (GeoDIL number - 436).jpg",
+        "license": "CC0",
+        "author": "Mike Davis"
+      },
+      "notes": "GeoDIL, метабазальт, Или (Миннесота)"
+    },
+    {
+      "id": "gl-06",
+      "file": "gl-06.jpg",
+      "is_rock": true,
+      "rock_class": "quartzite",
+      "acceptable_alternatives": [
+        "sandstone",
+        "jasper"
+      ],
+      "inclusions": [
+        {
+          "mineral": "quartz",
+          "extent": "dominant"
+        },
+        {
+          "mineral": "hematite",
+          "extent": "traces"
+        }
+      ],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Pink_quartzite_(GeoDIL_number_-_419).jpg",
+        "title": "File:Pink quartzite (GeoDIL number - 419).jpg",
+        "license": "CC0",
+        "author": "Nessa Eull"
+      },
+      "notes": "розовый кварцит Sioux"
+    },
+    {
+      "id": "gl-07",
+      "file": "gl-07.jpg",
+      "is_rock": true,
+      "rock_class": "migmatite",
+      "acceptable_alternatives": [
+        "gneiss",
+        "granite"
+      ],
+      "inclusions": [],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Migmatite_(Precambrian;_near_Morrison,_Colorado,_USA)_1.jpg",
+        "title": "File:Migmatite (Precambrian; near Morrison, Colorado, USA) 1.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "лейкосома/меланосома"
+    },
+    {
+      "id": "gl-08",
+      "file": "gl-08.jpg",
+      "is_rock": true,
+      "rock_class": "marble",
+      "acceptable_alternatives": [
+        "limestone",
+        "quartzite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "calcite",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Marble_(GeoDIL_number_-_510).jpg",
+        "title": "File:Marble (GeoDIL number - 510).jpg",
+        "license": "CC0",
+        "author": "Nessa Eull"
+      },
+      "notes": "GeoDIL; в Эстонии известняк местный — мрамор странник"
+    },
+    {
+      "id": "gl-09",
+      "file": "gl-09.jpg",
+      "is_rock": true,
+      "rock_class": "slate",
+      "acceptable_alternatives": [
+        "phyllite",
+        "shale"
+      ],
+      "inclusions": [
+        {
+          "mineral": "chlorite",
+          "extent": "traces"
+        }
+      ],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Green_slate_(GeoDIL_number_-_422).jpg",
+        "title": "File:Green slate (GeoDIL number - 422).jpg",
+        "license": "CC0",
+        "author": "Mike Davis"
+      },
+      "notes": "GeoDIL, зелёный сланец Вермонта"
+    },
+    {
+      "id": "gl-10",
+      "file": "gl-10.jpg",
+      "is_rock": true,
+      "rock_class": "phyllite",
+      "acceptable_alternatives": [
+        "slate",
+        "schist"
+      ],
+      "inclusions": [
+        {
+          "mineral": "mica",
+          "extent": "noticeable"
+        }
+      ],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Phyllite_(GeoDIL_number_-_423).jpg",
+        "title": "File:Phyllite (GeoDIL number - 423).jpg",
+        "license": "CC0",
+        "author": "Mike Davis"
+      },
+      "notes": "GeoDIL, шелковистый блеск, 9.5 см"
+    },
+    {
+      "id": "gl-11",
+      "file": "gl-11.jpg",
+      "is_rock": true,
+      "rock_class": "hornfels",
+      "acceptable_alternatives": [
+        "slate",
+        "basalt"
+      ],
+      "inclusions": [],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Spotted_hornfels_7.jpg",
+        "title": "File:Spotted hornfels 7.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "пятнистый роговик"
+    },
+    {
+      "id": "gl-12",
+      "file": "gl-12.jpg",
+      "is_rock": true,
+      "rock_class": "conglomerate",
+      "acceptable_alternatives": [
+        "quartzite",
+        "breccia"
+      ],
+      "inclusions": [
+        {
+          "mineral": "quartz",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "glacial",
+      "trap": null,
+      "decoy": null,
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Quartz-pebble_metaconglomerate_(Jack_Hills_Quartzite,_Archean,_2.65_to_3.05_Ga;_Jack_Hills,_Western_Australia)_2.jpg",
+        "title": "File:Quartz-pebble metaconglomerate (Jack Hills Quartzite, Archean, 2.65 to 3.05 Ga; Jack Hills, Western Australia) 2.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "полированный образец метаконгломерата — surface=polished ожидаемо"
+    },
+    {
+      "id": "tr-01",
+      "file": "tr-01.jpg",
+      "is_rock": true,
+      "rock_class": "schist",
+      "acceptable_alternatives": [
+        "phyllite",
+        "gneiss"
+      ],
+      "inclusions": [
+        {
+          "mineral": "muscovite",
+          "extent": "dominant"
+        },
+        {
+          "mineral": "hornblende",
+          "extent": "traces"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": "mica_vs_pyrite",
+      "decoy": {
+        "mineral": "pyrite"
+      },
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Muscovite_schist_(Paleoproterozoic;_Black_Hills,_South_Dakota,_USA)_5_(31511123494).jpg",
+        "title": "File:Muscovite schist (Paleoproterozoic; Black Hills, South Dakota, USA) 5 (31511123494).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "серебристые чешуйки мусковита — не пирит"
+    },
+    {
+      "id": "tr-02",
+      "file": "tr-02.jpg",
+      "is_rock": true,
+      "rock_class": "concretion",
+      "acceptable_alternatives": [
+        "shale",
+        "mudstone",
+        "ironstone"
+      ],
+      "inclusions": [
+        {
+          "mineral": "pyrite",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "limestone_coast",
+      "trap": "mica_vs_pyrite",
+      "decoy": {
+        "mineral": "mica"
+      },
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Pyrite_concretion_(Chattanooga_Shale,_Upper_Devonian;_Burkesville_West_Rt._90_roadcut,_Kentucky,_USA)_1_(42300453012).jpg",
+        "title": "File:Pyrite concretion (Chattanooga Shale, Upper Devonian; Burkesville West Rt. 90 roadcut, Kentucky, USA) 1 (42300453012).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "пиритовая конкреция в чёрном сланце; Дорсет (Киммеридж) — пирит там есть"
+    },
+    {
+      "id": "tr-03",
+      "file": "tr-03.jpg",
+      "is_rock": true,
+      "rock_class": "gneiss",
+      "acceptable_alternatives": [
+        "schist",
+        "granite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "biotite",
+          "extent": "dominant"
+        },
+        {
+          "mineral": "quartz",
+          "extent": "noticeable"
+        }
+      ],
+      "geology_type": "glacial",
+      "trap": "mica_vs_pyrite",
+      "decoy": {
+        "mineral": "pyrite"
+      },
+      "lat": 59.45,
+      "lng": 24.4,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Gneiss_1_(16310656713).jpg",
+        "title": "File:Gneiss 1 (16310656713).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "блестящие чёрные полосы биотита, 6.8 см"
+    },
+    {
+      "id": "tr-04",
+      "file": "tr-04.jpg",
+      "is_rock": true,
+      "rock_class": "schist",
+      "acceptable_alternatives": [
+        "greenstone",
+        "phyllite",
+        "serpentinite"
+      ],
+      "inclusions": [
+        {
+          "mineral": "chlorite",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": "chlorite_vs_malachite",
+      "decoy": {
+        "mineral": "malachite"
+      },
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Chlorite_schist_(Pelona_Schist,_Cretaceous_or_Paleocene_(%3F);_San_Antonio_Canyon,_San_Gabiel_Mountains,_California,_USA)_1.jpg",
+        "title": "File:Chlorite schist (Pelona Schist, Cretaceous or Paleocene (?); San Antonio Canyon, San Gabiel Mountains, California, USA) 1.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "зелёный хлоритовый сланец"
+    },
+    {
+      "id": "tr-05",
+      "file": "tr-05.jpg",
+      "is_rock": true,
+      "rock_class": "unknown",
+      "acceptable_alternatives": [
+        "ironstone",
+        "limestone",
+        "unknown_sedimentary"
+      ],
+      "inclusions": [
+        {
+          "mineral": "malachite",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": "chlorite_vs_malachite",
+      "decoy": {
+        "mineral": "chlorite"
+      },
+      "lat": 36.06,
+      "lng": -112.14,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Malachite_(Zaire)_(41560615730).jpg",
+        "title": "File:Malachite (Zaire) (41560615730).jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "почковидный малахит на матрице; порода-хозяин не определена — top-1 засчитывается по unknown/альтернативам"
+    },
+    {
+      "id": "tr-06",
+      "file": "tr-06.jpg",
+      "is_rock": true,
+      "rock_class": "serpentinite",
+      "acceptable_alternatives": [
+        "greenstone",
+        "soapstone"
+      ],
+      "inclusions": [
+        {
+          "mineral": "serpentine",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "granite_river",
+      "trap": "chlorite_vs_malachite",
+      "decoy": {
+        "mineral": "malachite"
+      },
+      "lat": 37.7275,
+      "lng": -119.61,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Serpentinite_(New_Idria_Serpentinite,_Middle_Miocene,_~14_Ma;_Green_Fire_Mine,_California,_USA)_2.jpg",
+        "title": "File:Serpentinite (New Idria Serpentinite, Middle Miocene, ~14 Ma; Green Fire Mine, California, USA) 2.jpg",
+        "license": "CC BY 2.0",
+        "author": "James St. John"
+      },
+      "notes": "зелёная порода без медных минералов"
+    },
+    {
+      "id": "tr-07",
+      "file": "tr-07.jpg",
+      "is_rock": false,
+      "rock_class": "unknown",
+      "acceptable_alternatives": [],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": "concrete_vs_limestone",
+      "decoy": {
+        "rock_class": "limestone"
+      },
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Coastal_East_Lothian_,_Concrete_fragments_on_Belhaven_sands_-_geograph.org.uk_-_8306488.jpg",
+        "title": "File:Coastal East Lothian , Concrete fragments on Belhaven sands - geograph.org.uk - 8306488.jpg",
+        "license": "CC BY-SA 2.0",
+        "author": "Richard West"
+      },
+      "notes": "обломки бетона на пляже (несколько объектов в кадре; gate может дать multiple_objects)"
+    },
+    {
+      "id": "tr-08",
+      "file": "tr-08.jpg",
+      "is_rock": false,
+      "rock_class": "unknown",
+      "acceptable_alternatives": [],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": "concrete_vs_limestone",
+      "decoy": {
+        "rock_class": "limestone"
+      },
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:-2019-02-23_Fallen_floor_tiles_on_Trimingham_beach.JPG",
+        "title": "File:-2019-02-23 Fallen floor tiles on Trimingham beach.JPG",
+        "license": "CC BY-SA 4.0",
+        "author": "Kolforn"
+      },
+      "notes": "бетонная плитка, вымытая на пляж; окатанного бетонного «камня» на Commons не нашлось — заменить своим фото"
+    },
+    {
+      "id": "tr-09",
+      "file": "tr-09.jpg",
+      "is_rock": true,
+      "rock_class": "limestone",
+      "acceptable_alternatives": [
+        "sandstone",
+        "coquina"
+      ],
+      "inclusions": [],
+      "geology_type": "limestone_coast",
+      "trap": "concrete_vs_limestone",
+      "decoy": {
+        "rock_class": "unknown"
+      },
+      "lat": 50.62,
+      "lng": -2.27,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Oolitic_limestone_(Salem_Limestone,_Middle_Mississippian;_Bedford,_Indiana,_USA)_1.jpg",
+        "title": "File:Oolitic limestone (Salem Limestone, Middle Mississippian; Bedford, Indiana, USA) 1.jpg",
+        "license": "CC BY-SA 4.0",
+        "author": "James St. John"
+      },
+      "notes": "оолитовый известняк, похож на бетон; Дорсет (портлендский оолит)"
+    },
+    {
+      "id": "tr-10",
+      "file": "tr-10.jpg",
+      "is_rock": false,
+      "rock_class": "unknown",
+      "acceptable_alternatives": [],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": "glass_vs_quartz",
+      "decoy": {
+        "rock_class": "quartz_vein",
+        "mineral": "quartz"
+      },
+      "lat": 41.57,
+      "lng": 41.57,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Sea_glass_at_Glass_Beach_in_Fort_Bragg.jpg",
+        "title": "File:Sea glass at Glass Beach in Fort Bragg.jpg",
+        "license": "CC BY-SA 4.0",
+        "author": "Grendelkhan"
+      },
+      "notes": "окатанное бутылочное стекло на гравии, несколько кусочков"
+    },
+    {
+      "id": "tr-11",
+      "file": "tr-11.jpg",
+      "is_rock": false,
+      "rock_class": "unknown",
+      "acceptable_alternatives": [],
+      "inclusions": [],
+      "geology_type": "volcanic_coast",
+      "trap": "glass_vs_quartz",
+      "decoy": {
+        "rock_class": "quartz_vein",
+        "mineral": "quartz"
+      },
+      "lat": 41.57,
+      "lng": 41.57,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:White_and_green_sea_glass.jpg",
+        "title": "File:White and green sea glass.jpg",
+        "license": "CC BY 2.0",
+        "author": "Paul VanDerWerf"
+      },
+      "notes": "белое/зелёное матовое стекло, горсть; 1340 px"
+    },
+    {
+      "id": "tr-12",
+      "file": "tr-12.jpg",
+      "is_rock": true,
+      "rock_class": "quartz_vein",
+      "acceptable_alternatives": [
+        "quartzite",
+        "chalcedony"
+      ],
+      "inclusions": [
+        {
+          "mineral": "quartz",
+          "extent": "dominant"
+        }
+      ],
+      "geology_type": "volcanic_coast",
+      "trap": "glass_vs_quartz",
+      "decoy": {
+        "rock_class": "unknown"
+      },
+      "lat": 41.57,
+      "lng": 41.57,
+      "source": {
+        "url": "https://commons.wikimedia.org/wiki/File:Cape_May_diamonds.jpg",
+        "title": "File:Cape May diamonds.jpg",
+        "license": "CC BY-SA 3.0",
+        "author": "Clark Perks"
+      },
+      "notes": "«алмазы Кейп-Мей» — окатанные кварцевые гальки, несколько в кадре"
+    }
+  ]
+}
