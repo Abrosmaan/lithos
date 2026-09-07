@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { loadLlmConfig } from './llm/config.js';
 
 // .env лежит в корне монорепо; воркер запускается из apps/worker (dev) или /app/apps/worker (docker).
 // Ищем вверх по дереву — первый найденный. На VPS env_file подаёт переменные напрямую.
@@ -23,11 +24,26 @@ function req(name: string): string {
   return v;
 }
 
+// T1.3: ступени, fallback и ключи моделей — разбор в llm/config.ts (чистая функция, тестируется без .env).
+const llm = loadLlmConfig(process.env);
+
 export const config = {
   // Pooler (IPv4, session mode) работает и с мака, и с VPS; direct — IPv6-only. Порядок: явный → pooler → direct.
-  dbUrl: process.env.WORKER_DB_URL ?? process.env.SUPABASE_DB_POOLER_URL ?? req('SUPABASE_DB_URL'),
+  // Getter: ошибка «Missing env» возникает при первом обращении, а не при импорте модуля —
+  // так llm/smoke и тесты не требуют БД-переменных.
+  get dbUrl(): string {
+    return process.env.WORKER_DB_URL ?? process.env.SUPABASE_DB_POOLER_URL ?? req('SUPABASE_DB_URL');
+  },
   dbSchema: process.env.DB_SCHEMA ?? 'lithos',
   pollIntervalMs: Number(process.env.POLL_INTERVAL_MS ?? 1000),
   leaseSeconds: 60,
   logLevel: process.env.LOG_LEVEL ?? 'info',
+
+  // ---- Модели (T1.3) ----
+  stageGate: llm.stages.gate,
+  stageMain: llm.stages.main,
+  stageEscalation: llm.stages.escalation,
+  fallbackProvider: llm.fallbackProvider,
+  /** Полный конфиг провайдерного слоя (ступени + fallback + ключи). Ключи не логировать. */
+  llm,
 };
