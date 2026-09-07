@@ -1,0 +1,8 @@
+{
+  "cli": { "version": ">= 16.0.0", "appVersionSource": "remote" },
+  "build": {
+    "preview": { "distribution": "internal", "channel": "preview", "environment": "preview" },
+    "production": { "distribution": "store", "channel": "production", "environment": "production" }
+  },
+  "submit": { "production": {} }
+}

@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# .env генерируется scripts/sync-env.mjs (только EXPO_PUBLIC_*), в git не попадает
+.env*
+!.env.example

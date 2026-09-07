@@ -17,6 +17,7 @@
     "expo-image-manipulator": "~57.0.16",
     "expo-location": "~57.0.16",
     "expo-status-bar": "~57.0.1",
+    "jpeg-js": "0.4.4",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-maps": "1.27.2",
@@ -26,14 +27,22 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^3.0.0"
   },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prestart": "node scripts/sync-env.mjs",
+    "export": "node scripts/sync-env.mjs && expo export",
+    "test": "vitest run --passWithNoTests",
+    "check:backend": "node scripts/sync-env.mjs && node scripts/check-backend.mjs",
+    "preios": "node scripts/sync-env.mjs",
+    "preandroid": "node scripts/sync-env.mjs",
+    "preweb": "node scripts/sync-env.mjs"
   },
   "private": true
 }
