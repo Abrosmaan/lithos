@@ -1,0 +1,512 @@
+{
+ "lat": 50.62225,
+ "lng": -2.26868,
+ "probe_km": 4.0,
+ "center": {
+  "success": {
+   "v": 2,
+   "license": "CC-BY 4.0",
+   "data": [
+    {
+     "map_id": 2035432,
+     "source_id": 23,
+     "name": "White Chalk Subgroup",
+     "strat_name": "White Chalk Subgroup",
+     "lith": "chalk",
+     "descrip": "",
+     "comments": "",
+     "macro_units": [],
+     "strat_names": [
+      100847
+     ],
+     "liths": [
+      92
+     ],
+     "t_int_id": 35,
+     "t_int_age": 66,
+     "t_int_name": "Maastrichtian",
+     "b_int_id": 40,
+     "b_int_age": 100.5,
+     "b_int_name": "Cenomanian",
+     "color": "#A6D84A",
+     "t_age": 66,
+     "b_age": 100.5,
+     "best_int_name": "Late Cretaceous"
+    },
+    {
+     "map_id": 3153365,
+     "source_id": 147,
+     "name": "Late Jurassic claystone",
+     "strat_name": "",
+     "lith": "Major:{claystone}, Minor{limestone,sandstone}",
+     "descrip": "",
+     "comments": "",
+     "macro_units": [],
+     "strat_names": [],
+     "liths": [
+      6,
+      10,
+      30
+     ],
+     "t_int_id": 49,
+     "t_int_age": 143.1,
+     "t_int_name": "Late Jurassic",
+     "b_int_id": 49,
+     "b_int_age": 161.5,
+     "b_int_name": "Late Jurassic",
+     "color": "#B3E3EE",
+     "t_age": 145,
+     "b_age": 163.5,
+     "best_int_name": "Jurassic"
+    }
+   ],
+   "refs": {
+    "23": "British Geological Survey. DiGMapGB-625. British Geological Survey ©NERC. ",
+    "147": "Asch, K. The 1:5M International Geological Map of Europe and Adjacent Areas: Development and Implementation of a GIS-enabled Concept. Geologisches Jahrbuch, SA 3. "
+   }
+  }
+ },
+ "probes": {
+  "n": {
+   "lat": 50.65818,
+   "lng": -2.26868,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 2035432,
+       "source_id": 23,
+       "name": "White Chalk Subgroup",
+       "strat_name": "White Chalk Subgroup",
+       "lith": "chalk",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [
+        100847
+       ],
+       "liths": [
+        92
+       ],
+       "t_int_id": 35,
+       "t_int_age": 66,
+       "t_int_name": "Maastrichtian",
+       "b_int_id": 40,
+       "b_int_age": 100.5,
+       "b_int_name": "Cenomanian",
+       "color": "#A6D84A",
+       "t_age": 66,
+       "b_age": 100.5,
+       "best_int_name": "Late Cretaceous"
+      },
+      {
+       "map_id": 3157834,
+       "source_id": 147,
+       "name": "Palaeocene sandstone",
+       "strat_name": "",
+       "lith": "Major:{sandstone}, Minor{claystone,conglomerate}",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        6,
+        10,
+        14
+       ],
+       "t_int_id": 29,
+       "t_int_age": 56,
+       "t_int_name": "Paleocene",
+       "b_int_id": 29,
+       "b_int_age": 66,
+       "b_int_name": "Paleocene",
+       "color": "#FDA75F",
+       "t_age": 56,
+       "b_age": 66,
+       "best_int_name": "Paleocene"
+      },
+      {
+       "map_id": 3186097,
+       "source_id": 154,
+       "name": "Cenozoic sedimentary rocks",
+       "strat_name": "",
+       "lith": "sedimentary rocks",
+       "descrip": "",
+       "comments": "Hampshire Basin",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 21,
+       "t_int_age": 23.04,
+       "t_int_name": "Oligocene",
+       "b_int_id": 24,
+       "b_int_age": 56,
+       "b_int_name": "Eocene",
+       "color": "#FD9A52",
+       "t_age": 23.03,
+       "b_age": 56,
+       "best_int_name": "Cenozoic"
+      }
+     ],
+     "refs": {
+      "23": "British Geological Survey. DiGMapGB-625. British Geological Survey ©NERC. ",
+      "147": "Asch, K. The 1:5M International Geological Map of Europe and Adjacent Areas: Development and Implementation of a GIS-enabled Concept. Geologisches Jahrbuch, SA 3. ",
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 70,
+      "mapData": [
+       {
+        "map_id": 2035432,
+        "source_id": 23,
+        "name": "White Chalk Subgroup",
+        "age": "Cenomanian - Maastrichtian",
+        "strat_name": "White Chalk Subgroup",
+        "lith": "chalk",
+        "descrip": "",
+        "comments": "",
+        "liths": [
+         {
+          "lith_id": 92,
+          "lith": "chalk",
+          "lith_type": "carbonate",
+          "lith_class": "sedimentary",
+          "color": "#6495ED",
+          "lith_fill": 626
+         }
+        ],
+        "b_int": {
+         "int_id": 40,
+         "b_age": 100.5,
+         "t_age": 93.9,
+         "int_name": "Cenomanian",
+         "color": "#B3DE53"
+        },
+        "t_int": {
+         "int_id": 35,
+         "b_age": 72.2,
+         "t_age": 66,
+         "int_name": "Maastrichtian",
+         "color": "#F2FA8C"
+        },
+        "color": "#A6D84A",
+        "scale": "large",
+        "ref": {
+         "url": "http://www.bgs.ac.uk/products/digitalmaps/DiGMapGB_625.html",
+         "name": "Great Britain and Northern Ireland 1:625K",
+         "authors": "British Geological Survey",
+         "isbn_doi": "",
+         "ref_year": "2015",
+         "ref_title": "DiGMapGB-625",
+         "source_id": 23,
+         "ref_source": "British Geological Survey ©NERC"
+        },
+        "macrostrat": {
+         "strat_names": [
+          {
+           "strat_name_id": 100847,
+           "rank_name": "White Chalk Subgroup"
+          }
+         ],
+         "unit_ids": [
+          null
+         ],
+         "max_thick": 0,
+         "max_min_thick": 0,
+         "min_min_thick": 0,
+         "b_age": null,
+         "t_age": null,
+         "pbdb_collections": null,
+         "pbdb_occs": null,
+         "b_int": null,
+         "t_int": null,
+         "liths": [],
+         "econs": [],
+         "environs": []
+        },
+        "lines": [
+         {
+          "line_id": 765487,
+          "source_id": 23,
+          "name": "",
+          "type": "fault",
+          "direction": "",
+          "descrip": "",
+          "scale": "large"
+         }
+        ]
+       }
+      ],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  },
+  "s": {
+   "lat": 50.58632,
+   "lng": -2.26868,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3139389,
+       "source_id": 147,
+       "name": "Late Jurassic claystone",
+       "strat_name": "",
+       "lith": "Major:{claystone}, Minor{limestone,sandstone}",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        6,
+        10,
+        30
+       ],
+       "t_int_id": 49,
+       "t_int_age": 143.1,
+       "t_int_name": "Late Jurassic",
+       "b_int_id": 49,
+       "b_int_age": 161.5,
+       "b_int_name": "Late Jurassic",
+       "color": "#B3E3EE",
+       "t_age": 145,
+       "b_age": 163.5,
+       "best_int_name": "Jurassic"
+      }
+     ],
+     "refs": {
+      "147": "Asch, K. The 1:5M International Geological Map of Europe and Adjacent Areas: Development and Implementation of a GIS-enabled Concept. Geologisches Jahrbuch, SA 3. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 0,
+      "mapData": [],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  },
+  "e": {
+   "lat": 50.62225,
+   "lng": -2.21204,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 2035432,
+       "source_id": 23,
+       "name": "White Chalk Subgroup",
+       "strat_name": "White Chalk Subgroup",
+       "lith": "chalk",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [
+        100847
+       ],
+       "liths": [
+        92
+       ],
+       "t_int_id": 35,
+       "t_int_age": 66,
+       "t_int_name": "Maastrichtian",
+       "b_int_id": 40,
+       "b_int_age": 100.5,
+       "b_int_name": "Cenomanian",
+       "color": "#A6D84A",
+       "t_age": 66,
+       "b_age": 100.5,
+       "best_int_name": "Late Cretaceous"
+      },
+      {
+       "map_id": 3154559,
+       "source_id": 147,
+       "name": "Eocene claystone",
+       "strat_name": "",
+       "lith": "claystone",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        6
+       ],
+       "t_int_id": 24,
+       "t_int_age": 33.9,
+       "t_int_name": "Eocene",
+       "b_int_id": 24,
+       "b_int_age": 56,
+       "b_int_name": "Eocene",
+       "color": "#FDB46C",
+       "t_age": 33.9,
+       "b_age": 56,
+       "best_int_name": "Eocene"
+      }
+     ],
+     "refs": {
+      "23": "British Geological Survey. DiGMapGB-625. British Geological Survey ©NERC. ",
+      "147": "Asch, K. The 1:5M International Geological Map of Europe and Adjacent Areas: Development and Implementation of a GIS-enabled Concept. Geologisches Jahrbuch, SA 3. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 80,
+      "mapData": [
+       {
+        "map_id": 2035432,
+        "source_id": 23,
+        "name": "White Chalk Subgroup",
+        "age": "Cenomanian - Maastrichtian",
+        "strat_name": "White Chalk Subgroup",
+        "lith": "chalk",
+        "descrip": "",
+        "comments": "",
+        "liths": [
+         {
+          "lith_id": 92,
+          "lith": "chalk",
+          "lith_type": "carbonate",
+          "lith_class": "sedimentary",
+          "color": "#6495ED",
+          "lith_fill": 626
+         }
+        ],
+        "b_int": {
+         "int_id": 40,
+         "b_age": 100.5,
+         "t_age": 93.9,
+         "int_name": "Cenomanian",
+         "color": "#B3DE53"
+        },
+        "t_int": {
+         "int_id": 35,
+         "b_age": 72.2,
+         "t_age": 66,
+         "int_name": "Maastrichtian",
+         "color": "#F2FA8C"
+        },
+        "color": "#A6D84A",
+        "scale": "large",
+        "ref": {
+         "url": "http://www.bgs.ac.uk/products/digitalmaps/DiGMapGB_625.html",
+         "name": "Great Britain and Northern Ireland 1:625K",
+         "authors": "British Geological Survey",
+         "isbn_doi": "",
+         "ref_year": "2015",
+         "ref_title": "DiGMapGB-625",
+         "source_id": 23,
+         "ref_source": "British Geological Survey ©NERC"
+        },
+        "macrostrat": {
+         "strat_names": [
+          {
+           "strat_name_id": 100847,
+           "rank_name": "White Chalk Subgroup"
+          }
+         ],
+         "unit_ids": [
+          null
+         ],
+         "max_thick": 0,
+         "max_min_thick": 0,
+         "min_min_thick": 0,
+         "b_age": null,
+         "t_age": null,
+         "pbdb_collections": null,
+         "pbdb_occs": null,
+         "b_int": null,
+         "t_int": null,
+         "liths": [],
+         "econs": [],
+         "environs": []
+        },
+        "lines": []
+       }
+      ],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  },
+  "w": {
+   "lat": 50.62225,
+   "lng": -2.32532,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3139389,
+       "source_id": 147,
+       "name": "Late Jurassic claystone",
+       "strat_name": "",
+       "lith": "Major:{claystone}, Minor{limestone,sandstone}",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        6,
+        10,
+        30
+       ],
+       "t_int_id": 49,
+       "t_int_age": 143.1,
+       "t_int_name": "Late Jurassic",
+       "b_int_id": 49,
+       "b_int_age": 161.5,
+       "b_int_name": "Late Jurassic",
+       "color": "#B3E3EE",
+       "t_age": 145,
+       "b_age": 163.5,
+       "best_int_name": "Jurassic"
+      }
+     ],
+     "refs": {
+      "147": "Asch, K. The 1:5M International Geological Map of Europe and Adjacent Areas: Development and Implementation of a GIS-enabled Concept. Geologisches Jahrbuch, SA 3. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 0,
+      "mapData": [],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  }
+ }
+}

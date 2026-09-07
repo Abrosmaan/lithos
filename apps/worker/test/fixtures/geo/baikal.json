@@ -1,0 +1,238 @@
+{
+ "lat": 51.85822,
+ "lng": 104.85901,
+ "probe_km": 4.0,
+ "center": {
+  "success": {
+   "v": 2,
+   "license": "CC-BY 4.0",
+   "data": [
+    {
+     "map_id": 3184446,
+     "source_id": 154,
+     "name": "",
+     "strat_name": "",
+     "lith": "",
+     "descrip": "",
+     "comments": "",
+     "macro_units": [],
+     "strat_names": [],
+     "liths": [],
+     "t_int_id": null,
+     "t_int_age": null,
+     "t_int_name": null,
+     "b_int_id": null,
+     "b_int_age": null,
+     "b_int_name": null,
+     "color": null,
+     "t_age": null,
+     "b_age": null,
+     "best_int_name": null
+    }
+   ],
+   "refs": {
+    "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+   }
+  }
+ },
+ "probes": {
+  "n": {
+   "lat": 51.89415,
+   "lng": 104.85901,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3192134,
+       "source_id": 154,
+       "name": "Mesozoic sedimentary rocks",
+       "strat_name": "",
+       "lith": "sedimentary rocks",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 48,
+       "t_int_age": 143.1,
+       "t_int_name": "Jurassic",
+       "b_int_id": 48,
+       "b_int_age": 201.4,
+       "b_int_name": "Jurassic",
+       "color": "#34B2C9",
+       "t_age": 145,
+       "b_age": 201.3,
+       "best_int_name": "Jurassic"
+      }
+     ],
+     "refs": {
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 613,
+      "mapData": [],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  },
+  "s": {
+   "lat": 51.82229,
+   "lng": 104.85901,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3184446,
+       "source_id": 154,
+       "name": "",
+       "strat_name": "",
+       "lith": "",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [],
+       "t_int_id": null,
+       "t_int_age": null,
+       "t_int_name": null,
+       "b_int_id": null,
+       "b_int_age": null,
+       "b_int_name": null,
+       "color": null,
+       "t_age": null,
+       "b_age": null,
+       "best_int_name": null
+      }
+     ],
+     "refs": {
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 449,
+      "mapData": [],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  },
+  "e": {
+   "lat": 51.85822,
+   "lng": 104.91719,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3184446,
+       "source_id": 154,
+       "name": "",
+       "strat_name": "",
+       "lith": "",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [],
+       "t_int_id": null,
+       "t_int_age": null,
+       "t_int_name": null,
+       "b_int_id": null,
+       "b_int_age": null,
+       "b_int_name": null,
+       "color": null,
+       "t_age": null,
+       "b_age": null,
+       "best_int_name": null
+      }
+     ],
+     "refs": {
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 818,
+      "mapData": [],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  },
+  "w": {
+   "lat": 51.85822,
+   "lng": 104.80083,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3184446,
+       "source_id": 154,
+       "name": "",
+       "strat_name": "",
+       "lith": "",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [],
+       "t_int_id": null,
+       "t_int_age": null,
+       "t_int_name": null,
+       "b_int_id": null,
+       "b_int_age": null,
+       "b_int_name": null,
+       "color": null,
+       "t_age": null,
+       "b_age": null,
+       "best_int_name": null
+      }
+     ],
+     "refs": {
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 449,
+      "mapData": [],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,306 @@
+{
+ "lat": 41.56952,
+ "lng": 41.56677,
+ "probe_km": 4.0,
+ "center": {
+  "success": {
+   "v": 2,
+   "license": "CC-BY 4.0",
+   "data": [
+    {
+     "map_id": 3160676,
+     "source_id": 147,
+     "name": "Caucasus",
+     "strat_name": "",
+     "lith": "Major:{carbonates}, Minor{tuff group,andesite}",
+     "descrip": "",
+     "comments": "",
+     "macro_units": [],
+     "strat_names": [],
+     "liths": [
+      18,
+      69,
+      76
+     ],
+     "t_int_id": 24,
+     "t_int_age": 33.9,
+     "t_int_name": "Eocene",
+     "b_int_id": 24,
+     "b_int_age": 56,
+     "b_int_name": "Eocene",
+     "color": "#FDB46C",
+     "t_age": 33.9,
+     "b_age": 56,
+     "best_int_name": "Eocene"
+    }
+   ],
+   "refs": {
+    "147": "Asch, K. The 1:5M International Geological Map of Europe and Adjacent Areas: Development and Implementation of a GIS-enabled Concept. Geologisches Jahrbuch, SA 3. "
+   }
+  }
+ },
+ "probes": {
+  "n": {
+   "lat": 41.60545,
+   "lng": 41.56677,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3155716,
+       "source_id": 147,
+       "name": "Barents and Black sea",
+       "strat_name": "",
+       "lith": "Major:{sandstone}, Minor{claystone,limestone}",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        6,
+        10,
+        30
+       ],
+       "t_int_id": 20,
+       "t_int_age": 23.04,
+       "t_int_name": "Paleogene",
+       "b_int_id": 33,
+       "b_int_age": 143.1,
+       "b_int_name": "Cretaceous",
+       "color": "#9AD9DD",
+       "t_age": 23.03,
+       "b_age": 145,
+       "best_int_name": "Phanerozoic"
+      }
+     ],
+     "refs": {
+      "147": "Asch, K. The 1:5M International Geological Map of Europe and Adjacent Areas: Development and Implementation of a GIS-enabled Concept. Geologisches Jahrbuch, SA 3. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 0,
+      "mapData": [],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  },
+  "s": {
+   "lat": 41.53359,
+   "lng": 41.56677,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3160676,
+       "source_id": 147,
+       "name": "Caucasus",
+       "strat_name": "",
+       "lith": "Major:{carbonates}, Minor{tuff group,andesite}",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        18,
+        69,
+        76
+       ],
+       "t_int_id": 24,
+       "t_int_age": 33.9,
+       "t_int_name": "Eocene",
+       "b_int_id": 24,
+       "b_int_age": 56,
+       "b_int_name": "Eocene",
+       "color": "#FDB46C",
+       "t_age": 33.9,
+       "b_age": 56,
+       "best_int_name": "Eocene"
+      },
+      {
+       "map_id": 3187464,
+       "source_id": 154,
+       "name": "Cenozoic sedimentary rocks",
+       "strat_name": "",
+       "lith": "sedimentary rocks",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 1,
+       "t_int_age": 0,
+       "t_int_name": "Cenozoic",
+       "b_int_id": 1,
+       "b_int_age": 66,
+       "b_int_name": "Cenozoic",
+       "color": "#F2F91D",
+       "t_age": 0,
+       "b_age": 66,
+       "best_int_name": "Cenozoic"
+      }
+     ],
+     "refs": {
+      "147": "Asch, K. The 1:5M International Geological Map of Europe and Adjacent Areas: Development and Implementation of a GIS-enabled Concept. Geologisches Jahrbuch, SA 3. ",
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 491,
+      "mapData": [],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  },
+  "e": {
+   "lat": 41.56952,
+   "lng": 41.6148,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3160676,
+       "source_id": 147,
+       "name": "Caucasus",
+       "strat_name": "",
+       "lith": "Major:{carbonates}, Minor{tuff group,andesite}",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        18,
+        69,
+        76
+       ],
+       "t_int_id": 24,
+       "t_int_age": 33.9,
+       "t_int_name": "Eocene",
+       "b_int_id": 24,
+       "b_int_age": 56,
+       "b_int_name": "Eocene",
+       "color": "#FDB46C",
+       "t_age": 33.9,
+       "b_age": 56,
+       "best_int_name": "Eocene"
+      },
+      {
+       "map_id": 3187464,
+       "source_id": 154,
+       "name": "Cenozoic sedimentary rocks",
+       "strat_name": "",
+       "lith": "sedimentary rocks",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 1,
+       "t_int_age": 0,
+       "t_int_name": "Cenozoic",
+       "b_int_id": 1,
+       "b_int_age": 66,
+       "b_int_name": "Cenozoic",
+       "color": "#F2F91D",
+       "t_age": 0,
+       "b_age": 66,
+       "best_int_name": "Cenozoic"
+      }
+     ],
+     "refs": {
+      "147": "Asch, K. The 1:5M International Geological Map of Europe and Adjacent Areas: Development and Implementation of a GIS-enabled Concept. Geologisches Jahrbuch, SA 3. ",
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 87,
+      "mapData": [],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  },
+  "w": {
+   "lat": 41.56952,
+   "lng": 41.51874,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3155716,
+       "source_id": 147,
+       "name": "Barents and Black sea",
+       "strat_name": "",
+       "lith": "Major:{sandstone}, Minor{claystone,limestone}",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        6,
+        10,
+        30
+       ],
+       "t_int_id": 20,
+       "t_int_age": 23.04,
+       "t_int_name": "Paleogene",
+       "b_int_id": 33,
+       "b_int_age": 143.1,
+       "b_int_name": "Cretaceous",
+       "color": "#9AD9DD",
+       "t_age": 23.03,
+       "b_age": 145,
+       "best_int_name": "Phanerozoic"
+      }
+     ],
+     "refs": {
+      "147": "Asch, K. The 1:5M International Geological Map of Europe and Adjacent Areas: Development and Implementation of a GIS-enabled Concept. Geologisches Jahrbuch, SA 3. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 0,
+      "mapData": [],
+      "regions": [],
+      "hasColumns": false
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,1434 @@
+{
+ "lat": 36.05988,
+ "lng": -112.14294,
+ "probe_km": 4.0,
+ "center": {
+  "success": {
+   "v": 2,
+   "license": "CC-BY 4.0",
+   "data": [
+    {
+     "map_id": 2203840,
+     "source_id": 34,
+     "name": "Hermit Formation",
+     "strat_name": "Hermit Formation",
+     "lith": "",
+     "descrip": "Red, slope-forming, fine-grained, thin-bedded siltstone and sandstone. Upper part contains red and white, massive, low-angle cross-bedded calcareous sandstone and siltstone beds in western one-quarter of map area. Siltstone beds are dark red and crumbly, and fill shallow erosion channels that are widespread. Siltstone beds form recesses between thicker sandstone beds; locally contains poorly preserved plant fossils in channel fills in lower part of formation. Sandstone beds thicken and thin laterally either as channel fill or low sand dune accumulations. Sandstone bleaches to yellow-white color in vicinity of breccia pipes throughout map area, and at upper contact with Coconino Sandstone (Pc) or Toroweap Formation (Pt) in western half of map area. Unconformably overlies Esplanade Sandstone (Pe). Dark-red, platy, thin-bedded siltstone of Hermit Formation fills channels as much as 60 ft (16 m) deep eroded into the underlying Esplanade in eastern part of map area, and as much as 130 ft (40 m) deep in Havasu Canyon area, south-central part of map area. Erosional relief is generally less than 10 ft (3 m) in northeastern part of map area. About 260 ft (80 m) thick along eastern edge of map area, increasing to about 850 ft (260 m) at western edge of map area",
+     "comments": "",
+     "macro_units": [],
+     "strat_names": [
+      874
+     ],
+     "liths": [
+      3,
+      9,
+      10,
+      15
+     ],
+     "t_int_id": 80,
+     "t_int_age": 274.4,
+     "t_int_name": "Early Permian",
+     "b_int_id": 80,
+     "b_int_age": 298.9,
+     "b_int_name": "Early Permian",
+     "color": "#EE5845",
+     "t_age": 272.95,
+     "b_age": 298.9,
+     "best_int_name": "Permian"
+    },
+    {
+     "map_id": 3005545,
+     "source_id": 133,
+     "name": "Permian to Pennsylvanian sedimentary rocks",
+     "strat_name": "Hermit Formation; Supai Group; Schnebly Hill Formation; Naco Group",
+     "lith": "Major:{sandstone,shale,limestone}",
+     "descrip": "Interbedded sandstone, shale, and limestone usually characterized by ledgy outcrops. Orange to reddish sandstone forms cliffs near Sedona. This unit includes Supai Group and Hermit Shale in northern Arizona and Naco Group in southern Arizona. It was deposited in coastal-plain to shallow-marine settings during time of variable and changing sea level. Rocks of this map unit in southern Arizona may be in part equivalent to Permian rocks of map unit P in central and northern Arizona.  (280-310 Ma)",
+     "comments": "Original map source: Arizona Geological Survey, DI-8 Geologic Map of Arizona, Digital Spatial data for the Geologic Map of Arizona, v. 3.0, edited by S.M. Richard and S.M. Kneale, 2002, 10 p., 2 DOS HD disks. Arc/INFO export file (.e00) format, scale 1:1,000,000. Primary reference: Richard, S.M., Reynolds, S.J., Spencer, J.E., and Pearthree, P.A., 2000, Geologic Map of Arizona: Arizona Geological Survey Map 35, 1 sheet, scale 1:1,000,000.",
+     "macro_units": [
+      15037
+     ],
+     "strat_names": [
+      874,
+      1843,
+      2575,
+      68381
+     ],
+     "liths": [
+      8,
+      10,
+      30
+     ],
+     "t_int_id": 79,
+     "t_int_age": 274.4,
+     "t_int_name": "Kungurian",
+     "b_int_id": 88,
+     "b_int_age": 315.2,
+     "b_int_name": "Moscovian",
+     "color": "#C5816F",
+     "t_age": 282,
+     "b_age": 313.75,
+     "best_int_name": "Paleozoic"
+    },
+    {
+     "map_id": 936383,
+     "source_id": 7,
+     "name": "Permian sedimentary",
+     "strat_name": "",
+     "lith": "sedimentary",
+     "descrip": "",
+     "comments": "",
+     "macro_units": [],
+     "strat_names": [],
+     "liths": [
+      111
+     ],
+     "t_int_id": 75,
+     "t_int_age": 251.902,
+     "t_int_name": "Permian",
+     "b_int_id": 75,
+     "b_int_age": 298.9,
+     "b_int_name": "Permian",
+     "color": "#F04028",
+     "t_age": 251.902,
+     "b_age": 298.9,
+     "best_int_name": "Permian"
+    },
+    {
+     "map_id": 3187666,
+     "source_id": 154,
+     "name": "Paleozoic sedimentary rocks",
+     "strat_name": "",
+     "lith": "sedimentary rocks",
+     "descrip": "",
+     "comments": "",
+     "macro_units": [],
+     "strat_names": [],
+     "liths": [
+      111
+     ],
+     "t_int_id": 75,
+     "t_int_age": 251.902,
+     "t_int_name": "Permian",
+     "b_int_id": 75,
+     "b_int_age": 298.9,
+     "b_int_name": "Permian",
+     "color": "#F04028",
+     "t_age": 251.902,
+     "b_age": 298.9,
+     "best_int_name": "Permian"
+    }
+   ],
+   "refs": {
+    "7": "Garrity, C.P., and Soller, D.R.,. Database of the Geologic Map of North America: adapted from the map by J.C. Reed, Jr. and others (2005). U.S. Geological Survey Data Series 424 . ",
+    "34": "Billingsley, G.H. Geologic Map of the Grand Canyon 30' x 60' Quadrangle, Coconino and Mohave Counties, Northwestern Arizona. USGS Geologic Investigations Series I-2688. ",
+    "133": "Horton, J.D., C.A. San Juan, and D.B. Stoeser. The State Geologic Map Compilation (SGMC) geodatabase of the conterminous United States. doi: 10.3133/ds1052. U.S. Geological Survey Data Series 1052. ",
+    "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+   }
+  }
+ },
+ "probes": {
+  "n": {
+   "lat": 36.09581,
+   "lng": -112.14294,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 3026586,
+       "source_id": 133,
+       "name": "Mississippian, Devonian, and Cambrian sedimentary rocks",
+       "strat_name": "Tapeats Sandstone; Bright Angel Shale; Muav Limestone; Temple Butte Formation; Redwall Limestone; Bolsa Quartzite; Abrigo Formation; Martin Formation; Escabrosa Limestone",
+       "lith": "Major:{sandstone,shale,limestone}, Minor:{dolostone,quartzite}",
+       "descrip": "Brown to dark gray sandstone grades upward into green and gray shale, overlain by light to medium gray or tan limestone and dolostone. This unit includes the Tapeats Sandstone, Bright Angel Shale, Muav Limestone, Temple Butte Formation and Redwall Limestone in northern Arizona, and the Bolsa Quartzite, Abrigo Formation, Martin Formation, and Escabrosa Limestone in southern Arizona. These rocks record intermittent sea-level rise and inundation in early Paleozoic time.  (330-540 Ma)",
+       "comments": "Original map source: Arizona Geological Survey, DI-8 Geologic Map of Arizona, Digital Spatial data for the Geologic Map of Arizona, v. 3.0, edited by S.M. Richard and S.M. Kneale, 2002, 10 p., 2 DOS HD disks. Arc/INFO export file (.e00) format, scale 1:1,000,000. Primary reference: Beus, S.S., 1989, Devonian and Mississippian geology of Arizona, in Jenney, J.P., and Reynolds, S.J., editors, Geologic evolution of Arizona: Arizona Geological Society Digest 17, p. 287-311.",
+       "macro_units": [
+        14096,
+        14097,
+        14102,
+        14833,
+        14834,
+        14835,
+        15027,
+        15028,
+        15029,
+        15031,
+        15032
+       ],
+       "strat_names": [
+        6,
+        1234,
+        3431,
+        3575,
+        3722,
+        3779,
+        4052,
+        4623,
+        66905,
+        68231,
+        68396,
+        74011
+       ],
+       "liths": [
+        8,
+        10,
+        30,
+        31,
+        85
+       ],
+       "t_int_id": 91,
+       "t_int_age": 323.4,
+       "t_int_name": "Serpukhovian",
+       "b_int_id": 130,
+       "b_int_age": 538.8,
+       "b_int_name": "Early Cambrian",
+       "color": "#99C08D",
+       "t_age": 335,
+       "b_age": 516.1,
+       "best_int_name": "Paleozoic"
+      },
+      {
+       "map_id": 943368,
+       "source_id": 7,
+       "name": "Cambrian-Mississippian sedimentary",
+       "strat_name": "",
+       "lith": "sedimentary",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 90,
+       "t_int_age": 323.4,
+       "t_int_name": "Mississippian",
+       "b_int_id": 122,
+       "b_int_age": 538.8,
+       "b_int_name": "Cambrian",
+       "color": "#99C08D",
+       "t_age": 323.2,
+       "b_age": 541,
+       "best_int_name": null
+      },
+      {
+       "map_id": 2203353,
+       "source_id": 34,
+       "name": "Bright Angel Shale",
+       "strat_name": "Bright Angel Shale",
+       "lith": "",
+       "descrip": "Green and purple-red, slope-forming siltstone and shale, and interbeds of red-brown to brown sandstone of Tapeats Sandstone lithology. Includes ledge-forming red-brown sandstone member of McKee and Resser (1945). Consists of green and purple-red, fine-grained, micaceous, ripple-laminated, fossiliferous siltstone and shale; dark-green, medium- to coarse-grained, thin-bedded, glauconitic sandstone; and interbedded purplish-red and brown, thin-bedded, fine- to coarse-grained, ripple-laminated sandstone. Includes gray, thin-bedded, fine-grained, micaceous silty dolomite in upper part of unit in western quarter of map area. Intertonguing and facies change relationships with the underlying Tapeats produce variable thickness trends. Contact with the Tapeats is arbitrarily marked at lithologic vertical and lateral transition from predominantly green siltstone and shale to predominantly brown sandstone in slope above the Tapeats cliff. Thickness is about 350 ft (107 m) in eastern quarter of map area, thickening to about 500 ft (150 m) in western quarter",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [
+        4052,
+        66905
+       ],
+       "liths": [
+        8,
+        9,
+        10,
+        31
+       ],
+       "t_int_id": 128,
+       "t_int_age": 501,
+       "t_int_name": "Middle Cambrian",
+       "b_int_id": 128,
+       "b_int_age": 511,
+       "b_int_name": "Middle Cambrian",
+       "color": "#BFD99D",
+       "t_age": 501,
+       "b_age": 511,
+       "best_int_name": "Cambrian"
+      },
+      {
+       "map_id": 3187666,
+       "source_id": 154,
+       "name": "Paleozoic sedimentary rocks",
+       "strat_name": "",
+       "lith": "sedimentary rocks",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 75,
+       "t_int_age": 251.902,
+       "t_int_name": "Permian",
+       "b_int_id": 75,
+       "b_int_age": 298.9,
+       "b_int_name": "Permian",
+       "color": "#F04028",
+       "t_age": 251.902,
+       "b_age": 298.9,
+       "best_int_name": "Permian"
+      }
+     ],
+     "refs": {
+      "7": "Garrity, C.P., and Soller, D.R.,. Database of the Geologic Map of North America: adapted from the map by J.C. Reed, Jr. and others (2005). U.S. Geological Survey Data Series 424 . ",
+      "34": "Billingsley, G.H. Geologic Map of the Grand Canyon 30' x 60' Quadrangle, Coconino and Mohave Counties, Northwestern Arizona. USGS Geologic Investigations Series I-2688. ",
+      "133": "Horton, J.D., C.A. San Juan, and D.B. Stoeser. The State Geologic Map Compilation (SGMC) geodatabase of the conterminous United States. doi: 10.3133/ds1052. U.S. Geological Survey Data Series 1052. ",
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 1134,
+      "mapData": [
+       {
+        "map_id": 2203353,
+        "source_id": 34,
+        "name": "Bright Angel Shale",
+        "age": "Middle Cambrian",
+        "strat_name": "Bright Angel Shale",
+        "lith": "",
+        "descrip": "Green and purple-red, slope-forming siltstone and shale, and interbeds of red-brown to brown sandstone of Tapeats Sandstone lithology. Includes ledge-forming red-brown sandstone member of McKee and Resser (1945). Consists of green and purple-red, fine-grained, micaceous, ripple-laminated, fossiliferous siltstone and shale; dark-green, medium- to coarse-grained, thin-bedded, glauconitic sandstone; and interbedded purplish-red and brown, thin-bedded, fine- to coarse-grained, ripple-laminated sandstone. Includes gray, thin-bedded, fine-grained, micaceous silty dolomite in upper part of unit in western quarter of map area. Intertonguing and facies change relationships with the underlying Tapeats produce variable thickness trends. Contact with the Tapeats is arbitrarily marked at lithologic vertical and lateral transition from predominantly green siltstone and shale to predominantly brown sandstone in slope above the Tapeats cliff. Thickness is about 350 ft (107 m) in eastern quarter of map area, thickening to about 500 ft (150 m) in western quarter",
+        "comments": "",
+        "liths": [
+         {
+          "lith_id": 8,
+          "lith": "shale",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#7B8896",
+          "lith_fill": 620
+         },
+         {
+          "lith_id": 9,
+          "lith": "siltstone",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#86919D",
+          "lith_fill": 616
+         },
+         {
+          "lith_id": 10,
+          "lith": "sandstone",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#FFD500",
+          "lith_fill": 607
+         },
+         {
+          "lith_id": 31,
+          "lith": "dolomite",
+          "lith_type": "carbonate",
+          "lith_class": "sedimentary",
+          "color": "#527AF0",
+          "lith_fill": 642
+         }
+        ],
+        "b_int": {
+         "int_id": 128,
+         "b_age": 511,
+         "t_age": 501,
+         "int_name": "Middle Cambrian",
+         "color": "#BFD99D"
+        },
+        "t_int": {
+         "int_id": 128,
+         "b_age": 511,
+         "t_age": 501,
+         "int_name": "Middle Cambrian",
+         "color": "#BFD99D"
+        },
+        "color": "#BFD99D",
+        "scale": "large",
+        "ref": {
+         "url": "http://pubs.usgs.gov/imap/i-2688/",
+         "name": "Grand Canyon, AZ",
+         "authors": "Billingsley, G.H.",
+         "isbn_doi": "",
+         "ref_year": "2000",
+         "ref_title": "Geologic Map of the Grand Canyon 30' x 60' Quadrangle, Coconino and Mohave Counties, Northwestern Arizona",
+         "source_id": 34,
+         "ref_source": "USGS Geologic Investigations Series I-2688"
+        },
+        "macrostrat": {
+         "strat_names": [
+          {
+           "strat_name_id": 4052,
+           "rank_name": "Bright Angel Shale"
+          },
+          {
+           "strat_name_id": 66905,
+           "rank_name": "Bright Angel Shale"
+          }
+         ],
+         "unit_ids": [
+          13444,
+          14096,
+          14834,
+          15008,
+          15028,
+          15198,
+          null
+         ],
+         "max_thick": 610,
+         "max_min_thick": 150,
+         "min_min_thick": 150,
+         "b_age": 517.95,
+         "t_age": 497.85,
+         "pbdb_collections": 2,
+         "pbdb_occs": 18,
+         "b_int": {
+          "int_id": 254,
+          "int_name": "Stage 3",
+          "color": "#A6C583"
+         },
+         "t_int": {
+          "int_id": 250,
+          "int_name": "Guzhangian",
+          "color": "#CCDFAA"
+         },
+         "liths": [
+          {
+           "lith_id": 8,
+           "lith": "shale",
+           "lith_type": "siliciclastic",
+           "lith_class": "sedimentary",
+           "color": "#7B8896",
+           "lith_fill": 620,
+           "prop": 0.4
+          },
+          {
+           "lith_id": 10,
+           "lith": "sandstone",
+           "lith_type": "siliciclastic",
+           "lith_class": "sedimentary",
+           "color": "#FFD500",
+           "lith_fill": 607,
+           "prop": 0.4
+          },
+          {
+           "lith_id": 30,
+           "lith": "limestone",
+           "lith_type": "carbonate",
+           "lith_class": "sedimentary",
+           "color": "#4C71F1",
+           "lith_fill": 627,
+           "prop": 0.133
+          },
+          {
+           "lith_id": 31,
+           "lith": "dolomite",
+           "lith_type": "carbonate",
+           "lith_class": "sedimentary",
+           "color": "#527AF0",
+           "lith_fill": 642,
+           "prop": 0.067
+          }
+         ],
+         "econs": [],
+         "environs": [
+          {
+           "environ_id": 38,
+           "environ": "marine",
+           "environ_type": "",
+           "environ_class": "marine",
+           "color": "#CCFFFF"
+          },
+          {
+           "environ_id": 93,
+           "environ": "inferred marine",
+           "environ_type": "",
+           "environ_class": "marine",
+           "color": "#D6F5FF"
+          }
+         ]
+        },
+        "lines": [
+         {
+          "line_id": 783221,
+          "source_id": 34,
+          "name": "",
+          "type": "normal fault",
+          "direction": "",
+          "descrip": "",
+          "scale": "large"
+         }
+        ]
+       }
+      ],
+      "regions": [],
+      "hasColumns": true
+     }
+    }
+   }
+  },
+  "s": {
+   "lat": 36.02395,
+   "lng": -112.14294,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 936383,
+       "source_id": 7,
+       "name": "Permian sedimentary",
+       "strat_name": "",
+       "lith": "sedimentary",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 75,
+       "t_int_age": 251.902,
+       "t_int_name": "Permian",
+       "b_int_id": 75,
+       "b_int_age": 298.9,
+       "b_int_name": "Permian",
+       "color": "#F04028",
+       "t_age": 251.902,
+       "b_age": 298.9,
+       "best_int_name": "Permian"
+      },
+      {
+       "map_id": 2202009,
+       "source_id": 34,
+       "name": "Kaibab Formation",
+       "strat_name": "Kaibab Formation",
+       "lith": "",
+       "descrip": "Includes, in descending order, Harrisburg and Fossil Mountain Members, undivided, as defined by Sorauf and Billingsley (1991). Harrisburg Member—Reddish-gray and brownish-gray, slope-forming gypsum, siltstone, sandstone, and limestone. Informally subdivided, in descending order, into three units forming an upper slope, middle cliff, and lower slope. Upper slope unit is interbedded red and gray gypsum, sandstone, and siltstone, and yellowish-gray fossiliferous sandy limestone. Middle cliff unit is gray, thin-bedded, fossiliferous cherty limestone and sandy limestone. Lower slope unit is (1) yellowish-gray to pale-red gypsifereous siltstone and calcareous sandstone, (2) gray, thin-bedded sandy limestone, and (3) gray to white, thick-bedded gypsum. Upper, middle, and lower units become inseparable on the Kaibab Plateau, northeastern quarter of map area. Solution weathering within gypsum beds of lower slope unit has resulted in warping and bending of limestone of middle cliff unit, especially in or near local drainages on Kanab and Coconino Plateaus where middle cliff unit forms surface bedrock. Gypsum solutioning is responsible for several sinkhole depressions within Harrisburg Member. Contact with underlying Fossil Mountain Member is gradational and arbitrarily marked at top of cherty limestone cliff of the Fossil Mountain. About 260 ft (80 m) thick in western half of map area, thinning eastward to about 120 ft (36 m) in northeastern quarter of map area. Average thickness about 165 ft (50 m) Fossil Mountain Member—Light-gray, cliff-forming, fine- to medium-grained, thin- to medium-bedded [1–6 ft (0.3–2 m)], fossiliferous, sandy, cherty limestone. In general, unit weathers dark gray. Unit characterized by gray to white fossiliferous chert nodules and white chert lenses parallel to bedding; chert weathers dark gray to black. Some chert nodules contain concentric black and white bands. Includes brecciated chert beds 4–10 ft (1–3 m) thick in upper part at contact of thin limestone or gypsifereous siltstone of Harrisburg Member. Chert in central and western parts of map area makes up about 20 percent of unit; unit becomes sandy in northeastern quarter of map area. Generally forms cliff at rim of the Grand Canyon. Weathers into pinnacles or “pillars” detached from cliff in western half of map area. Unconformable contact with underlying Woods Ranch Member of Toroweap Formation (Pt) attributed to solution erosion and channel erosion; average relief about 10 ft (3 m). Some channels have eroded as much as 150 ft (45 m) into the Woods Ranch in western half of map area. Erosion channels were filled with sandy cherty limestone typical of the Fossil Mountain, providing an extra thickness of the Fossil Mountain. Thickness about 230–350 ft (70–107 m)",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [
+        1001
+       ],
+       "liths": [
+        9,
+        10,
+        30,
+        36,
+        45
+       ],
+       "t_int_id": 80,
+       "t_int_age": 274.4,
+       "t_int_name": "Early Permian",
+       "b_int_id": 80,
+       "b_int_age": 298.9,
+       "b_int_name": "Early Permian",
+       "color": "#EE5845",
+       "t_age": 272.95,
+       "b_age": 298.9,
+       "best_int_name": "Permian"
+      },
+      {
+       "map_id": 2728387,
+       "source_id": 133,
+       "name": "Permian sedimentary rocks",
+       "strat_name": "Kaibab Formation; Toroweap Formation; Coconino Sandstone",
+       "lith": "Major:{sandstone,limestone}, Minor:{chert}",
+       "descrip": "Gray to tan, cherty limestone of Kaibab and Toroweap Formations, and underlying white to tan, fine-grained Coconino Sandstone. Limestone was deposited in a shallow sea, and sandstone was deposited in near-shore dunes and beach settings.  (270-280 Ma)",
+       "comments": "Original map source: Arizona Geological Survey, DI-8 Geologic Map of Arizona, Digital Spatial data for the Geologic Map of Arizona, v. 3.0, edited by S.M. Richard and S.M. Kneale, 2002, 10 p., 2 DOS HD disks. Arc/INFO export file (.e00) format, scale 1:1,000,000. Primary reference: Richard, S.M., Reynolds, S.J., Spencer, J.E., and Pearthree, P.A., 2000, Geologic Map of Arizona: Arizona Geological Survey Map 35, 1 sheet, scale 1:1,000,000.",
+       "macro_units": [
+        14844,
+        14845,
+        15033,
+        15034,
+        15035
+       ],
+       "strat_names": [
+        1001,
+        2116,
+        3273
+       ],
+       "liths": [
+        10,
+        30,
+        45
+       ],
+       "t_int_id": 226,
+       "t_int_age": 266.9,
+       "t_int_name": "Roadian",
+       "b_int_id": 79,
+       "b_int_age": 283.3,
+       "b_int_name": "Kungurian",
+       "color": "#F04028",
+       "t_age": 262.5625,
+       "b_age": 279.7375,
+       "best_int_name": "Permian"
+      },
+      {
+       "map_id": 3187666,
+       "source_id": 154,
+       "name": "Paleozoic sedimentary rocks",
+       "strat_name": "",
+       "lith": "sedimentary rocks",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 75,
+       "t_int_age": 251.902,
+       "t_int_name": "Permian",
+       "b_int_id": 75,
+       "b_int_age": 298.9,
+       "b_int_name": "Permian",
+       "color": "#F04028",
+       "t_age": 251.902,
+       "b_age": 298.9,
+       "best_int_name": "Permian"
+      }
+     ],
+     "refs": {
+      "7": "Garrity, C.P., and Soller, D.R.,. Database of the Geologic Map of North America: adapted from the map by J.C. Reed, Jr. and others (2005). U.S. Geological Survey Data Series 424 . ",
+      "34": "Billingsley, G.H. Geologic Map of the Grand Canyon 30' x 60' Quadrangle, Coconino and Mohave Counties, Northwestern Arizona. USGS Geologic Investigations Series I-2688. ",
+      "133": "Horton, J.D., C.A. San Juan, and D.B. Stoeser. The State Geologic Map Compilation (SGMC) geodatabase of the conterminous United States. doi: 10.3133/ds1052. U.S. Geological Survey Data Series 1052. ",
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 2082,
+      "mapData": [
+       {
+        "map_id": 2202009,
+        "source_id": 34,
+        "name": "Kaibab Formation",
+        "age": "Lower Permian",
+        "strat_name": "Kaibab Formation",
+        "lith": "",
+        "descrip": "Includes, in descending order, Harrisburg and Fossil Mountain Members, undivided, as defined by Sorauf and Billingsley (1991). Harrisburg Member—Reddish-gray and brownish-gray, slope-forming gypsum, siltstone, sandstone, and limestone. Informally subdivided, in descending order, into three units forming an upper slope, middle cliff, and lower slope. Upper slope unit is interbedded red and gray gypsum, sandstone, and siltstone, and yellowish-gray fossiliferous sandy limestone. Middle cliff unit is gray, thin-bedded, fossiliferous cherty limestone and sandy limestone. Lower slope unit is (1) yellowish-gray to pale-red gypsifereous siltstone and calcareous sandstone, (2) gray, thin-bedded sandy limestone, and (3) gray to white, thick-bedded gypsum. Upper, middle, and lower units become inseparable on the Kaibab Plateau, northeastern quarter of map area. Solution weathering within gypsum beds of lower slope unit has resulted in warping and bending of limestone of middle cliff unit, especially in or near local drainages on Kanab and Coconino Plateaus where middle cliff unit forms surface bedrock. Gypsum solutioning is responsible for several sinkhole depressions within Harrisburg Member. Contact with underlying Fossil Mountain Member is gradational and arbitrarily marked at top of cherty limestone cliff of the Fossil Mountain. About 260 ft (80 m) thick in western half of map area, thinning eastward to about 120 ft (36 m) in northeastern quarter of map area. Average thickness about 165 ft (50 m) Fossil Mountain Member—Light-gray, cliff-forming, fine- to medium-grained, thin- to medium-bedded [1–6 ft (0.3–2 m)], fossiliferous, sandy, cherty limestone. In general, unit weathers dark gray. Unit characterized by gray to white fossiliferous chert nodules and white chert lenses parallel to bedding; chert weathers dark gray to black. Some chert nodules contain concentric black and white bands. Includes brecciated chert beds 4–10 ft (1–3 m) thick in upper part at contact of thin limestone or gypsifereous siltstone of Harrisburg Member. Chert in central and western parts of map area makes up about 20 percent of unit; unit becomes sandy in northeastern quarter of map area. Generally forms cliff at rim of the Grand Canyon. Weathers into pinnacles or “pillars” detached from cliff in western half of map area. Unconformable contact with underlying Woods Ranch Member of Toroweap Formation (Pt) attributed to solution erosion and channel erosion; average relief about 10 ft (3 m). Some channels have eroded as much as 150 ft (45 m) into the Woods Ranch in western half of map area. Erosion channels were filled with sandy cherty limestone typical of the Fossil Mountain, providing an extra thickness of the Fossil Mountain. Thickness about 230–350 ft (70–107 m)",
+        "comments": "",
+        "liths": [
+         {
+          "lith_id": 9,
+          "lith": "siltstone",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#86919D",
+          "lith_fill": 616
+         },
+         {
+          "lith_id": 10,
+          "lith": "sandstone",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#FFD500",
+          "lith_fill": 607
+         },
+         {
+          "lith_id": 30,
+          "lith": "limestone",
+          "lith_type": "carbonate",
+          "lith_class": "sedimentary",
+          "color": "#4C71F1",
+          "lith_fill": 627
+         },
+         {
+          "lith_id": 36,
+          "lith": "gypsum",
+          "lith_type": "evaporite",
+          "lith_class": "sedimentary",
+          "color": "#F3A8B3",
+          "lith_fill": 667
+         },
+         {
+          "lith_id": 45,
+          "lith": "chert",
+          "lith_type": "chemical",
+          "lith_class": "sedimentary",
+          "color": "#CD5C5C",
+          "lith_fill": 649
+         }
+        ],
+        "b_int": {
+         "int_id": 80,
+         "b_age": 298.9,
+         "t_age": 274.4,
+         "int_name": "Early Permian",
+         "color": "#EE5845"
+        },
+        "t_int": {
+         "int_id": 80,
+         "b_age": 298.9,
+         "t_age": 274.4,
+         "int_name": "Early Permian",
+         "color": "#EE5845"
+        },
+        "color": "#EE5845",
+        "scale": "large",
+        "ref": {
+         "url": "http://pubs.usgs.gov/imap/i-2688/",
+         "name": "Grand Canyon, AZ",
+         "authors": "Billingsley, G.H.",
+         "isbn_doi": "",
+         "ref_year": "2000",
+         "ref_title": "Geologic Map of the Grand Canyon 30' x 60' Quadrangle, Coconino and Mohave Counties, Northwestern Arizona",
+         "source_id": 34,
+         "ref_source": "USGS Geologic Investigations Series I-2688"
+        },
+        "macrostrat": {
+         "strat_names": [
+          {
+           "strat_name_id": 1001,
+           "rank_name": "Kaibab Formation"
+          }
+         ],
+         "unit_ids": [
+          6595,
+          14008,
+          15016,
+          15206
+         ],
+         "max_thick": 650,
+         "max_min_thick": 80,
+         "min_min_thick": 80,
+         "b_age": 294.675,
+         "t_age": 251.902,
+         "pbdb_collections": 1,
+         "pbdb_occs": 2,
+         "b_int": {
+          "int_id": 83,
+          "int_name": "Asselian",
+          "color": "#E36350"
+         },
+         "t_int": {
+          "int_id": 73,
+          "int_name": "Induan",
+          "color": "#A4469F"
+         },
+         "liths": [
+          {
+           "lith_id": 30,
+           "lith": "limestone",
+           "lith_type": "carbonate",
+           "lith_class": "sedimentary",
+           "color": "#4C71F1",
+           "lith_fill": 627,
+           "prop": 0.6
+          },
+          {
+           "lith_id": 31,
+           "lith": "dolomite",
+           "lith_type": "carbonate",
+           "lith_class": "sedimentary",
+           "color": "#527AF0",
+           "lith_fill": 642,
+           "prop": 0.2
+          },
+          {
+           "lith_id": 45,
+           "lith": "chert",
+           "lith_type": "chemical",
+           "lith_class": "sedimentary",
+           "color": "#CD5C5C",
+           "lith_fill": 649,
+           "prop": 0.2
+          }
+         ],
+         "econs": [],
+         "environs": [
+          {
+           "environ_id": 1,
+           "environ": "peritidal",
+           "environ_type": "carbonate",
+           "environ_class": "marine",
+           "color": "#B8B8E6"
+          },
+          {
+           "environ_id": 2,
+           "environ": "shallow subtidal",
+           "environ_type": "carbonate",
+           "environ_class": "marine",
+           "color": "#3399FF"
+          },
+          {
+           "environ_id": 3,
+           "environ": "open shallow subtidal",
+           "environ_type": "carbonate",
+           "environ_class": "marine",
+           "color": "#3399FF"
+          },
+          {
+           "environ_id": 38,
+           "environ": "marine",
+           "environ_type": "",
+           "environ_class": "marine",
+           "color": "#CCFFFF"
+          }
+         ]
+        },
+        "lines": []
+       }
+      ],
+      "regions": [],
+      "hasColumns": true
+     }
+    }
+   }
+  },
+  "e": {
+   "lat": 36.05988,
+   "lng": -112.09849,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 2203964,
+       "source_id": 34,
+       "name": "Wescogame Formation, Manakacha Formation, Watahomigi Formation",
+       "strat_name": "Wescogame Formation; Manakacha Formation; Watahomigi Formation",
+       "lith": "",
+       "descrip": "Wescogame Formation—Light-red, pale-yellow, and light-gray upper slope unit and lower cliff unit. Upper slope unit consists mainly of dark-red, fine-grained siltstone and mudstone interbedded with light-red, coarse-grained, calcareous sandstone and dolomitic sandstone, siltstone, mudstone, and conglomerate. Lower cliff unit consists mainly of light-red to gray, high-angle, large- and medium-scale, tabular-planar, cross-bedded sandstone and calcareous sandstone sets as much as 40 ft (12 m) thick. Includes interbedded dark-red, thin-bedded siltstone in upper part of cliff. Cross-bed sets contain large footprints of four-footed vertebrate animals in eastern part of map area. Unconformable contact with underlying Manakacha Formation marked by unconformity of erosion channels as much as 80 ft (24 m) deep in western part of map area, and less than 30 ft (10 m) deep in eastern part of map area. Channels commonly filled with limestone/chert conglomerate. The Wescogame thickens slightly from west to east, averaging about 130 ft (40 m) in western part of map area and about 150 ft (45 m) in eastern part Manakacha Formation—Light-red, white, and gray upper slope unit and lower cliff unit of sandstone, calcareous sandstone, dark-red siltstone, and gray limestone. Upper slope unit consists mainly of shaley siltstone and mudstone with minor interbedded, thin-bedded limestone and sandstone. Carbonate content of upper slope unit increases westward to form numerous ledge-forming, thin- and medium-bedded limestone beds. Upper slope unit is about 100 ft (30 m) thick in eastern half of map area, decreasing to less than 60 ft (18 m) thick in western half. Lower cliff unit is dominated by grayish-red, medium- to thick-bedded, cross-bedded calcareous sandstone, dolomite, and sandy limestone. Lower cliff unit is about 60 ft (18 m) thick in eastern part of map area, thickening to about 100 ft (30 m) in western part. Carbonate content of lower cliff unit increases westward across map area, forming numerous gray limestone ledges. Unconformable erosional contact between the Manakacha and underlying Watahomigi Formation approximately marked at base of lower sandstone cliff of the Manakacha; erosional relief generally less than 3 ft (1 m) and wavy unconformable surface. Overall thickness averages about 200 ft (60 m) throughout map area Watahomigi Formation—Gray and purplish-red, slope-forming limestone, siltstone, mudstone, and conglomerate. Forms an upper ledge/slope unit and a lower slope unit. Upper ledge/slope unit consists of alternating gray, thin-bedded cherty limestone ledges interbedded with purplish-gray siltstone and mudstone; limestone beds contain Lower Pennsylvanian conodont fossils (Martin and Barrick, 1999); red chert lenses and nodules common. Includes limestone chert-pebble conglomerate at base, locally containing Lower Pennsylvanian fossils. Upper ledge/slope unit averages about 70 ft (21 m) thick throughout map area. Lower slope unit consists mainly of purplish-red mudstone and siltstone, interbedded with thin-bedded, aphanitic to granular limestone in upper part with red chert veins and nodules. Conodonts in lower thin limestone beds are Upper Mississippian (Martin and Barrick, 1999). Unit includes purple siltstone and gray limestone interbedded with conglomerate that fill small erosion channels cut into either Surprise Canyon Formation (Ms) or Redwall Limestone (Mr). Purple shale and mudstone of lower slope unit unconformably overlies the gray Redwall in majority of map area. Contact with the Surprise Canyon is often based on color change from purple mudstone of the Watahomigi to dark-red mudstone of the Surprise Canyon. Unit averages about 100 ft (30 m) thick along eastern edge of map area, thickening to about 200 ft (60 m) along western edge",
+       "comments": "",
+       "macro_units": [
+        15037
+       ],
+       "strat_names": [
+        2030
+       ],
+       "liths": [
+        7,
+        8,
+        9,
+        10,
+        14,
+        18,
+        30,
+        31,
+        45
+       ],
+       "t_int_id": 982,
+       "t_int_age": 298.9,
+       "t_int_name": "Late Pennsylvanian",
+       "b_int_id": 985,
+       "b_int_age": 330.3,
+       "b_int_name": "Late Mississippian",
+       "color": "#C5816F",
+       "t_age": 282,
+       "b_age": 313.75,
+       "best_int_name": "Paleozoic"
+      },
+      {
+       "map_id": 3005545,
+       "source_id": 133,
+       "name": "Permian to Pennsylvanian sedimentary rocks",
+       "strat_name": "Hermit Formation; Supai Group; Schnebly Hill Formation; Naco Group",
+       "lith": "Major:{sandstone,shale,limestone}",
+       "descrip": "Interbedded sandstone, shale, and limestone usually characterized by ledgy outcrops. Orange to reddish sandstone forms cliffs near Sedona. This unit includes Supai Group and Hermit Shale in northern Arizona and Naco Group in southern Arizona. It was deposited in coastal-plain to shallow-marine settings during time of variable and changing sea level. Rocks of this map unit in southern Arizona may be in part equivalent to Permian rocks of map unit P in central and northern Arizona.  (280-310 Ma)",
+       "comments": "Original map source: Arizona Geological Survey, DI-8 Geologic Map of Arizona, Digital Spatial data for the Geologic Map of Arizona, v. 3.0, edited by S.M. Richard and S.M. Kneale, 2002, 10 p., 2 DOS HD disks. Arc/INFO export file (.e00) format, scale 1:1,000,000. Primary reference: Richard, S.M., Reynolds, S.J., Spencer, J.E., and Pearthree, P.A., 2000, Geologic Map of Arizona: Arizona Geological Survey Map 35, 1 sheet, scale 1:1,000,000.",
+       "macro_units": [
+        15037
+       ],
+       "strat_names": [
+        874,
+        1843,
+        2575,
+        68381
+       ],
+       "liths": [
+        8,
+        10,
+        30
+       ],
+       "t_int_id": 79,
+       "t_int_age": 274.4,
+       "t_int_name": "Kungurian",
+       "b_int_id": 88,
+       "b_int_age": 315.2,
+       "b_int_name": "Moscovian",
+       "color": "#C5816F",
+       "t_age": 282,
+       "b_age": 313.75,
+       "best_int_name": "Paleozoic"
+      },
+      {
+       "map_id": 954078,
+       "source_id": 7,
+       "name": "Pennsylvanian-Permian sedimentary",
+       "strat_name": "",
+       "lith": "sedimentary",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 75,
+       "t_int_age": 251.902,
+       "t_int_name": "Permian",
+       "b_int_id": 85,
+       "b_int_age": 323.4,
+       "b_int_name": "Pennsylvanian",
+       "color": "#C5816F",
+       "t_age": 251.902,
+       "b_age": 323.2,
+       "best_int_name": "Paleozoic"
+      },
+      {
+       "map_id": 3187666,
+       "source_id": 154,
+       "name": "Paleozoic sedimentary rocks",
+       "strat_name": "",
+       "lith": "sedimentary rocks",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 75,
+       "t_int_age": 251.902,
+       "t_int_name": "Permian",
+       "b_int_id": 75,
+       "b_int_age": 298.9,
+       "b_int_name": "Permian",
+       "color": "#F04028",
+       "t_age": 251.902,
+       "b_age": 298.9,
+       "best_int_name": "Permian"
+      }
+     ],
+     "refs": {
+      "7": "Garrity, C.P., and Soller, D.R.,. Database of the Geologic Map of North America: adapted from the map by J.C. Reed, Jr. and others (2005). U.S. Geological Survey Data Series 424 . ",
+      "34": "Billingsley, G.H. Geologic Map of the Grand Canyon 30' x 60' Quadrangle, Coconino and Mohave Counties, Northwestern Arizona. USGS Geologic Investigations Series I-2688. ",
+      "133": "Horton, J.D., C.A. San Juan, and D.B. Stoeser. The State Geologic Map Compilation (SGMC) geodatabase of the conterminous United States. doi: 10.3133/ds1052. U.S. Geological Survey Data Series 1052. ",
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 1636,
+      "mapData": [
+       {
+        "map_id": 2203964,
+        "source_id": 34,
+        "name": "Wescogame Formation, Manakacha Formation, Watahomigi Formation",
+        "age": "Late Pennsylvanian to Late Mississippian",
+        "strat_name": "Wescogame Formation; Manakacha Formation; Watahomigi Formation",
+        "lith": "",
+        "descrip": "Wescogame Formation—Light-red, pale-yellow, and light-gray upper slope unit and lower cliff unit. Upper slope unit consists mainly of dark-red, fine-grained siltstone and mudstone interbedded with light-red, coarse-grained, calcareous sandstone and dolomitic sandstone, siltstone, mudstone, and conglomerate. Lower cliff unit consists mainly of light-red to gray, high-angle, large- and medium-scale, tabular-planar, cross-bedded sandstone and calcareous sandstone sets as much as 40 ft (12 m) thick. Includes interbedded dark-red, thin-bedded siltstone in upper part of cliff. Cross-bed sets contain large footprints of four-footed vertebrate animals in eastern part of map area. Unconformable contact with underlying Manakacha Formation marked by unconformity of erosion channels as much as 80 ft (24 m) deep in western part of map area, and less than 30 ft (10 m) deep in eastern part of map area. Channels commonly filled with limestone/chert conglomerate. The Wescogame thickens slightly from west to east, averaging about 130 ft (40 m) in western part of map area and about 150 ft (45 m) in eastern part Manakacha Formation—Light-red, white, and gray upper slope unit and lower cliff unit of sandstone, calcareous sandstone, dark-red siltstone, and gray limestone. Upper slope unit consists mainly of shaley siltstone and mudstone with minor interbedded, thin-bedded limestone and sandstone. Carbonate content of upper slope unit increases westward to form numerous ledge-forming, thin- and medium-bedded limestone beds. Upper slope unit is about 100 ft (30 m) thick in eastern half of map area, decreasing to less than 60 ft (18 m) thick in western half. Lower cliff unit is dominated by grayish-red, medium- to thick-bedded, cross-bedded calcareous sandstone, dolomite, and sandy limestone. Lower cliff unit is about 60 ft (18 m) thick in eastern part of map area, thickening to about 100 ft (30 m) in western part. Carbonate content of lower cliff unit increases westward across map area, forming numerous gray limestone ledges. Unconformable erosional contact between the Manakacha and underlying Watahomigi Formation approximately marked at base of lower sandstone cliff of the Manakacha; erosional relief generally less than 3 ft (1 m) and wavy unconformable surface. Overall thickness averages about 200 ft (60 m) throughout map area Watahomigi Formation—Gray and purplish-red, slope-forming limestone, siltstone, mudstone, and conglomerate. Forms an upper ledge/slope unit and a lower slope unit. Upper ledge/slope unit consists of alternating gray, thin-bedded cherty limestone ledges interbedded with purplish-gray siltstone and mudstone; limestone beds contain Lower Pennsylvanian conodont fossils (Martin and Barrick, 1999); red chert lenses and nodules common. Includes limestone chert-pebble conglomerate at base, locally containing Lower Pennsylvanian fossils. Upper ledge/slope unit averages about 70 ft (21 m) thick throughout map area. Lower slope unit consists mainly of purplish-red mudstone and siltstone, interbedded with thin-bedded, aphanitic to granular limestone in upper part with red chert veins and nodules. Conodonts in lower thin limestone beds are Upper Mississippian (Martin and Barrick, 1999). Unit includes purple siltstone and gray limestone interbedded with conglomerate that fill small erosion channels cut into either Surprise Canyon Formation (Ms) or Redwall Limestone (Mr). Purple shale and mudstone of lower slope unit unconformably overlies the gray Redwall in majority of map area. Contact with the Surprise Canyon is often based on color change from purple mudstone of the Watahomigi to dark-red mudstone of the Surprise Canyon. Unit averages about 100 ft (30 m) thick along eastern edge of map area, thickening to about 200 ft (60 m) along western edge",
+        "comments": "",
+        "liths": [
+         {
+          "lith_id": 7,
+          "lith": "mudstone",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#9CA3AA",
+          "lith_fill": 620
+         },
+         {
+          "lith_id": 8,
+          "lith": "shale",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#7B8896",
+          "lith_fill": 620
+         },
+         {
+          "lith_id": 9,
+          "lith": "siltstone",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#86919D",
+          "lith_fill": 616
+         },
+         {
+          "lith_id": 10,
+          "lith": "sandstone",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#FFD500",
+          "lith_fill": 607
+         },
+         {
+          "lith_id": 14,
+          "lith": "conglomerate",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#FFC000",
+          "lith_fill": 602
+         },
+         {
+          "lith_id": 18,
+          "lith": "carbonate",
+          "lith_type": "carbonate",
+          "lith_class": "sedimentary",
+          "color": "#0508FD",
+          "lith_fill": 641
+         },
+         {
+          "lith_id": 30,
+          "lith": "limestone",
+          "lith_type": "carbonate",
+          "lith_class": "sedimentary",
+          "color": "#4C71F1",
+          "lith_fill": 627
+         },
+         {
+          "lith_id": 31,
+          "lith": "dolomite",
+          "lith_type": "carbonate",
+          "lith_class": "sedimentary",
+          "color": "#527AF0",
+          "lith_fill": 642
+         },
+         {
+          "lith_id": 45,
+          "lith": "chert",
+          "lith_type": "chemical",
+          "lith_class": "sedimentary",
+          "color": "#CD5C5C",
+          "lith_fill": 649
+         }
+        ],
+        "b_int": {
+         "int_id": 985,
+         "b_age": 330.3,
+         "t_age": 323.4,
+         "int_name": "Late Mississippian",
+         "color": "#BFC26B"
+        },
+        "t_int": {
+         "int_id": 982,
+         "b_age": 307,
+         "t_age": 298.9,
+         "int_name": "Late Pennsylvanian",
+         "color": "#CCD4C7"
+        },
+        "color": "#C5816F",
+        "scale": "large",
+        "ref": {
+         "url": "http://pubs.usgs.gov/imap/i-2688/",
+         "name": "Grand Canyon, AZ",
+         "authors": "Billingsley, G.H.",
+         "isbn_doi": "",
+         "ref_year": "2000",
+         "ref_title": "Geologic Map of the Grand Canyon 30' x 60' Quadrangle, Coconino and Mohave Counties, Northwestern Arizona",
+         "source_id": 34,
+         "ref_source": "USGS Geologic Investigations Series I-2688"
+        },
+        "macrostrat": {
+         "strat_names": [
+          {
+           "strat_name_id": 2030,
+           "rank_name": "Supai Formation"
+          }
+         ],
+         "unit_ids": [
+          15037
+         ],
+         "max_thick": 250,
+         "max_min_thick": 0,
+         "min_min_thick": 0,
+         "b_age": 313.75,
+         "t_age": 282,
+         "pbdb_collections": 36,
+         "pbdb_occs": 269,
+         "b_int": {
+          "int_id": 88,
+          "int_name": "Moscovian",
+          "color": "#C7CBB9"
+         },
+         "t_int": {
+          "int_id": 79,
+          "int_name": "Kungurian",
+          "color": "#E38776"
+         },
+         "liths": [
+          {
+           "lith_id": 8,
+           "lith": "shale",
+           "lith_type": "siliciclastic",
+           "lith_class": "sedimentary",
+           "color": "#7B8896",
+           "lith_fill": 620,
+           "prop": 0.5
+          },
+          {
+           "lith_id": 10,
+           "lith": "sandstone",
+           "lith_type": "siliciclastic",
+           "lith_class": "sedimentary",
+           "color": "#FFD500",
+           "lith_fill": 607,
+           "prop": 0.5
+          }
+         ],
+         "econs": [],
+         "environs": [
+          {
+           "environ_id": 83,
+           "environ": "alluvial fan",
+           "environ_type": "landscape",
+           "environ_class": "non-marine",
+           "color": "#B8B894"
+          }
+         ]
+        },
+        "lines": [
+         {
+          "line_id": 783328,
+          "source_id": 34,
+          "name": "",
+          "type": "normal fault",
+          "direction": "",
+          "descrip": "",
+          "scale": "large"
+         }
+        ]
+       }
+      ],
+      "regions": [],
+      "hasColumns": true
+     }
+    }
+   }
+  },
+  "w": {
+   "lat": 36.05988,
+   "lng": -112.18739,
+   "response": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": [
+      {
+       "map_id": 936383,
+       "source_id": 7,
+       "name": "Permian sedimentary",
+       "strat_name": "",
+       "lith": "sedimentary",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 75,
+       "t_int_age": 251.902,
+       "t_int_name": "Permian",
+       "b_int_id": 75,
+       "b_int_age": 298.9,
+       "b_int_name": "Permian",
+       "color": "#F04028",
+       "t_age": 251.902,
+       "b_age": 298.9,
+       "best_int_name": "Permian"
+      },
+      {
+       "map_id": 2202009,
+       "source_id": 34,
+       "name": "Kaibab Formation",
+       "strat_name": "Kaibab Formation",
+       "lith": "",
+       "descrip": "Includes, in descending order, Harrisburg and Fossil Mountain Members, undivided, as defined by Sorauf and Billingsley (1991). Harrisburg Member—Reddish-gray and brownish-gray, slope-forming gypsum, siltstone, sandstone, and limestone. Informally subdivided, in descending order, into three units forming an upper slope, middle cliff, and lower slope. Upper slope unit is interbedded red and gray gypsum, sandstone, and siltstone, and yellowish-gray fossiliferous sandy limestone. Middle cliff unit is gray, thin-bedded, fossiliferous cherty limestone and sandy limestone. Lower slope unit is (1) yellowish-gray to pale-red gypsifereous siltstone and calcareous sandstone, (2) gray, thin-bedded sandy limestone, and (3) gray to white, thick-bedded gypsum. Upper, middle, and lower units become inseparable on the Kaibab Plateau, northeastern quarter of map area. Solution weathering within gypsum beds of lower slope unit has resulted in warping and bending of limestone of middle cliff unit, especially in or near local drainages on Kanab and Coconino Plateaus where middle cliff unit forms surface bedrock. Gypsum solutioning is responsible for several sinkhole depressions within Harrisburg Member. Contact with underlying Fossil Mountain Member is gradational and arbitrarily marked at top of cherty limestone cliff of the Fossil Mountain. About 260 ft (80 m) thick in western half of map area, thinning eastward to about 120 ft (36 m) in northeastern quarter of map area. Average thickness about 165 ft (50 m) Fossil Mountain Member—Light-gray, cliff-forming, fine- to medium-grained, thin- to medium-bedded [1–6 ft (0.3–2 m)], fossiliferous, sandy, cherty limestone. In general, unit weathers dark gray. Unit characterized by gray to white fossiliferous chert nodules and white chert lenses parallel to bedding; chert weathers dark gray to black. Some chert nodules contain concentric black and white bands. Includes brecciated chert beds 4–10 ft (1–3 m) thick in upper part at contact of thin limestone or gypsifereous siltstone of Harrisburg Member. Chert in central and western parts of map area makes up about 20 percent of unit; unit becomes sandy in northeastern quarter of map area. Generally forms cliff at rim of the Grand Canyon. Weathers into pinnacles or “pillars” detached from cliff in western half of map area. Unconformable contact with underlying Woods Ranch Member of Toroweap Formation (Pt) attributed to solution erosion and channel erosion; average relief about 10 ft (3 m). Some channels have eroded as much as 150 ft (45 m) into the Woods Ranch in western half of map area. Erosion channels were filled with sandy cherty limestone typical of the Fossil Mountain, providing an extra thickness of the Fossil Mountain. Thickness about 230–350 ft (70–107 m)",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [
+        1001
+       ],
+       "liths": [
+        9,
+        10,
+        30,
+        36,
+        45
+       ],
+       "t_int_id": 80,
+       "t_int_age": 274.4,
+       "t_int_name": "Early Permian",
+       "b_int_id": 80,
+       "b_int_age": 298.9,
+       "b_int_name": "Early Permian",
+       "color": "#EE5845",
+       "t_age": 272.95,
+       "b_age": 298.9,
+       "best_int_name": "Permian"
+      },
+      {
+       "map_id": 2728387,
+       "source_id": 133,
+       "name": "Permian sedimentary rocks",
+       "strat_name": "Kaibab Formation; Toroweap Formation; Coconino Sandstone",
+       "lith": "Major:{sandstone,limestone}, Minor:{chert}",
+       "descrip": "Gray to tan, cherty limestone of Kaibab and Toroweap Formations, and underlying white to tan, fine-grained Coconino Sandstone. Limestone was deposited in a shallow sea, and sandstone was deposited in near-shore dunes and beach settings.  (270-280 Ma)",
+       "comments": "Original map source: Arizona Geological Survey, DI-8 Geologic Map of Arizona, Digital Spatial data for the Geologic Map of Arizona, v. 3.0, edited by S.M. Richard and S.M. Kneale, 2002, 10 p., 2 DOS HD disks. Arc/INFO export file (.e00) format, scale 1:1,000,000. Primary reference: Richard, S.M., Reynolds, S.J., Spencer, J.E., and Pearthree, P.A., 2000, Geologic Map of Arizona: Arizona Geological Survey Map 35, 1 sheet, scale 1:1,000,000.",
+       "macro_units": [
+        14844,
+        14845,
+        15033,
+        15034,
+        15035
+       ],
+       "strat_names": [
+        1001,
+        2116,
+        3273
+       ],
+       "liths": [
+        10,
+        30,
+        45
+       ],
+       "t_int_id": 226,
+       "t_int_age": 266.9,
+       "t_int_name": "Roadian",
+       "b_int_id": 79,
+       "b_int_age": 283.3,
+       "b_int_name": "Kungurian",
+       "color": "#F04028",
+       "t_age": 262.5625,
+       "b_age": 279.7375,
+       "best_int_name": "Permian"
+      },
+      {
+       "map_id": 3187666,
+       "source_id": 154,
+       "name": "Paleozoic sedimentary rocks",
+       "strat_name": "",
+       "lith": "sedimentary rocks",
+       "descrip": "",
+       "comments": "",
+       "macro_units": [],
+       "strat_names": [],
+       "liths": [
+        111
+       ],
+       "t_int_id": 75,
+       "t_int_age": 251.902,
+       "t_int_name": "Permian",
+       "b_int_id": 75,
+       "b_int_age": 298.9,
+       "b_int_name": "Permian",
+       "color": "#F04028",
+       "t_age": 251.902,
+       "b_age": 298.9,
+       "best_int_name": "Permian"
+      }
+     ],
+     "refs": {
+      "7": "Garrity, C.P., and Soller, D.R.,. Database of the Geologic Map of North America: adapted from the map by J.C. Reed, Jr. and others (2005). U.S. Geological Survey Data Series 424 . ",
+      "34": "Billingsley, G.H. Geologic Map of the Grand Canyon 30' x 60' Quadrangle, Coconino and Mohave Counties, Northwestern Arizona. USGS Geologic Investigations Series I-2688. ",
+      "133": "Horton, J.D., C.A. San Juan, and D.B. Stoeser. The State Geologic Map Compilation (SGMC) geodatabase of the conterminous United States. doi: 10.3133/ds1052. U.S. Geological Survey Data Series 1052. ",
+      "154": "Chorlton, L.B. Generalized geology of the world: bedrock domains and major faults in GIS format: a small-scale world geology map with an extended geological attribute database. doi: 10.4095/223767. Geological Survey of Canada, Open File 5529. "
+     }
+    }
+   },
+   "elevation": {
+    "success": {
+     "v": 2,
+     "license": "CC-BY 4.0",
+     "data": {
+      "elevation": 2071,
+      "mapData": [
+       {
+        "map_id": 2202009,
+        "source_id": 34,
+        "name": "Kaibab Formation",
+        "age": "Lower Permian",
+        "strat_name": "Kaibab Formation",
+        "lith": "",
+        "descrip": "Includes, in descending order, Harrisburg and Fossil Mountain Members, undivided, as defined by Sorauf and Billingsley (1991). Harrisburg Member—Reddish-gray and brownish-gray, slope-forming gypsum, siltstone, sandstone, and limestone. Informally subdivided, in descending order, into three units forming an upper slope, middle cliff, and lower slope. Upper slope unit is interbedded red and gray gypsum, sandstone, and siltstone, and yellowish-gray fossiliferous sandy limestone. Middle cliff unit is gray, thin-bedded, fossiliferous cherty limestone and sandy limestone. Lower slope unit is (1) yellowish-gray to pale-red gypsifereous siltstone and calcareous sandstone, (2) gray, thin-bedded sandy limestone, and (3) gray to white, thick-bedded gypsum. Upper, middle, and lower units become inseparable on the Kaibab Plateau, northeastern quarter of map area. Solution weathering within gypsum beds of lower slope unit has resulted in warping and bending of limestone of middle cliff unit, especially in or near local drainages on Kanab and Coconino Plateaus where middle cliff unit forms surface bedrock. Gypsum solutioning is responsible for several sinkhole depressions within Harrisburg Member. Contact with underlying Fossil Mountain Member is gradational and arbitrarily marked at top of cherty limestone cliff of the Fossil Mountain. About 260 ft (80 m) thick in western half of map area, thinning eastward to about 120 ft (36 m) in northeastern quarter of map area. Average thickness about 165 ft (50 m) Fossil Mountain Member—Light-gray, cliff-forming, fine- to medium-grained, thin- to medium-bedded [1–6 ft (0.3–2 m)], fossiliferous, sandy, cherty limestone. In general, unit weathers dark gray. Unit characterized by gray to white fossiliferous chert nodules and white chert lenses parallel to bedding; chert weathers dark gray to black. Some chert nodules contain concentric black and white bands. Includes brecciated chert beds 4–10 ft (1–3 m) thick in upper part at contact of thin limestone or gypsifereous siltstone of Harrisburg Member. Chert in central and western parts of map area makes up about 20 percent of unit; unit becomes sandy in northeastern quarter of map area. Generally forms cliff at rim of the Grand Canyon. Weathers into pinnacles or “pillars” detached from cliff in western half of map area. Unconformable contact with underlying Woods Ranch Member of Toroweap Formation (Pt) attributed to solution erosion and channel erosion; average relief about 10 ft (3 m). Some channels have eroded as much as 150 ft (45 m) into the Woods Ranch in western half of map area. Erosion channels were filled with sandy cherty limestone typical of the Fossil Mountain, providing an extra thickness of the Fossil Mountain. Thickness about 230–350 ft (70–107 m)",
+        "comments": "",
+        "liths": [
+         {
+          "lith_id": 9,
+          "lith": "siltstone",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#86919D",
+          "lith_fill": 616
+         },
+         {
+          "lith_id": 10,
+          "lith": "sandstone",
+          "lith_type": "siliciclastic",
+          "lith_class": "sedimentary",
+          "color": "#FFD500",
+          "lith_fill": 607
+         },
+         {
+          "lith_id": 30,
+          "lith": "limestone",
+          "lith_type": "carbonate",
+          "lith_class": "sedimentary",
+          "color": "#4C71F1",
+          "lith_fill": 627
+         },
+         {
+          "lith_id": 36,
+          "lith": "gypsum",
+          "lith_type": "evaporite",
+          "lith_class": "sedimentary",
+          "color": "#F3A8B3",
+          "lith_fill": 667
+         },
+         {
+          "lith_id": 45,
+          "lith": "chert",
+          "lith_type": "chemical",
+          "lith_class": "sedimentary",
+          "color": "#CD5C5C",
+          "lith_fill": 649
+         }
+        ],
+        "b_int": {
+         "int_id": 80,
+         "b_age": 298.9,
+         "t_age": 274.4,
+         "int_name": "Early Permian",
+         "color": "#EE5845"
+        },
+        "t_int": {
+         "int_id": 80,
+         "b_age": 298.9,
+         "t_age": 274.4,
+         "int_name": "Early Permian",
+         "color": "#EE5845"
+        },
+        "color": "#EE5845",
+        "scale": "large",
+        "ref": {
+         "url": "http://pubs.usgs.gov/imap/i-2688/",
+         "name": "Grand Canyon, AZ",
+         "authors": "Billingsley, G.H.",
+         "isbn_doi": "",
+         "ref_year": "2000",
+         "ref_title": "Geologic Map of the Grand Canyon 30' x 60' Quadrangle, Coconino and Mohave Counties, Northwestern Arizona",
+         "source_id": 34,
+         "ref_source": "USGS Geologic Investigations Series I-2688"
+        },
+        "macrostrat": {
+         "strat_names": [
+          {
+           "strat_name_id": 1001,
+           "rank_name": "Kaibab Formation"
+          }
+         ],
+         "unit_ids": [
+          6595,
+          14008,
+          15016,
+          15206
+         ],
+         "max_thick": 650,
+         "max_min_thick": 80,
+         "min_min_thick": 80,
+         "b_age": 294.675,
+         "t_age": 251.902,
+         "pbdb_collections": 1,
+         "pbdb_occs": 2,
+         "b_int": {
+          "int_id": 83,
+          "int_name": "Asselian",
+          "color": "#E36350"
+         },
+         "t_int": {
+          "int_id": 73,
+          "int_name": "Induan",
+          "color": "#A4469F"
+         },
+         "liths": [
+          {
+           "lith_id": 30,
+           "lith": "limestone",
+           "lith_type": "carbonate",
+           "lith_class": "sedimentary",
+           "color": "#4C71F1",
+           "lith_fill": 627,
+           "prop": 0.6
+          },
+          {
+           "lith_id": 31,
+           "lith": "dolomite",
+           "lith_type": "carbonate",
+           "lith_class": "sedimentary",
+           "color": "#527AF0",
+           "lith_fill": 642,
+           "prop": 0.2
+          },
+          {
+           "lith_id": 45,
+           "lith": "chert",
+           "lith_type": "chemical",
+           "lith_class": "sedimentary",
+           "color": "#CD5C5C",
+           "lith_fill": 649,
+           "prop": 0.2
+          }
+         ],
+         "econs": [],
+         "environs": [
+          {
+           "environ_id": 1,
+           "environ": "peritidal",
+           "environ_type": "carbonate",
+           "environ_class": "marine",
+           "color": "#B8B8E6"
+          },
+          {
+           "environ_id": 2,
+           "environ": "shallow subtidal",
+           "environ_type": "carbonate",
+           "environ_class": "marine",
+           "color": "#3399FF"
+          },
+          {
+           "environ_id": 3,
+           "environ": "open shallow subtidal",
+           "environ_type": "carbonate",
+           "environ_class": "marine",
+           "color": "#3399FF"
+          },
+          {
+           "environ_id": 38,
+           "environ": "marine",
+           "environ_type": "",
+           "environ_class": "marine",
+           "color": "#CCFFFF"
+          }
+         ]
+        },
+        "lines": [
+         {
+          "line_id": 783297,
+          "source_id": 34,
+          "name": "",
+          "type": "normal fault",
+          "direction": "",
+          "descrip": "",
+          "scale": "large"
+         }
+        ]
+       }
+      ],
+      "regions": [],
+      "hasColumns": true
+     }
+    }
+   }
+  }
+ }
+}
