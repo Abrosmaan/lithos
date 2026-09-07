@@ -14,3 +14,17 @@ export const colors = {
 
 export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 } as const;
 export const radius = { sm: 10, md: 14, lg: 20, full: 999 } as const;
+
+// Цвета тиров — оформление, не баланс (пороги тиров — в @lithos/shared).
+export const tierColors = {
+  common: '#8f9aa6',
+  uncommon: '#3fa06a',
+  rare: '#3b82f6',
+  epic: '#9b5de5',
+  legendary: '#e0a526',
+  none: '#5b6673',
+} as const;
+
+export function tierColor(tier: keyof typeof tierColors | null | undefined): string {
+  return tier ? tierColors[tier] : tierColors.none;
+}

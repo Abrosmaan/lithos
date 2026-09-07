@@ -13,11 +13,15 @@ interface ScanDraft {
   photos: DraftPhoto[];
   tests: DraftTests;
   scanId: string | null;
+  /** Раскол: id закрытой родительской карточки; null — обычный скан. */
+  parentCardId: string | null;
   addPhoto: (photo: Omit<DraftPhoto, 'isScale'>) => void;
   removePhoto: (index: number) => void;
   setScalePhoto: (index: number | null) => void;
   setTests: (patch: Partial<DraftTests>) => void;
   setScanId: (id: string | null) => void;
+  /** Начать раскол: очистить черновик и запомнить родителя. */
+  startSplit: (parentCardId: string) => void;
   reset: () => void;
 }
 
@@ -27,6 +31,7 @@ export function ScanDraftProvider({ children }: { children: ReactNode }) {
   const [photos, setPhotos] = useState<DraftPhoto[]>([]);
   const [tests, setTestsState] = useState<DraftTests>(EMPTY_TESTS);
   const [scanId, setScanId] = useState<string | null>(null);
+  const [parentCardId, setParentCardId] = useState<string | null>(null);
 
   const addPhoto = useCallback((photo: Omit<DraftPhoto, 'isScale'>) => {
     setPhotos((prev) => (prev.length >= MAX_PHOTOS ? prev : [...prev, { ...photo, isScale: false }]));
@@ -55,11 +60,16 @@ export function ScanDraftProvider({ children }: { children: ReactNode }) {
     });
     setTestsState(EMPTY_TESTS);
     setScanId(null);
+    setParentCardId(null);
   }, []);
+  const startSplit = useCallback((id: string) => {
+    reset();
+    setParentCardId(id);
+  }, [reset]);
 
   const value = useMemo<ScanDraft>(
-    () => ({ photos, tests, scanId, addPhoto, removePhoto, setScalePhoto, setTests, setScanId, reset }),
-    [photos, tests, scanId, addPhoto, removePhoto, setScalePhoto, setTests, reset],
+    () => ({ photos, tests, scanId, parentCardId, addPhoto, removePhoto, setScalePhoto, setTests, setScanId, startSplit, reset }),
+    [photos, tests, scanId, parentCardId, addPhoto, removePhoto, setScalePhoto, setTests, startSplit, reset],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

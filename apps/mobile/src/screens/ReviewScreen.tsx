@@ -42,15 +42,17 @@ function confirmAsync(title: string, message: string, okLabel: string): Promise<
 }
 
 export function ReviewScreen({ navigation }: Props) {
-  const { photos, tests, scanId: draftScanId, removePhoto, setScalePhoto, setTests, setScanId, reset } = useScanDraft();
+  const { photos, tests, scanId: draftScanId, parentCardId, removePhoto, setScalePhoto, setTests, setScanId, reset } = useScanDraft();
+  const isSplit = parentCardId !== null;
   const [busy, setBusy] = useState(false);
   const [geoStatus, setGeoStatus] = useState<GeoStatus | null>(null);
   const insets = useSafeAreaInsets();
   useEffect(() => {
+    if (isSplit) return; // раскол: гео и тесты берутся от родительской карточки (воркер T2.3)
     let alive = true;
     requestGeoFix().then((r) => { if (alive) setGeoStatus(r.status); });
     return () => { alive = false; };
-  }, []);
+  }, [isSplit]);
 
   const scaleIndex = photos.findIndex((p) => p.isScale);
 
@@ -58,11 +60,13 @@ export function ReviewScreen({ navigation }: Props) {
     if (busy || photos.length === 0) return;
     setBusy(true);
     try {
-      const geo = await requestGeoFix();
-      setGeoStatus(geo.status);
-      if (!geo.fix) {
-        const go = await confirmAsync('Нет геопозиции', MSG.noGeo + '. Продолжить?', 'Продолжить без гео');
-        if (!go) return;
+      const geo = isSplit ? null : await requestGeoFix();
+      if (geo) {
+        setGeoStatus(geo.status);
+        if (!geo.fix) {
+          const go = await confirmAsync('Нет геопозиции', MSG.noGeo + '. Продолжить?', 'Продолжить без гео');
+          if (!go) return;
+        }
       }
       // Тот же scan_id при повторе после сбоя (идемпотентность); черновик сбрасывает его при изменениях.
       const scanId = draftScanId ?? (await createScanId(await getDeviceId()));
@@ -71,7 +75,8 @@ export function ReviewScreen({ navigation }: Props) {
         scanId,
         photos,
         tests: { ...tests, has_scale_photo: scaleIndex >= 0 },
-        geo: geo.fix,
+        geo: geo?.fix ?? null,
+        parentCardId,
       });
       reset();
       navigation.replace('Result', { scanId });
@@ -85,6 +90,11 @@ export function ReviewScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing.xl }]}>
+      {isSplit && (
+        <View style={styles.banner}>
+          <Text style={styles.bannerText}>Раскол: фото свежего скола. Место и подсказки возьмём из исходной карточки.</Text>
+        </View>
+      )}
       <Text style={styles.h1}>Фото ({photos.length} / {MAX_PHOTOS})</Text>
       <Text style={styles.muted}>Нажмите на фото, где есть монета или палец — оно задаст масштаб.</Text>
       <View style={styles.photos}>
@@ -97,13 +107,17 @@ export function ReviewScreen({ navigation }: Props) {
         <BigButton label={photos.length === 0 ? 'Снять фото' : 'Добавить или переснять'} variant="secondary" onPress={() => navigation.navigate('Camera')} />
       )}
 
-      <Text style={styles.h1}>Подсказки для определения</Text>
-      <Text style={styles.muted}>Необязательно, но каждый ответ повышает точность и даёт бонус к редкости.</Text>
-      <Segmented title="Вес в руке" options={WEIGHT_OPTIONS} value={tests.weight} onChange={(v) => setTests({ weight: v })} />
-      <Segmented title="Чем царапается" options={SCRATCH_OPTIONS} value={tests.scratch} onChange={(v) => setTests({ scratch: v })} />
-      <Segmented title="Камень" options={WET_OPTIONS} value={tests.wet} onChange={(v) => setTests({ wet: v })} />
+      {!isSplit && (
+        <>
+          <Text style={styles.h1}>Подсказки для определения</Text>
+          <Text style={styles.muted}>Необязательно, но каждый ответ повышает точность и даёт бонус к редкости.</Text>
+          <Segmented title="Вес в руке" options={WEIGHT_OPTIONS} value={tests.weight} onChange={(v) => setTests({ weight: v })} />
+          <Segmented title="Чем царапается" options={SCRATCH_OPTIONS} value={tests.scratch} onChange={(v) => setTests({ scratch: v })} />
+          <Segmented title="Камень" options={WET_OPTIONS} value={tests.wet} onChange={(v) => setTests({ wet: v })} />
+        </>
+      )}
 
-      {geoStatus !== null && geoStatus !== 'granted' && (
+      {!isSplit && geoStatus !== null && geoStatus !== 'granted' && (
         <View style={styles.banner}>
           <Text style={styles.bannerText}>{MSG.noGeo}</Text>
         </View>

@@ -1,7 +1,5 @@
-// Заглушки маршрутов волн 2–3 (spec §12): Card (T2.2), Collection/Map/Profile (T3.x).
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+// Заглушки маршрутов волны 3 (spec §12): Map / Profile (T3.x).
 import { StyleSheet, Text, View } from 'react-native';
-import type { RootStackParamList } from '../navigation/types';
 import { colors, spacing } from '../theme';
 
 function Stub({ title, note }: { title: string; note: string }) {
@@ -13,12 +11,6 @@ function Stub({ title, note }: { title: string; note: string }) {
   );
 }
 
-export function CardScreen({ route }: NativeStackScreenProps<RootStackParamList, 'Card'>) {
-  return <Stub title="Карточка" note={`Скоро здесь будет карточка камня. ${route.params.cardId}`} />;
-}
-export function CollectionScreen() {
-  return <Stub title="Коллекция" note="Скоро." />;
-}
 export function MapScreen() {
   return <Stub title="Карта" note="Скоро." />;
 }

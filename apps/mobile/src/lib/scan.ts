@@ -24,6 +24,8 @@ export interface SubmitScanInput {
   photos: DraftPhoto[];
   tests: UserTests;
   geo: GeoFix | null;
+  /** Раскол (T2.3): скан свежего скола; воркер берёт гео и тесты от родительской карточки. */
+  parentCardId?: string | null;
 }
 
 async function readBytes(uri: string): Promise<ArrayBuffer> {
@@ -42,6 +44,7 @@ export async function submitScan(input: SubmitScanInput): Promise<{ scanId: stri
     lng: input.geo?.lng ?? null,
     accuracy_m: input.geo?.accuracy_m ?? null,
     user_tests: input.tests,
+    parent_card_id: input.parentCardId ?? null,
   };
 
   // 1. scans: insert (stage = default 'preflight'); при повторе — только обновить поля клиента

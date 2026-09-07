@@ -1,9 +1,12 @@
-// Маршруты прототипа (spec §12). Result/Card/Collection/Map/Profile — заглушки до волн 2–3.
+// Маршруты прототипа (spec §12). Map/Profile — заглушки до волны 3.
 export type RootStackParamList = {
-  Camera: undefined;
+  /** parentCardId — раскол (T2.3): камера открыта для фото свежего скола. */
+  Camera: { parentCardId?: string } | undefined;
   Review: undefined;
   Result: { scanId: string };
   Card: { cardId: string };
+  /** Экран безопасности перед первым расколом; после «Понимаю» — Camera с parentCardId. */
+  Safety: { parentCardId: string };
   Collection: undefined;
   Map: undefined;
   Profile: undefined;

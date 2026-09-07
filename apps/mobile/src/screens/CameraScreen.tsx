@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigButton } from '../components/BigButton';
@@ -20,17 +20,34 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Camera'>;
 
 const CAPTURE_QUALITY = 0.9;
 
-export function CameraScreen({ navigation }: Props) {
+export function CameraScreen({ navigation, route }: Props) {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
-  const { photos, addPhoto, removePhoto } = useScanDraft();
+  const { photos, parentCardId, addPhoto, removePhoto, startSplit, reset } = useScanDraft();
   const [busy, setBusy] = useState(false);
   const [active, setActive] = useState(true);
   const insets = useSafeAreaInsets();
 
   useFocusEffect(useCallback(() => { setActive(true); return () => setActive(false); }, []));
 
+  // Раскол (T2.3): пришли с parentCardId → новый черновик со ссылкой на родителя; параметр гасим,
+  // чтобы возврат на камеру после этого скана не начинал раскол заново.
+  const splitParam = route.params?.parentCardId;
+  useEffect(() => {
+    if (!splitParam) return;
+    startSplit(splitParam);
+    navigation.setParams({ parentCardId: undefined });
+  }, [splitParam, startSplit, navigation]);
+
   const full = photos.length >= MAX_PHOTOS;
+
+  const cancelSplit = () => {
+    if (photos.length === 0) { reset(); return; }
+    Alert.alert('Отменить раскол?', 'Снятые фото будут удалены.', [
+      { text: 'Продолжить съёмку', style: 'cancel' },
+      { text: 'Отменить раскол', style: 'destructive', onPress: reset },
+    ]);
+  };
 
   const shoot = async () => {
     if (!cameraRef.current || busy || full) return;
@@ -76,8 +93,17 @@ export function CameraScreen({ navigation }: Props) {
 
       <View style={[styles.top, { paddingTop: insets.top + spacing.sm }]}>
         <View style={styles.hint}>
-          <Text style={styles.hintText}>Одно фото — с монетой или пальцем для масштаба</Text>
+          <Text style={styles.hintText}>{parentCardId ? 'Раскол: снимите свежий скол крупно' : 'Одно фото — с монетой или пальцем для масштаба'}</Text>
         </View>
+        {parentCardId ? (
+          <Pressable onPress={cancelSplit} accessibilityRole="button" style={styles.counter}>
+            <Text style={styles.counterText}>Отменить раскол</Text>
+          </Pressable>
+        ) : (
+          <Pressable onPress={() => navigation.navigate('Collection')} accessibilityRole="button" style={styles.counter}>
+            <Text style={styles.counterText}>Коллекция</Text>
+          </Pressable>
+        )}
         <View style={styles.counter}>
           <Text style={styles.counterText}>{photos.length} / {MAX_PHOTOS}</Text>
         </View>
