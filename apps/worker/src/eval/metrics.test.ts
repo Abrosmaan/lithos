@@ -122,6 +122,26 @@ describe('percentages regex (ai-pipeline §11 п.7)', () => {
     expect(hasPercentages(result({ lore: 'Несколько процентов слюды.' }))).toBe(true);
     expect(hasPercentages(result({ revision_note: 'about ten percent feldspar' }))).toBe(true);
     expect(hasPercentages(result({ inclusions: [{ mineral: 'quartz', confidence: 0.7, extent: 'traces', location: null, evidence: 'roughly 5% white grains' }] }))).toBe(true);
+    // T4.1 §11 п.7: числительное словами + «процентов», «per cent», неразрывный пробел перед %
+    expect(hasPercentages(result({ lore: 'около сорока процентов кварца' }))).toBe(true);
+    expect(hasPercentages(result({ lore: 'около 40 процентов кварца' }))).toBe(true);
+    expect(hasPercentages(result({ lore: 'about ten per cent mica' }))).toBe(true);
+    expect(hasPercentages(result({ lore: 'примерно 30\u00a0% полевого шпата' }))).toBe(true);
+  });
+
+  it('does not flag fractions in words, plain numbers or units (T4.1 §11 п.7, no false positives)', () => {
+    for (const text of [
+      'half quartz, a third feldspar',
+      'наполовину кварц, треть полевого шпата',
+      'много кварца и немного слюды',
+      'около 40 мм в поперечнике, 2 см вкрапленники',
+      'SiO2-rich rock with 3 visible veins',
+      'уверенность 0.7, 100 метров от берега',
+      'преобладает кварц, подчинённо — полевой шпат',
+    ]) {
+      expect(hasPercentages(result({ lore: text })), text).toBe(false);
+      expect(hasPercentages(result({ revision_note: text })), text).toBe(false);
+    }
   });
   it('ignores clean text', () => {
     expect(hasPercentages(result({ lore: 'Кварц заметен, слюда — следы. Возраст 300 млн лет.' }))).toBe(false);

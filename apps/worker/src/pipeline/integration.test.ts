@@ -5,9 +5,9 @@
 import dotenv from 'dotenv';
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import sharp from 'sharp';
 import { afterAll, describe, expect, it } from 'vitest';
 import { SCAN_ERROR_CODES } from './constants.js';
+import { rockImage } from './__fixtures__/synthetic.js';
 
 let dir = process.cwd();
 for (let i = 0; i < 4 && !existsSync(resolve(dir, '.env')); i++) dir = dirname(dir);
@@ -19,44 +19,6 @@ const enabled =
   !!process.env.SUPABASE_URL &&
   !!(process.env.SUPABASE_SERVICE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY) &&
   !!process.env.ANTHROPIC_API_KEY;
-
-/** Синтетический «камень»: тёмно-серый окатанный овал с зернистостью и тенью на песчаном фоне, 800×600. */
-async function rockImage(): Promise<Buffer> {
-  const w = 800;
-  const h = 600;
-  const raw = Buffer.alloc(w * h * 3);
-  let s = 42;
-  const rnd = () => ((s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const i = (y * w + x) * 3;
-      const dx = (x - 400) / 230;
-      const dy = (y - 310) / 160;
-      const r = dx * dx + dy * dy;
-      let R: number;
-      let G: number;
-      let B: number;
-      if (r < 1) {
-        const shade = 0.75 + 0.35 * (1 - r) * (0.6 - dx * 0.5 - dy * 0.6);
-        const grain = (rnd() - 0.5) * 70;
-        const vein = Math.abs(Math.sin((x + y * 0.4) / 9)) > 0.985 ? 60 : 0;
-        R = 95 * shade + grain + vein;
-        G = 92 * shade + grain + vein;
-        B = 88 * shade + grain + vein;
-      } else {
-        const shadow = r < 1.25 && dy > 0 ? 0.7 : 1;
-        const g = (rnd() - 0.5) * 30;
-        R = 205 * shadow + g;
-        G = 190 * shadow + g;
-        B = 160 * shadow + g;
-      }
-      raw[i] = Math.max(0, Math.min(255, R));
-      raw[i + 1] = Math.max(0, Math.min(255, G));
-      raw[i + 2] = Math.max(0, Math.min(255, B));
-    }
-  }
-  return sharp(raw, { raw: { width: w, height: h, channels: 3 } }).jpeg({ quality: 85 }).toBuffer();
-}
 
 interface ScenarioOpts {
   /** Файл реального фото (PIPELINE_INTEGRATION_PHOTO) или синтетика. */

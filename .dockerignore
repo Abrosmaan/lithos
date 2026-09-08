@@ -1,0 +1,12 @@
+.git
+node_modules
+**/node_modules
+apps/mobile
+reference
+docs
+supabase/seed
+dist
+.expo
+.turbo
+.env
+.env.*

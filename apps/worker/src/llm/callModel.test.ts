@@ -3,7 +3,7 @@ import { MockLanguageModelV4 } from 'ai/test';
 import type { ScanResult } from '@lithos/shared';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { BreakerRegistry } from './breaker.js';
-import { LlmUnavailableError, REPAIR_INSTRUCTION, callModel, type CallModelDeps } from './callModel.js';
+import { LlmUnavailableError, REPAIR_INSTRUCTION, callModel, classifyError, type CallModelDeps } from './callModel.js';
 import { loadLlmConfig, type ModelSpec, type Provider } from './config.js';
 import { MissingApiKeyError } from './providers.js';
 
@@ -362,6 +362,57 @@ describe('callModel', () => {
     expect(out.fallbackReason).toBe('provider_error');
     expect(anthropic.doGenerateCalls).toHaveLength(1);
     expect(deps.sleep).not.toHaveBeenCalled();
+  });
+
+  it('401 (auth): no retry, breaker opens on the first call, fallback answers; next scan skips primary entirely (T4.1 §11 п.2)', async () => {
+    const anthropic = mockModel('anthropic', [httpError(401)]);
+    const google = mockModel('google', [ok(VALID_SCAN)]);
+    const deps = makeDeps({ anthropic, google });
+
+    const r1 = await callModel({ ...mainInput, scanId: 'a1' }, deps);
+
+    expect(r1.provider).toBe('google');
+    expect(r1.usedFallback).toBe(true);
+    expect(r1.fallbackReason).toBe('provider_error');
+    expect(r1.attempts).toBe(2); // 1 × 401 + 1 fallback
+    expect(anthropic.doGenerateCalls).toHaveLength(1);
+    expect(deps.sleep).not.toHaveBeenCalled(); // без backoff-шторма
+    expect(deps.breakers.get('anthropic').state).toBe('open'); // сразу, без minCalls
+    expect(deps.log.error).toHaveBeenCalledWith(
+      'llm call failed (auth): provider key rejected, breaker opened',
+      expect.objectContaining({ scan_id: 'a1', provider: 'anthropic', model: 'claude-sonnet-5', error: expect.objectContaining({ status: 401 }), breaker: 'open' }),
+    );
+    expect(deps.log.warn).toHaveBeenCalledWith('llm primary provider failed, trying fallback', expect.objectContaining({ reason: 'auth', attempts: 1 }));
+
+    // Следующий скан: к Anthropic ни одного HTTP-вызова — breaker открыт
+    const r2 = await callModel({ ...mainInput, scanId: 'a2' }, deps);
+    expect(r2.fallbackReason).toBe('breaker_open');
+    expect(r2.attempts).toBe(1);
+    expect(anthropic.doGenerateCalls).toHaveLength(1);
+  });
+
+  it('401 on primary + fallback without key → LlmUnavailableError{auth HTTP 401, no_api_key} after a single HTTP call', async () => {
+    const anthropic = mockModel('anthropic', [httpError(401)]);
+    const deps = makeDeps({ anthropic }); // google → MissingApiKeyError
+
+    const err = await callModel(mainInput, deps).catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(LlmUnavailableError);
+    const e = err as LlmUnavailableError;
+    expect(e.attempts).toBe(1);
+    expect(e.causes).toEqual([
+      { provider: 'anthropic', model: 'claude-sonnet-5', kind: 'auth', message: 'HTTP 401: HTTP 401' },
+      { provider: 'google', model: 'gemini-3.7-flash', kind: 'no_api_key', message: expect.stringContaining('MissingApiKeyError') },
+    ]);
+    expect(anthropic.doGenerateCalls).toHaveLength(1);
+    expect(deps.sleep).not.toHaveBeenCalled();
+    expect(deps.breakers.get('anthropic').state).toBe('open');
+  });
+
+  it('classifyError: 401 → auth; 400/403/404/422 → fatal (fallback без breaker); 408/429/529/5xx → retryable', () => {
+    expect(classifyError(httpError(401))).toBe('auth');
+    for (const s of [400, 403, 404, 422]) expect(classifyError(httpError(s))).toBe('fatal');
+    for (const s of [408, 429, 529, 500, 503]) expect(classifyError(httpError(s))).toBe('retryable');
   });
 
   it('primary not configured (no API key): fallback answers, usedFallback=false, fallbackReason=no_api_key, warn once per process', async () => {

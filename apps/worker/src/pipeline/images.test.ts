@@ -1,6 +1,8 @@
 // T2.1 S0: нормализация, резкость, pHash, Хэмминг — на синтетических картинках sharp.
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
+import { rockImage, rockImageRetake } from './__fixtures__/synthetic.js';
+import { PIPELINE } from './constants.js';
 import { hammingDistance, normalizeImage, perceptualHash, sharpness } from './images.js';
 
 async function texture(w: number, h: number, seed = 1, blurSigma?: number): Promise<Buffer> {
@@ -68,5 +70,12 @@ describe('images (S0)', () => {
     expect(hammingDistance('ff', '00')).toBe(8);
     expect(hammingDistance('ff', 'f')).toBe(Infinity);
     expect(hammingDistance('zz', '00')).toBe(Infinity);
+  });
+
+  it('T4.1 §11 п.5: «пересъёмка» синтетического камня (+5 % яркости, кроп 1 %) → Хэмминг ≤ PIPELINE.phashMaxDistance', async () => {
+    const a = await perceptualHash((await normalizeImage(await rockImage())).bytes);
+    const b = await perceptualHash((await normalizeImage(await rockImageRetake())).bytes);
+    expect(a).not.toBe(b); // картинка действительно другая
+    expect(hammingDistance(a, b)).toBeLessThanOrEqual(PIPELINE.phashMaxDistance);
   });
 });

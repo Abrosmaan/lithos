@@ -5,6 +5,7 @@ import { createBudgetGuard, pgSpentTodayUsd } from './budget.js';
 function harness(dailyBudgetUsd: number, spent: () => number | Promise<number>) {
   const clock = { t: 1_000_000 };
   const logs: Array<{ level: string; msg: string }> = [];
+  const fields: Array<Record<string, unknown> | undefined> = [];
   let queries = 0;
   const guard = createBudgetGuard(
     { dailyBudgetUsd, cacheMs: 30_000 },
@@ -15,13 +16,13 @@ function harness(dailyBudgetUsd: number, spent: () => number | Promise<number>) 
       },
       now: () => clock.t,
       log: {
-        info: (msg) => logs.push({ level: 'info', msg }),
-        warn: (msg) => logs.push({ level: 'warn', msg }),
-        error: (msg) => logs.push({ level: 'error', msg }),
+        info: (msg, f) => (logs.push({ level: 'info', msg }), fields.push(f)),
+        warn: (msg, f) => (logs.push({ level: 'warn', msg }), fields.push(f)),
+        error: (msg, f) => (logs.push({ level: 'error', msg }), fields.push(f)),
       },
     },
   );
-  return { guard, clock, logs, queries: () => queries };
+  return { guard, clock, logs, fields, queries: () => queries };
 }
 
 describe('budget guard (лимит $1)', () => {
@@ -37,6 +38,9 @@ describe('budget guard (лимит $1)', () => {
     h.guard.invalidate();
     expect(await h.guard.level()).toBe('hard');
     expect(h.logs.at(-1)).toEqual({ level: 'error', msg: 'budget: daily limit reached, pausing scans' });
+    // T4.1: поле `level` перекрывало уровень записи в log.ts (в JSON-логе было level=hard вместо error)
+    expect(h.fields.at(-1)).toEqual({ budget_level: 'hard', prev_level: 'soft', spent_usd: 1, daily_budget_usd: 1 });
+    expect(h.fields.at(-1)).not.toHaveProperty('level');
     expect(h.guard.snapshot()).toMatchObject({ level: 'hard', spentUsd: 1, dailyBudgetUsd: 1 });
     expect(BUDGET_SOFT_RATIO).toBe(0.8);
   });
@@ -76,6 +80,8 @@ describe('budget guard (лимит $1)', () => {
     h.clock.t += 31_000;
     expect(await h.guard.level()).toBe('soft');
     expect(h.logs.at(-1)).toEqual({ level: 'warn', msg: 'budget: spend query failed, keeping last level' });
+    expect(h.fields.at(-1)).toMatchObject({ budget_level: 'soft' });
+    expect(h.fields.at(-1)).not.toHaveProperty('level');
   });
 
   it('бюджет 0 → предохранитель выключен, БД не опрашивается', async () => {

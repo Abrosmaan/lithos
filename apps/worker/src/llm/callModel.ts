@@ -28,7 +28,7 @@ import {
   type Provider,
   type TokenUsage,
 } from './config.js';
-import { MissingApiKeyError, createModelResolverFromEnv, providerOptionsFor, type ModelResolver } from './providers.js';
+import { API_KEY_ENV, MissingApiKeyError, createModelResolverFromEnv, providerOptionsFor, type ModelResolver } from './providers.js';
 import { PROMPT_VERSION as ESCALATION_PROMPT_VERSION, buildEscalationPrompt } from './prompts/escalation.js';
 import { PROMPT_VERSION as GATE_PROMPT_VERSION, buildGatePrompt, type BuiltPrompt } from './prompts/gate.js';
 import { PROMPT_VERSION as MAIN_PROMPT_VERSION, buildMainPrompt } from './prompts/main.js';
@@ -91,13 +91,21 @@ export class LlmUnavailableError extends Error {
   }
 }
 
-type FailureKind = 'retryable' | 'schema' | 'fatal';
+/**
+ * retryable — 429/529/5xx/timeout/сеть (retry с backoff, учёт в breaker);
+ * schema    — невалидный/пустой вывод (repair, в breaker — вызов без ошибки);
+ * auth      — 401: ключ невалиден/отозван — отказ провайдера целиком, без retry, breaker открывается сразу (T4.1 §11 п.2);
+ * fatal     — прочие 4xx (400 bad request, 403 permission/модель недоступна, 404…): без retry, сразу fallback,
+ *             в breaker не учитывается — может быть наш запрос/конфиг, а не отказ провайдера.
+ */
+type FailureKind = 'retryable' | 'schema' | 'auth' | 'fatal';
 
 /** Классификация ошибки вызова (ai-pipeline §7, таблица «Ошибки модели по типу»). */
 export function classifyError(err: unknown): FailureKind {
   if (NoObjectGeneratedError.isInstance(err) || NoOutputGeneratedError.isInstance(err)) return 'schema';
   if (APICallError.isInstance(err)) {
     const s = err.statusCode;
+    if (s === 401) return 'auth';
     if (s === 429 || s === 529 || s === 408 || (s !== undefined && s >= 500)) return 'retryable';
     if (s === undefined && err.isRetryable) return 'retryable'; // сетевая ошибка без статуса
     return 'fatal';
@@ -126,6 +134,7 @@ type StageFailureKind = FailureKind | 'breaker_open' | 'no_api_key';
 
 const FALLBACK_REASON: Record<StageFailureKind, FallbackReason> = {
   retryable: 'provider_error',
+  auth: 'provider_error',
   fatal: 'provider_error',
   schema: 'schema_invalid',
   breaker_open: 'breaker_open',
@@ -236,6 +245,14 @@ async function runOnProvider<S extends z.ZodTypeAny>(
         if (!breaker.allow()) throw new StageFailure('breaker_open', attempts, usage, err);
         await deps.sleep(backoffMs(attempt, deps.random));
         continue;
+      }
+      if (kind === 'auth') {
+        // Ключ невалиден/отозван: провайдер недоступен целиком, а не один запрос. Retry бесполезен (тот же ключ),
+        // ждать minCalls breaker'а незачем — каждый следующий вызов упал бы так же. Открываем сразу: трафик → fallback,
+        // через openMs half-open проверит, вернули ли ключ. Текст ответа провайдера — только в лог, не пользователю.
+        breaker.forceOpen();
+        deps.log.error('llm call failed (auth): provider key rejected, breaker opened', { ...logCtx, attempt: attempts, error: errorSummary(err), breaker: breaker.state });
+        throw new StageFailure('auth', attempts, usage, err);
       }
       deps.log.warn('llm call failed (fatal)', { ...logCtx, attempt: attempts, error: errorSummary(err) });
       throw new StageFailure('fatal', attempts, usage, err);
@@ -351,7 +368,7 @@ export async function callModel(input: CallModelInput, depsOverride?: Partial<Ca
     if (f.kind === 'no_api_key') {
       if (!deps.noKeyWarned.has(spec.provider)) {
         deps.noKeyWarned.add(spec.provider);
-        deps.log.warn('llm provider not configured (no API key), skipping', { provider: spec.provider, env: `${spec.provider.toUpperCase()}_API_KEY` });
+        deps.log.warn('llm provider not configured (no API key), skipping', { provider: spec.provider, env: API_KEY_ENV[spec.provider] });
       }
       return;
     }

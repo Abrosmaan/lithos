@@ -102,8 +102,11 @@ export function inclusionCounts(result: ScanResult, label: GoldenLabel): Inclusi
   return { predicted: predicted.size, truePositive, labeled: truth.size, found: truePositive };
 }
 
-/** Проценты состава в тексте (чек-лист §11 п.7): «30%», «30 %», «процентов», «percent». \b не работает с кириллицей — без него. */
-export const PERCENT_RE = /\d\s?%|процент|percent/iu;
+/**
+ * Проценты состава в тексте (чек-лист §11 п.7): «30%», «30 %», «процентов», «percent» / «per cent». \b не работает
+ * с кириллицей — без него. Доли словами («half quartz», «треть») — не проценты, не ловим (T4.1: проверено на синтетике).
+ */
+export const PERCENT_RE = /\d\s?%|процент|per\s?cent/iu;
 
 export function textFields(result: ScanResult): string[] {
   return [

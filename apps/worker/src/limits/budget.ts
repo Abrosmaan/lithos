@@ -45,7 +45,8 @@ export function createBudgetGuard(opts: BudgetGuardOptions, deps: BudgetGuardDep
       const spentUsd = await deps.spentTodayUsd();
       const level = budgetLevel(spentUsd, opts.dailyBudgetUsd);
       if (level !== cached.level) {
-        const fields = { level, prev: cached.level, spent_usd: Number(spentUsd.toFixed(4)), daily_budget_usd: opts.dailyBudgetUsd };
+        // Не `level`: поле перекрыло бы уровень записи лога (`log.ts` кладёт fields поверх {ts, level, msg}) — T4.1.
+        const fields = { budget_level: level, prev_level: cached.level, spent_usd: Number(spentUsd.toFixed(4)), daily_budget_usd: opts.dailyBudgetUsd };
         if (level === 'hard') deps.log.error('budget: daily limit reached, pausing scans', fields);
         else if (level === 'soft') deps.log.warn('budget: soft limit reached, escalation disabled', fields);
         else deps.log.info('budget: back to normal', fields);
@@ -53,7 +54,7 @@ export function createBudgetGuard(opts: BudgetGuardOptions, deps: BudgetGuardDep
       cached = { level, spentUsd, dailyBudgetUsd: opts.dailyBudgetUsd, checkedAt: deps.now() };
     } catch (e) {
       // Не смогли прочитать расход — не останавливаем конвейер, держим последний известный уровень.
-      deps.log.warn('budget: spend query failed, keeping last level', { level: cached.level, error: (e instanceof Error ? e.message : String(e)).slice(0, 200) });
+      deps.log.warn('budget: spend query failed, keeping last level', { budget_level: cached.level, error: (e instanceof Error ? e.message : String(e)).slice(0, 200) });
       cached = { ...cached, checkedAt: deps.now() };
     }
     return cached;
