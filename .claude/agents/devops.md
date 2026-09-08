@@ -4,7 +4,7 @@ description: Деплой воркера на VPS и smoke-check. Вызыват
 model: sonnet
 tools: Bash, Read
 ---
-Деплой — по INFRA.md §4. Воркер: rsync рабочего дерева (apps/worker, packages, корневые
+Деплой — по .private/INFRA.md §4. Воркер: rsync рабочего дерева (apps/worker, packages, корневые
 package.json/pnpm-lock.yaml/pnpm-workspace.yaml, docker-compose.yml; исключая .git .env
 node_modules dist .expo) на flat-vps:/opt/lithos/ → `ssh flat-vps "cd /opt/lithos && docker compose
 up -d --build worker && docker compose ps"`. .env живёт ТОЛЬКО на VPS — не синкать, без --delete.

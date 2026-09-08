@@ -5,23 +5,23 @@
 1. `rock-game-spec.md` — продукт, механики, score, тиры.
 2. `rock-game-ai-pipeline.md` — провайдерный слой, ступени моделей, fallback, golden set.
 3. `rock-game-dev-plan.md` — стек, структура репо, волны задач, критерии приёмки.
-Инфра и ключи: `INFRA.md` (общая инфра pet-проектов), `.env` (секреты, не читать через bash).
+Инфра и ключи: `.private/INFRA.md` (общая инфра pet-проектов, в git не попадает), `.env` (секреты, не читать через bash).
 
 ## Стек
 - `apps/mobile/`: Expo (React Native) + expo-camera + expo-location + react-native-maps/MapLibre. TypeScript.
 - `apps/worker/`: Node 20 + TypeScript; читает pgmq, вызывает модели через Vercel AI SDK (`ai`, `@ai-sdk/anthropic`, `@ai-sdk/google`) с zod-схемой; `sharp` + `imghash` для pHash; Macrostrat API с кэшем в Postgres.
 - `packages/shared/`: zod-схемы, enum'ы, таблицы score — общие для клиента и воркера.
-- БД: **общий Supabase Postgres, изолированная схема `lithos`** (проект xucojuvolptvwcjyieyl делится с другими проектами). Таблицы, enum, функции, очереди pgmq — только в `lithos`, никогда в `public`. Storage-бакет `lithos-photos`.
+- БД: **общий Supabase Postgres, изолированная схема `lithos`** (инстанс общий с другими pet-проектами). Таблицы, enum, функции, очереди pgmq — только в `lithos`, никогда в `public`. Storage-бакет `lithos-photos`.
 - Миграции: `supabase/migrations/*.sql`, идемпотентны, schema-qualified, RLS включён. Только новые файлы, старые не править.
 - Монорепо: pnpm workspaces.
-- Воркер деплоится на общий Hetzner VPS (`ssh flat-vps`, `/opt/lithos`, контейнер `lithos-worker`, `network_mode: host`). См. INFRA.md §4.
+- Воркер деплоится на общий Hetzner VPS (`ssh flat-vps`, `/opt/lithos`, контейнер `lithos-worker`, `network_mode: host`). См. `.private/INFRA.md` §4.
 
 ## Команды
 - `pnpm typecheck` / `pnpm lint` / `pnpm test` — из корня, все workspace.
 - `pnpm eval` — прогон golden set через провайдерный слой, таблица точности/стоимости/латентности по моделям.
 - `pnpm db:migrate` — миграции через session pooler (IPv4, работает с мака).
 - `pnpm --filter mobile start` — Expo dev; `eas build --profile preview` — сборка на телефон.
-- Деплой воркера — rsync + `docker compose up -d --build worker` на flat-vps (INFRA.md §4), только после зелёных тестов.
+- Деплой воркера — rsync + `docker compose up -d --build worker` на flat-vps (`.private/INFRA.md` §4), только после зелёных тестов.
 
 ## Правила
 - Работаем по волнам из dev-plan §4. Внутри волны задачи параллельны; следующую волну не начинать без явной команды человека.

@@ -9,7 +9,7 @@
 
 ```bash
 pnpm install                      # все workspace
-cp .env.example .env              # заполнить: Supabase, ключи моделей (см. INFRA.md)
+cp .env.example .env              # заполнить: Supabase, ключи моделей (см. .private/INFRA.md)
 pnpm db:migrate                   # миграции в схему lithos через session pooler (IPv4)
 pnpm dev                          # воркер (tsx watch) + Expo dev server параллельно
 ```

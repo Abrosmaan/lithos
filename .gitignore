@@ -1,9 +1,12 @@
 # Секреты — только на VPS и локально, никогда в git
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 *.pem
 *.key
+
+# Приватные заметки по инфре (IP, id аккаунтов, чужие проекты) — не для публичного репо
+.private/
 
 # Node / pnpm
 node_modules/
