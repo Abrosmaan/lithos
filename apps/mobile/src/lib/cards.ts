@@ -1,6 +1,7 @@
 // Чтение результата/карточек из lithos.* и фото из Storage (signed URL). Только anon-ключ + RLS.
 import { ensureUser } from './auth';
 import { type CardRow, parseCardRow, parseScanPhotoRow, parseScanResultRow, parseScanRow, type ScanResultRow, type ScanRow } from './card-types';
+import { type DiaryRow, parseDiaryRow, parseExpectedRocks } from './diary';
 import { logError, MSG, UserError } from './errors';
 import { withRetry } from './retry';
 import { PHOTO_BUCKET } from './scan-helpers';
@@ -38,16 +39,6 @@ export async function fetchCard(cardId: string): Promise<CardRow | null> {
     if (r.error) fail(r.error);
     return parseCardRow(r.data);
   }, { label: 'cards.get' });
-}
-
-/** Коллекция: видимые карточки пользователя, новые сверху. */
-export async function listCards(): Promise<CardRow[]> {
-  await ensureUser();
-  return withRetry(async (signal) => {
-    const r = await supabase.from('cards').select(CARD_COLUMNS).eq('hidden', false).order('created_at', { ascending: false }).limit(200).abortSignal(signal);
-    if (r.error) fail(r.error);
-    return (r.data ?? []).map(parseCardRow).filter((c): c is CardRow => c !== null);
-  }, { label: 'cards.list' });
 }
 
 /** Сырые ответы моделей по ступеням — «история версий» карточки. */
@@ -113,4 +104,58 @@ export async function fetchAgeRange(cellId: string | null): Promise<string | nul
     logError('geo_cache', e);
     return null; // возраст — необязательное поле, блок просто скрывается
   }
+}
+
+// ---------------------------------------------------------------------------
+// Волна 3: дневник, ячейки, карточки в ячейке (T3.1 / T3.2).
+// ---------------------------------------------------------------------------
+
+const DIARY_COLUMNS = 'cell_id, expected, found, updated_at';
+
+/** Все строки дневника пользователя (RLS: только свои) — для карты и подсветки закрытых ячеек. */
+export async function listDiary(): Promise<DiaryRow[]> {
+  await ensureUser();
+  return withRetry(async (signal) => {
+    const r = await supabase.from('diary').select(DIARY_COLUMNS).limit(500).abortSignal(signal);
+    if (r.error) fail(r.error);
+    return (r.data ?? []).map(parseDiaryRow).filter((d): d is DiaryRow => d !== null);
+  }, { label: 'diary.list' });
+}
+
+export async function fetchDiaryCell(cellId: string): Promise<DiaryRow | null> {
+  await ensureUser();
+  return withRetry(async (signal) => {
+    const r = await supabase.from('diary').select(DIARY_COLUMNS).eq('cell_id', cellId).abortSignal(signal).maybeSingle();
+    if (r.error) fail(r.error);
+    return parseDiaryRow(r.data);
+  }, { label: 'diary.get' });
+}
+
+/** Ожидаемые породы ячейки из кэша Macrostrat (geo_cache.expected_rocks) — когда дневника ещё нет. Нет строки → []. */
+export async function fetchExpectedRocks(cellId: string): Promise<string[]> {
+  return withRetry(async (signal) => {
+    const r = await supabase.from('geo_cache').select('expected_rocks').eq('cell_id', cellId).abortSignal(signal).maybeSingle();
+    if (r.error) fail(r.error);
+    return parseExpectedRocks((r.data as { expected_rocks?: unknown } | null)?.expected_rocks);
+  }, { label: 'geo_cache.expected' });
+}
+
+/** Карточки пользователя в ячейке, включая скрытых родителей после раскола — для дневника это тоже находки. */
+export async function listCardsInCell(cellId: string): Promise<CardRow[]> {
+  await ensureUser();
+  return withRetry(async (signal) => {
+    const r = await supabase.from('cards').select(CARD_COLUMNS).eq('cell_id', cellId).order('created_at', { ascending: false }).limit(200).abortSignal(signal);
+    if (r.error) fail(r.error);
+    return (r.data ?? []).map(parseCardRow).filter((c): c is CardRow => c !== null);
+  }, { label: 'cards.inCell' });
+}
+
+/** Все карточки пользователя (и скрытые) — для дневника/статистики; коллекция фильтрует hidden сама. */
+export async function listAllCards(): Promise<CardRow[]> {
+  await ensureUser();
+  return withRetry(async (signal) => {
+    const r = await supabase.from('cards').select(CARD_COLUMNS).order('created_at', { ascending: false }).limit(500).abortSignal(signal);
+    if (r.error) fail(r.error);
+    return (r.data ?? []).map(parseCardRow).filter((c): c is CardRow => c !== null);
+  }, { label: 'cards.all' });
 }

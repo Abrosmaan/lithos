@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SCAN_ERROR_CODES } from './card-types';
-import { DONE_WITHOUT_CARD_MAX_READS, isTerminalSnapshot, rejectText, RESULT_TIMEOUT_MS, resultPhase, stageStatusText } from './result-text';
+import { DONE_WITHOUT_CARD_MAX_READS, isTerminalSnapshot, limitErrorCode, rejectText, RESULT_TIMEOUT_MS, resultPhase, stageStatusText } from './result-text';
 
 describe('rejectText', () => {
   it('каждый код отказа → свой русский заголовок и подсказка', () => {
@@ -28,6 +28,29 @@ describe('rejectText', () => {
     expect(rejectText('permission denied for schema lithos')).toEqual(rejectText('dlq'));
     expect(rejectText(null)).toEqual(rejectText('dlq'));
     expect(rejectText(undefined)).toEqual(rejectText('dlq'));
+  });
+});
+
+describe('лимиты T3.4', () => {
+  it('rate_limited / budget_paused — русские тексты из постановки', () => {
+    expect(rejectText('rate_limited').hint).toBe('Лимит сканов на сегодня исчерпан — возвращайтесь завтра.');
+    expect(rejectText('budget_paused').hint).toMatch(/^Сервис перегружен, обработаем в течение часа/);
+  });
+  it('limitErrorCode: код в сообщении RPC (raise exception rate_limited, миграция 0006), иначе null', () => {
+    expect(limitErrorCode('rate_limited')).toBe('rate_limited');
+    expect(limitErrorCode('P0001: budget_paused')).toBe('budget_paused');
+    expect(limitErrorCode('scan x not found or not owned')).toBeNull();
+    expect(limitErrorCode(null)).toBeNull();
+    expect(limitErrorCode('')).toBeNull();
+  });
+  it('budget_paused при stage ≠ done и без карточки → paused; с карточкой — refining; done/failed — как обычно', () => {
+    expect(resultPhase('preflight', false, 'budget_paused')).toBe('paused');
+    expect(resultPhase('main', false, 'budget_paused')).toBe('paused');
+    expect(resultPhase('main', true, 'budget_paused')).toBe('refining');
+    expect(resultPhase('done', true, 'budget_paused')).toBe('done');
+    expect(resultPhase('failed', false, 'rate_limited')).toBe('failed');
+    expect(resultPhase('main', false, null)).toBe('determining');
+    expect(resultPhase('main', false, 'something_else')).toBe('determining');
   });
 });
 

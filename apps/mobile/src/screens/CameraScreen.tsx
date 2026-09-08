@@ -1,6 +1,5 @@
 // Экран 1 (spec §12): живое превью, до 3 фото, S0 preflight сразу после съёмки.
 import { useFocusEffect } from '@react-navigation/native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -13,10 +12,10 @@ import { prefetchGeo } from '../lib/location';
 import { deleteFileQuietly, preparePhoto } from '../lib/preflight';
 import { MAX_PHOTOS } from '../lib/scan';
 import { useScanDraft } from '../lib/scan-draft';
-import type { RootStackParamList } from '../navigation/types';
+import type { TabScreenProps } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Camera'>;
+type Props = TabScreenProps<'Camera'>;
 
 const CAPTURE_QUALITY = 0.9;
 
@@ -95,13 +94,9 @@ export function CameraScreen({ navigation, route }: Props) {
         <View style={styles.hint}>
           <Text style={styles.hintText}>{parentCardId ? 'Раскол: снимите свежий скол крупно' : 'Одно фото — с монетой или пальцем для масштаба'}</Text>
         </View>
-        {parentCardId ? (
+        {parentCardId && (
           <Pressable onPress={cancelSplit} accessibilityRole="button" style={styles.counter}>
             <Text style={styles.counterText}>Отменить раскол</Text>
-          </Pressable>
-        ) : (
-          <Pressable onPress={() => navigation.navigate('Collection')} accessibilityRole="button" style={styles.counter}>
-            <Text style={styles.counterText}>Коллекция</Text>
           </Pressable>
         )}
         <View style={styles.counter}>
@@ -109,7 +104,7 @@ export function CameraScreen({ navigation, route }: Props) {
         </View>
       </View>
 
-      <View style={[styles.bottom, { paddingBottom: insets.bottom + spacing.md }]}>
+      <View style={[styles.bottom, { paddingBottom: spacing.md }]}>
         <View style={styles.strip}>
           {photos.map((p, i) => (
             <PhotoThumb key={p.uri} uri={p.uri} size={56} isScale={p.isScale} onRemove={() => removePhoto(i)} />

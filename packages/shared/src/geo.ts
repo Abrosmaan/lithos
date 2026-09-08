@@ -22,3 +22,6 @@ export interface UserTests {
   wet: boolean | null;
   has_scale_photo: boolean;
 }
+
+/** Точность geohash ячеек cards.cell_id / diary.cell_id / geo_cache.cell_id. Общая для воркера и клиента. */
+export const GEOHASH_PRECISION = 6;

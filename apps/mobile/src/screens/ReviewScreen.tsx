@@ -104,7 +104,7 @@ export function ReviewScreen({ navigation }: Props) {
       </View>
       {scaleIndex < 0 && <Text style={styles.warn}>Фото с масштабом не отмечено — размер камня будет оценён примерно.</Text>}
       {photos.length < MAX_PHOTOS && (
-        <BigButton label={photos.length === 0 ? 'Снять фото' : 'Добавить или переснять'} variant="secondary" onPress={() => navigation.navigate('Camera')} />
+        <BigButton label={photos.length === 0 ? 'Снять фото' : 'Добавить или переснять'} variant="secondary" onPress={() => navigation.navigate('Tabs', { screen: 'Camera' }, { pop: true })} />
       )}
 
       {!isSplit && (

@@ -6,6 +6,7 @@ import { ensureUser } from './auth';
 import { MSG, UserError } from './errors';
 import type { GeoFix } from './location';
 import type { PreparedPhoto } from './preflight';
+import { limitErrorCode, rejectText } from './result-text';
 import { withRetry } from './retry';
 import { MAX_PHOTOS, PHOTO_BUCKET, photoStoragePath, primaryPhotoIndex } from './scan-helpers';
 import { scanPhotoId } from './scan-id';
@@ -89,7 +90,12 @@ export async function submitScan(input: SubmitScanInput): Promise<{ scanId: stri
   // 4. очередь scan_interactive
   await withRetry(async (signal) => {
     const r = await supabase.rpc('enqueue_scan', { p_scan_id: scanId }).abortSignal(signal);
-    if (r.error) throw new UserError(MSG.submitFailed, { cause: r.error });
+    if (r.error) {
+      // Лимиты (T3.4): RPC может отказать кодом rate_limited / budget_paused — показываем текст, не повторяем.
+      const limit = limitErrorCode(r.error.message);
+      if (limit) throw new UserError(rejectText(limit).hint, { cause: r.error, retryable: false });
+      throw new UserError(MSG.submitFailed, { cause: r.error });
+    }
   }, { label: 'enqueue_scan' });
 
   return { scanId };

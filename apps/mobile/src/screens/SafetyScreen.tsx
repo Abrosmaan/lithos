@@ -30,7 +30,7 @@ export function SafetyScreen({ navigation, route }: Props) {
 
   const proceed = async () => {
     await acknowledgeSafety();
-    navigation.navigate('Camera', { parentCardId: route.params.parentCardId });
+    navigation.navigate('Tabs', { screen: 'Camera', params: { parentCardId: route.params.parentCardId } }, { pop: true });
   };
 
   return (

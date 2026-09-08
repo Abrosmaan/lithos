@@ -25,6 +25,12 @@ export const tierColors = {
   none: '#5b6673',
 } as const;
 
+/** Карта: подсветка ячейки с закрытым дневником (оформление). */
+export const mapColors = {
+  cellFill: 'rgba(224,165,38,0.25)',
+  cellStroke: tierColors.legendary,
+} as const;
+
 export function tierColor(tier: keyof typeof tierColors | null | undefined): string {
   return tier ? tierColors[tier] : tierColors.none;
 }

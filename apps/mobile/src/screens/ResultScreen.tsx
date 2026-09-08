@@ -23,7 +23,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Result'>;
 export function ResultScreen({ navigation, route }: Props) {
   const { scanId } = route.params;
   const { scan, card, error, gaveUp, reload } = useScanWatch(scanId);
-  const phase = resultPhase(scan?.stage ?? null, card !== null);
+  const phase = resultPhase(scan?.stage ?? null, card !== null, scan?.error ?? null);
   const [slow, setSlow] = useState(false);
   const [split, setSplit] = useState(false);
   const [parent, setParent] = useState<CardRow | null>(null);
@@ -75,13 +75,13 @@ export function ResultScreen({ navigation, route }: Props) {
 
   const toCollection = () => {
     if (card) { void markCardCollected(card.id); setCollected(true); }
-    navigation.navigate('Collection');
+    navigation.navigate('Tabs', { screen: 'Collection' }, { pop: true });
   };
-  const rescan = () => navigation.popToTop();
+  const rescan = () => navigation.navigate('Tabs', { screen: 'Camera' }, { pop: true });
   // Раскол не удался (размыто/темно): камень уже расколот — пересъёмка остаётся расколом того же родителя.
   // Если родитель не найден (parent_not_found) — повтор с тем же родителем бессмыслен, начинаем обычный скан.
   const keepParent = parentId !== null && scan?.error !== 'parent_not_found';
-  const retake = () => (keepParent && parentId ? navigation.navigate('Camera', { parentCardId: parentId }) : rescan());
+  const retake = () => (keepParent && parentId ? navigation.navigate('Tabs', { screen: 'Camera', params: { parentCardId: parentId } }, { pop: true }) : rescan());
   const pad = { paddingBottom: insets.bottom + spacing.xl };
 
   if (phase === 'failed') {
@@ -98,6 +98,18 @@ export function ResultScreen({ navigation, route }: Props) {
   }
 
   if (!card) {
+    // T3.4: бюджет исчерпан — воркер поставил скан на паузу (error='budget_paused', stage прежний). Не спиннер.
+    if (phase === 'paused') {
+      const t = rejectText('budget_paused');
+      return (
+        <View style={[styles.center, pad]}>
+          <Text style={styles.h1}>{t.title}</Text>
+          <Text style={styles.muted}>{t.hint}</Text>
+          <BigButton label="В коллекцию" onPress={toCollection} style={styles.stretch} />
+          <BigButton label="Новый скан" variant="secondary" onPress={rescan} style={styles.stretch} />
+        </View>
+      );
+    }
     if (error) {
       return (
         <View style={[styles.center, pad]}>

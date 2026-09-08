@@ -6,7 +6,7 @@ import { isSafetyAcknowledged } from '../lib/prefs';
 export function useSplitFlow(): (parentCardId: string) => Promise<void> {
   const navigation = useNavigation();
   return useCallback(async (parentCardId: string) => {
-    if (await isSafetyAcknowledged()) navigation.navigate('Camera', { parentCardId });
+    if (await isSafetyAcknowledged()) navigation.navigate('Tabs', { screen: 'Camera', params: { parentCardId } }, { pop: true });
     else navigation.navigate('Safety', { parentCardId });
   }, [navigation]);
 }

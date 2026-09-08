@@ -4,7 +4,7 @@ import type { Inclusion, ScanStage, ScoreBreakdown, Tier } from '@lithos/shared'
 import { SCAN_STAGES, TIERS } from '@lithos/shared';
 
 /** Коды scans.error при stage='failed' (контракт T2.1). */
-export const SCAN_ERROR_CODES = ['not_rock', 'blurry', 'dark', 'too_far', 'screen_photo', 'multiple_objects', 'photo_unavailable', 'parent_not_found', 'dlq'] as const;
+export const SCAN_ERROR_CODES = ['not_rock', 'blurry', 'dark', 'too_far', 'screen_photo', 'multiple_objects', 'photo_unavailable', 'parent_not_found', 'rate_limited', 'budget_paused', 'dlq'] as const;
 export type ScanErrorCode = (typeof SCAN_ERROR_CODES)[number];
 
 export type CardState = 'closed' | 'opened';

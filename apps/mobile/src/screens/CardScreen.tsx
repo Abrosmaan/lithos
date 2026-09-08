@@ -17,6 +17,7 @@ import type { CardRow } from '../lib/card-types';
 import { type CardPhoto, fetchAgeRange, fetchCard, fetchScanPhotos, fetchScanResults, updateCardUserName } from '../lib/cards';
 import { logError, MSG, toUserMessage } from '../lib/errors';
 import { splitRecommended, type VersionEntry, versionHistory } from '../lib/history';
+import { readShowcase, SHOWCASE_MAX, toggleShowcaseCard } from '../lib/showcase';
 import type { RootStackParamList } from '../navigation/types';
 import { useSplitFlow } from '../navigation/useSplitFlow';
 import { colors, radius, spacing, tierColor } from '../theme';
@@ -40,6 +41,7 @@ export function CardScreen({ navigation, route }: Props) {
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [inShowcase, setInShowcase] = useState(false);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const goSplit = useSplitFlow();
@@ -49,14 +51,16 @@ export function CardScreen({ navigation, route }: Props) {
       const card = await fetchCard(cardId);
       if (!isAlive()) return;
       if (!card) { setError('Карточка не найдена.'); return; }
-      const [photos, rows, age, parent] = await Promise.all([
+      const [photos, rows, age, parent, showcase] = await Promise.all([
         fetchScanPhotos(card.scan_id).catch((e) => { logError('card.photos', e); return [] as CardPhoto[]; }),
         fetchScanResults(card.scan_id).catch((e) => { logError('card.results', e); return []; }),
         fetchAgeRange(card.cell_id),
         card.parent_card_id ? fetchCard(card.parent_card_id).catch(() => null) : Promise.resolve(null),
+        readShowcase(),
       ]);
       if (!isAlive()) return;
       setData({ card, photos, history: versionHistory(rows), split: card.split_recommended ?? splitRecommended(rows), age, parent });
+      setInShowcase(showcase.includes(card.id));
       setError(null);
     } catch (e) {
       if (!isAlive()) return;
@@ -86,6 +90,14 @@ export function CardScreen({ navigation, route }: Props) {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Витрина (spec §8): до 12 карточек, выбор локальный (T3.3).
+  const toggleShowcase = async () => {
+    if (!data) return;
+    const res = await toggleShowcaseCard(data.card.id);
+    if (res.status === 'full') { Alert.alert('Витрина заполнена', `В витрине уже ${SHOWCASE_MAX} карточек. Уберите одну, чтобы добавить эту.`); return; }
+    setInShowcase(res.status === 'added');
   };
 
   if (error && !data) {
@@ -201,6 +213,11 @@ export function CardScreen({ navigation, route }: Props) {
         <Line>{place ?? 'Без геопозиции'}{date ? ` · ${date}` : ''}</Line>
         {age && <Line muted>Геологический возраст региона: {age}</Line>}
         <Line muted>ID {card.id.slice(0, 8)}</Line>
+        {card.cell_id && (
+          <Pressable onPress={() => navigation.navigate('Diary', { cellId: card.cell_id ?? undefined })} accessibilityRole="link">
+            <Text style={styles.link}>Дневник этого места →</Text>
+          </Pressable>
+        )}
       </Section>
 
       {card.lore ? (
@@ -232,7 +249,10 @@ export function CardScreen({ navigation, route }: Props) {
           <Text style={styles.muted}>Снаружи обычный — внутри может быть что-то. Раскол необратим: эта карточка станет «раскрытой».</Text>
         </>
       )}
-      <BigButton label="В коллекцию" variant="secondary" onPress={() => navigation.navigate('Collection')} />
+      {!card.hidden && (
+        <BigButton label={inShowcase ? 'Убрать из витрины' : 'В витрину'} variant="secondary" onPress={() => { void toggleShowcase(); }} />
+      )}
+      <BigButton label="В коллекцию" variant="secondary" onPress={() => navigation.navigate('Tabs', { screen: 'Collection' }, { pop: true })} />
     </ScrollView>
   );
 }
