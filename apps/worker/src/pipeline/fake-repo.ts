@@ -98,6 +98,11 @@ export class FakeRepo implements PipelineRepo {
     this.hook('setScanStage');
     this.transition(scanId, next);
   }
+  async setScanError(scanId: string, error: string | null) {
+    this.hook('setScanError');
+    const s = this.scans.get(scanId);
+    if (s) s.error = error;
+  }
   async upsertCard(card: CardUpsert, opts: UpsertCardOptions) {
     this.hook('upsertCard');
     const existing = [...this.cards.values()].find((c) => c.scan_id === card.scan_id);

@@ -121,7 +121,7 @@ async function runScenario(o: ScenarioOpts): Promise<Summary> {
 
     const repo = new PgPipelineRepo(pool);
     const pipeline = createPipeline({ repo, photos: createPhotoStore(config.supabaseUrl, config.supabaseServiceKey), callModel, getGeoContext, log, now: Date.now });
-    const consumer = createConsumer({ queue: { readOne, ack, archive, extendLease }, repo, runScan: pipeline.runScan, log, now: Date.now });
+    const consumer = createConsumer({ queue: { readOne, ack, archive, extendLease, send }, repo, runScan: pipeline.runScan, log, now: Date.now });
 
     // Один tick: сообщение наше (прод-сканов в очереди пока нет). Если цепочка > 90 с — дожидаемся фона.
     expect(await consumer.tick()).toBe(true);

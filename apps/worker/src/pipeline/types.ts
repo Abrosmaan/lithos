@@ -1,5 +1,6 @@
 // Типы конвейера (T2.1): строки таблиц lithos.*, интерфейс репозитория (инжектируется в тесты), зависимости.
 import type { GeoContext, ScanQueue, ScanStage, UserTests } from '@lithos/shared';
+import type { BudgetGuard } from '../limits/budget.js';
 import type { CallModelInput, CallModelOutput } from '../llm/index.js';
 import type { log } from '../log.js';
 
@@ -133,6 +134,8 @@ export interface PipelineRepo {
   /** Одна транзакция: insert scan_results ON CONFLICT DO NOTHING + scans.stage/cost_usd/provider/prompt_version. */
   saveStageResult(row: StageResultRow, next: StageTransition): Promise<void>;
   setScanStage(scanId: string, next: StageTransition): Promise<void>;
+  /** T3.4: только scans.error, stage не трогаем ('budget_paused' — скан ждёт бюджета; null — снять). */
+  setScanError(scanId: string, error: string | null): Promise<void>;
   /** Одна транзакция: cards upsert по scan_id (+ hidden родителя, + diary) + scans.stage. */
   upsertCard(card: CardUpsert, opts: UpsertCardOptions): Promise<CardRow>;
   dlqScan(scanId: string): Promise<DlqOutcome>;
@@ -164,9 +167,11 @@ export interface PipelineDeps {
   getGeoContext: (lat: number, lng: number) => Promise<GeoContext>;
   log: Logger;
   now: () => number;
+  /** T3.4: бюджетный предохранитель; нет → без ограничений (тесты). */
+  budget?: BudgetGuard;
 }
 
-/** deferred — скан занят другим процессом: сообщение не подтверждать, вернуть в очередь. */
+/** deferred — скан занят другим процессом (reason 'locked') или бюджет исчерпан (reason 'budget_paused'): не ack, вернуть в очередь. */
 export type RunStatus = 'done' | 'failed' | 'skipped' | 'deferred';
 
 export interface RunOutcome {

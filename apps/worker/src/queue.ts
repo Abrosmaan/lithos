@@ -31,7 +31,8 @@ export async function archive(queue: ScanQueue, msgId: string): Promise<void> {
   await pool.query('select pgmq.archive($1, $2::bigint)', [queue, msgId]);
 }
 
-export async function send(queue: ScanQueue, payload: ScanQueueMessage): Promise<string> {
-  const { rows } = await pool.query<{ send: string }>('select pgmq.send($1, $2::jsonb)', [queue, JSON.stringify(payload)]);
+/** Положить сообщение; delaySeconds > 0 — станет видимым позже (pgmq.send(queue, msg, delay int)). Новое сообщение: read_ct = 0. */
+export async function send(queue: ScanQueue, payload: ScanQueueMessage, delaySeconds = 0): Promise<string> {
+  const { rows } = await pool.query<{ send: string }>('select pgmq.send($1, $2::jsonb, $3::int)', [queue, JSON.stringify(payload), delaySeconds]);
   return rows[0]!.send;
 }

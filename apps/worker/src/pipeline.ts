@@ -4,7 +4,9 @@
 //   S1 Gate       1 фото (is_primary | самое резкое) → not_rock / blurry / dark / too_far / screen_photo → failed
 //   S2 Main       до 3 фото + GeoContext + user_tests → ScanResult; сразу предварительная карточка, если нужен S3
 //   S3 Escalation только по escalationTriggers из shared (+ очередь scan_dispute); пропускается при fallback
-//   S4 Rules      computeScore из shared, clampTier при fallback, geo_anomaly → pending_review, cards upsert, diary
+//   S4 Rules      computeScore из shared, clampTier при fallback / бюджете ≥ 80 %, geo_anomaly + тир ≥ epic → pending_review,
+//                 cards upsert, diary
+//   T3.4          бюджет ≥ 100 % → скан не обрабатывается (scans.error='budget_paused', deferred); ≥ 80 % → S3 выключен, тир ≤ rare
 //
 // Идемпотентность: перед каждой ступенью — scan_results(scan_id, stage); есть — модель не вызывается.
 // Запись ответа модели и scans.stage — одна транзакция (repo). Повторное сообщение по done/failed — no-op.
@@ -17,6 +19,7 @@ import {
   escalationTriggers,
   finalSplitRecommendation,
   hasGeology,
+  needsAnomalyReview,
   scoredInclusions,
   type EscalationTrigger,
   type GateResult,
@@ -48,7 +51,7 @@ export type { PipelineDeps, RunOutcome } from './pipeline/types.js';
 
 /** Триггеры S3: из shared + «пользователь оспорил» (очередь scan_dispute, ai-pipeline §3 S3). */
 export type PipelineTrigger = EscalationTrigger | 'dispute';
-export type EscalationStatus = 'none' | 'done' | 'pending' | 'skipped_fallback' | 'failed';
+export type EscalationStatus = 'none' | 'done' | 'pending' | 'skipped_fallback' | 'skipped_budget' | 'failed';
 
 interface PreparedPhoto {
   row: PhotoRow;
@@ -144,6 +147,7 @@ export function createPipeline(deps: PipelineDeps) {
       },
       transition,
     );
+    deps.budget?.invalidate(); // T3.4: стоимость записана — порог бюджета должен сработать без задержки кэша
     log.info('pipeline stage', {
       scan_id: scan.id,
       stage,
@@ -250,6 +254,8 @@ export function createPipeline(deps: PipelineDeps) {
     promptVersion: string | null;
     triggers: PipelineTrigger[];
     escalation: EscalationStatus;
+    /** T3.4: бюджет ≥ 80 % на момент S3 (в meta; тир режется только если S3 реально пропущен — escalation='skipped_budget'). */
+    budgetSoft: boolean;
     parent: CardRow | null;
     lat: number | null;
     lng: number | null;
@@ -261,7 +267,11 @@ export function createPipeline(deps: PipelineDeps) {
     const outcome = computeScore(result, geo, tests);
     const escalationFailed = input.escalation === 'failed';
     const provisional = input.usedFallback || escalationFailed;
-    const tier = input.usedFallback && outcome.tier ? clampTier(outcome.tier, FALLBACK_MAX_TIER) : outcome.tier;
+    // Тир ≤ rare: через fallback (§7) или S3 выключен бюджетом (§7 «всё через Sonnet»); replay/dispute с готовым S3 — не режем.
+    const tierCapped = input.usedFallback || input.escalation === 'skipped_budget';
+    const tier = tierCapped && outcome.tier ? clampTier(outcome.tier, FALLBACK_MAX_TIER) : outcome.tier;
+    // Антифрод (spec §11): аномалия отправляется на ревью только от ANOMALY_REVIEW_MIN_TIER; ниже — просто geo_anomaly в breakdown.
+    const pendingReview = needsAnomalyReview(outcome.geo_anomaly, outcome.internal_tier);
     const isSplit = parent !== null;
     const splitDelta = isSplit && outcome.score !== null && parent.score !== null ? outcome.score - parent.score : null;
 
@@ -284,6 +294,7 @@ export function createPipeline(deps: PipelineDeps) {
           triggers: input.triggers,
           escalation: input.escalation,
           fallback: input.usedFallback,
+          budget_soft: input.budgetSoft,
           provider: input.provider,
           prompt_version: input.promptVersion,
           geo_source: geo?.source ?? null,
@@ -301,7 +312,7 @@ export function createPipeline(deps: PipelineDeps) {
       name: cardName(result.rock_class.primary, geo),
       state: isSplit ? 'opened' : 'closed',
       parent_card_id: parent?.id ?? null,
-      verification: outcome.geo_anomaly ? 'pending_review' : 'ai',
+      verification: pendingReview ? 'pending_review' : 'ai',
       provisional,
       cell_id: geo?.cell_id || null,
       lat: input.lat,
@@ -334,6 +345,8 @@ export function createPipeline(deps: PipelineDeps) {
       provisional,
       escalation: input.escalation,
       geo_anomaly: outcome.geo_anomaly,
+      pending_review: pendingReview,
+      budget_soft: input.budgetSoft,
       split: isSplit,
       split_delta: splitDelta,
     });
@@ -370,6 +383,14 @@ export function createPipeline(deps: PipelineDeps) {
       return done('deferred', 'locked');
     }
     try {
+      // T3.4: бюджет ≥ 100 % — не обрабатываем: stage остаётся, error='budget_paused' (клиент: «обработаем в течение часа»),
+      // consumer вернёт сообщение в очередь на budgetPauseSeconds без учёта попытки. Снимается первым же переходом stage.
+      // Под lock'ом: параллельный процесс с тем же scan_id не перезапишет error/stage.
+      if (deps.budget && (await deps.budget.level()) === 'hard') {
+        if (scan.error !== 'budget_paused') await repo.setScanError(scan.id, 'budget_paused');
+        log.warn('pipeline: daily budget exhausted, scan paused', { scan_id: scan.id, queue, stage: scan.stage, budget: deps.budget.snapshot() });
+        return done('deferred', 'budget_paused');
+      }
       return await runLocked(scan, queue, isDispute, done);
     } finally {
       await lock.release().catch((e) => log.warn('pipeline: lock release failed', { scan_id: scan.id, error: String(e).slice(0, 200) }));
@@ -456,11 +477,16 @@ export function createPipeline(deps: PipelineDeps) {
       const prelim = computeScore(result, geo, tests);
       const triggers: PipelineTrigger[] = [...escalationTriggers(result, prelim.internal_tier, geo), ...(isDispute ? (['dispute'] as const) : [])];
       let escalation: EscalationStatus = 'none';
+      // T3.4: бюджет ≥ 80 % (или исчерпан посреди цепочки) — S3 выключен, тир ≤ rare; уже посчитанный S3 (replay) используем.
+      const budgetSoft = deps.budget ? (await deps.budget.level()) !== 'ok' : false;
       if (triggers.length > 0 && usedFallback) {
         escalation = 'skipped_fallback'; // ai-pipeline §7: через fallback S3 не идёт
         log.info('pipeline: escalation skipped (fallback)', { scan_id: scan.id, triggers });
+      } else if (triggers.length > 0 && budgetSoft && !(await repo.getStageResult(scan.id, 'escalation'))) {
+        escalation = 'skipped_budget';
+        log.warn('pipeline: escalation skipped (daily budget ≥ soft limit)', { scan_id: scan.id, triggers, budget: deps.budget?.snapshot() });
       } else if (triggers.length > 0) {
-        const base = { scan, geo, tests, provider, promptVersion, triggers, parent, lat, lng };
+        const base = { scan, geo, tests, provider, promptVersion, triggers, parent, lat, lng, budgetSoft };
         if (!(await repo.getStageResult(scan.id, 'escalation'))) {
           // Промежуточный ответ (ai-pipeline §4): карточка по S2 сразу, scans.stage='escalation' → клиент показывает «уточняем».
           await rules({ ...base, result, usedFallback, escalation: 'pending' });
@@ -481,7 +507,7 @@ export function createPipeline(deps: PipelineDeps) {
       }
 
       // S4
-      const card = await rules({ scan, result, geo, tests, usedFallback, provider, promptVersion, triggers, escalation, parent, lat, lng });
+      const card = await rules({ scan, result, geo, tests, usedFallback, provider, promptVersion, triggers, escalation, budgetSoft, parent, lat, lng });
       log.info('pipeline done', { scan_id: scan.id, queue, ms: deps.now() - t0, card_id: card.id, escalation, triggers });
       return done('done', null, card.id);
     } catch (e) {

@@ -192,6 +192,10 @@ export class PgPipelineRepo implements PipelineRepo {
     await applyTransition(this.pool, scanId, next);
   }
 
+  async setScanError(scanId: string, error: string | null): Promise<void> {
+    await this.pool.query('update lithos.scans set error = $2 where id = $1', [scanId, error]);
+  }
+
   async upsertCard(card: CardUpsert, opts: UpsertCardOptions): Promise<CardRow> {
     return this.tx(async (c) => {
       const { rows } = await c.query(

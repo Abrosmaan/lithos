@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import { describe, expect, it, vi } from 'vitest';
 import type { GateResult, GeoContext, ScanQueue, ScanResult, UserTests } from '@lithos/shared';
 import { LlmUnavailableError, type CallModelInput, type CallModelOutput } from './llm/index.js';
+import { createBudgetGuard, type BudgetGuard, type BudgetLevel } from './limits/budget.js';
 import { createPipeline, type PipelineDeps } from './pipeline.js';
 import { PIPELINE } from './pipeline/constants.js';
 import { createConsumer, type QueueOps } from './pipeline/consumer.js';
@@ -444,14 +445,15 @@ describe('pipeline S0–S4', () => {
     expect(h.repo.diary.size).toBe(0);
   });
 
-  it('гео-аномалия → verification=pending_review', async () => {
+  it('гео-аномалия ниже epic → geo_anomaly в breakdown, S3, но без ревью (verification=ai) — T3.4', async () => {
     const granite = { ...ANDESITE, rock_class: { primary: 'granite' as const, confidence: 0.9, alternatives: [] } };
     const h = harness({ gate: () => out(GATE_OK), main: () => out(granite), escalation: () => out(granite) });
     seedScan(h.repo);
     await h.run('scan-1');
     expect(h.stages()).toEqual(['gate', 'main', 'escalation']); // geology_mismatch → S3
     const card = cardOf(h.repo, 'scan-1');
-    expect(card.verification).toBe('pending_review');
+    expect(card.tier).toBe('common');
+    expect(card.verification).toBe('ai');
     expect(card.score_breakdown).toMatchObject({ geo_anomaly: true, meta: { escalation: 'done', triggers: ['geology_mismatch'] } });
     expect(card.score_breakdown).toMatchObject({ place: { points: 0, reason: 'mismatch_no_mechanism' } });
   });
@@ -526,6 +528,7 @@ describe('consumer', () => {
       ack: vi.fn(async () => {}),
       archive: vi.fn(async () => {}),
       extendLease: vi.fn(async () => {}),
+      send: vi.fn(async () => '99'),
     } satisfies QueueOps;
     return ops;
   }
@@ -695,5 +698,127 @@ describe('consumer', () => {
     await c.drain();
     expect(q.ack).toHaveBeenCalledWith('scan_interactive', '9');
     expect(c.inflightCount()).toBe(0);
+  });
+});
+
+// ---- T3.4: антифрод и лимиты --------------------------------------------------------------------
+describe('T3.4 антифрод и лимиты', () => {
+  const silent = { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} };
+  /** Гранит на побережье (аномалия: mismatch_no_mechanism) с богатым составом: 20 + 0 + 45 + 10 = 75 → epic. */
+  const RICH_GRANITE: ScanResult = {
+    ...ANDESITE,
+    rock_class: { primary: 'granite', confidence: 0.9, alternatives: [] },
+    inclusions: [
+      { mineral: 'amethyst', confidence: 0.9, extent: 'dominant', location: null, evidence: 'purple crystals' },
+      { mineral: 'quartz_druse', confidence: 0.9, extent: 'dominant', location: null, evidence: 'druse' },
+      { mineral: 'native_copper', confidence: 0.9, extent: 'dominant', location: null, evidence: 'metallic' },
+    ],
+    shape: { tags: ['natural_hole'], natural_hole: true, recognizable_silhouette: null },
+    surface: 'fresh_split',
+  };
+  const fixedBudget = (level: BudgetLevel): BudgetGuard => ({
+    level: async () => level,
+    snapshot: () => ({ level, spentUsd: 0, dailyBudgetUsd: 1, checkedAt: 0 }),
+    invalidate() {},
+  });
+
+  it('гео-аномалия + тир ≥ epic → verification=pending_review, score и тир сохранены', async () => {
+    const h = harness({ gate: () => out(GATE_OK), main: () => out(RICH_GRANITE), escalation: () => out(RICH_GRANITE) });
+    seedScan(h.repo);
+    const r = await h.run('scan-1');
+    expect(r.status).toBe('done');
+    expect(h.stages()).toEqual(['gate', 'main', 'escalation']);
+    const card = cardOf(h.repo, 'scan-1');
+    expect(card.verification).toBe('pending_review');
+    expect(card.tier).toBe('epic');
+    expect(card.score).toBe(75);
+    expect(card.provisional).toBe(false);
+    expect(card.score_breakdown).toMatchObject({ geo_anomaly: true, internal_tier: 'epic', place: { points: 0, reason: 'mismatch_no_mechanism' } });
+  });
+
+  it('бюджет ≥ 80 % (лимит $1, расход $0.8): S3 выключен, тир ≤ rare, карточка не provisional', async () => {
+    const h = harness({ gate: () => out(GATE_OK), main: () => out(FOSSIL), escalation: () => { throw new Error('S3 must not be called'); } });
+    h.deps.budget = createBudgetGuard({ dailyBudgetUsd: 1, cacheMs: 30_000 }, { spentTodayUsd: async () => 0.8, now: Date.now, log: silent });
+    seedScan(h.repo);
+    const r = await h.run('scan-1');
+    expect(r.status).toBe('done');
+    expect(h.stages()).toEqual(['gate', 'main']);
+    const card = cardOf(h.repo, 'scan-1');
+    expect(card.tier).toBe('rare');
+    expect(card.provisional).toBe(false);
+    expect(card.score_breakdown).toMatchObject({ tier_clamped: true, meta: { escalation: 'skipped_budget', budget_soft: true, fallback: false } });
+    expect(h.repo.scans.get('scan-1')).toMatchObject({ stage: 'done', error: null });
+  });
+
+  it('бюджет ≥ 80 %: без триггеров S3 тир не режется (нечего пропускать), budget_soft только в meta', async () => {
+    const h = harness({ gate: () => out(GATE_OK), main: () => out(ANDESITE) });
+    h.deps.budget = fixedBudget('soft');
+    seedScan(h.repo);
+    await h.run('scan-1');
+    const card = cardOf(h.repo, 'scan-1');
+    expect(card.tier).toBe('common');
+    expect(card.score_breakdown).toMatchObject({ tier_clamped: false, meta: { escalation: 'none', budget_soft: true } });
+  });
+
+  it('бюджет ≥ 80 %, но S3 уже посчитан (replay/dispute) → используется, тир не режется (M2)', async () => {
+    const h = harness({ gate: () => out(GATE_OK), main: () => out(FOSSIL), escalation: () => { throw new Error('S3 must not be called'); } });
+    h.deps.budget = fixedBudget('soft');
+    seedScan(h.repo);
+    h.repo.results.set('scan-1:escalation', {
+      scan_id: 'scan-1', stage: 'escalation', provider: 'anthropic', model: 'opus', prompt_version: 'v1',
+      raw_json: { result: FOSSIL, meta: { used_fallback: false, fallback_reason: 'none', repaired: false, attempts: 1 } },
+      tokens_in: 1, tokens_out: 1, cost_usd: 0.05, latency_ms: 1,
+    });
+    const r = await h.run('scan-1');
+    expect(r.status).toBe('done');
+    expect(h.stages()).toEqual(['gate', 'main']);
+    const card = cardOf(h.repo, 'scan-1');
+    expect(card.tier).toBe('epic'); // FOSSIL по GEO/TESTS — epic; при clamp был бы rare
+    expect(card.score_breakdown).toMatchObject({ tier_clamped: false, meta: { escalation: 'done', budget_soft: true } });
+  });
+
+  it('бюджет ≥ 100 % (лимит $1, расход $1): скан не обрабатывается — deferred/budget_paused, error=budget_paused, stage прежний; после восстановления — обработан, error снят', async () => {
+    let spent = 1;
+    const h = harness({ gate: () => out(GATE_OK), main: () => out(ANDESITE) });
+    const clock = { t: 0 };
+    h.deps.budget = createBudgetGuard({ dailyBudgetUsd: 1, cacheMs: 30_000 }, { spentTodayUsd: async () => spent, now: () => clock.t, log: silent });
+    seedScan(h.repo);
+    const r = await h.run('scan-1');
+    expect(r).toMatchObject({ status: 'deferred', reason: 'budget_paused' });
+    expect(h.calls).toHaveLength(0);
+    expect(h.repo.scans.get('scan-1')).toMatchObject({ stage: 'preflight', error: 'budget_paused' });
+    expect(h.repo.calls).toContain('tryLockScan'); // m11: под lock'ом
+    expect(h.repo.locks.size).toBe(0); // и отпущен
+    // Повтор через 10 мин при том же расходе — снова пауза, без вызовов.
+    clock.t += PIPELINE.budgetPauseSeconds * 1000;
+    expect((await h.run('scan-1')).reason).toBe('budget_paused');
+    expect(h.calls).toHaveLength(0);
+    // Новые сутки: расход обнулился → обработан, error снят первым же переходом stage.
+    spent = 0;
+    clock.t += 31_000;
+    const r2 = await h.run('scan-1');
+    expect(r2.status).toBe('done');
+    expect(h.stages()).toEqual(['gate', 'main']);
+    expect(h.repo.scans.get('scan-1')).toMatchObject({ stage: 'done', error: null });
+  });
+
+  it('consumer: budget_paused → новое сообщение с задержкой budgetPauseSeconds (read_ct=0) + ack старого, без set_vt', async () => {
+    const repo = new FakeRepo();
+    const q = {
+      readOne: vi.fn(async (qn: ScanQueue) => (qn === 'scan_interactive' ? { msgId: '21', readCount: 3, payload: { scan_id: 'p1', enqueued_at: 'x' } } : null)),
+      ack: vi.fn(async () => {}),
+      archive: vi.fn(async () => {}),
+      extendLease: vi.fn(async () => {}),
+      send: vi.fn(async () => '22'),
+    } satisfies QueueOps;
+    const runScan = vi.fn(async (): Promise<RunOutcome> => ({ status: 'deferred', scanId: 'p1', queue: 'scan_interactive', reason: 'budget_paused', cardId: null, ms: 1 }));
+    const warns: string[] = [];
+    const c = createConsumer({ queue: q, repo, runScan, log: { ...silent, warn: (m) => warns.push(m) }, now: Date.now, setTimer: () => ({ clear() {} }) });
+    expect(await c.tick()).toBe(true);
+    expect(q.send).toHaveBeenCalledWith('scan_interactive', { scan_id: 'p1', enqueued_at: 'x' }, PIPELINE.budgetPauseSeconds);
+    expect(q.ack).toHaveBeenCalledWith('scan_interactive', '21');
+    expect(q.extendLease).not.toHaveBeenCalled();
+    expect(q.archive).not.toHaveBeenCalled();
+    expect(warns).toContain('scan paused: daily budget exhausted, requeued');
   });
 });

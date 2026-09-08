@@ -1,7 +1,7 @@
 // Потребитель очередей: scan_interactive → scan_dispute → scan_batch, lease 60 с + heartbeat (pgmq.set_vt),
 // DLQ после read_ct > 3, таймаут цепочки 90 с (дальше — в фоне, до maxInflight одновременно),
 // жёсткий дедлайн задачи (heartbeat прекращается, слот освобождается, сообщение возвращается по lease).
-import { SCAN_QUEUES, type ScanQueue } from '@lithos/shared';
+import { SCAN_QUEUES, type ScanQueue, type ScanQueueMessage } from '@lithos/shared';
 import type { QueueMessage } from '../queue.js';
 import { PIPELINE } from './constants.js';
 import type { Logger, PipelineRepo, RunOutcome } from './types.js';
@@ -11,6 +11,8 @@ export interface QueueOps {
   ack(queue: ScanQueue, msgId: string): Promise<void>;
   archive(queue: ScanQueue, msgId: string): Promise<void>;
   extendLease(queue: ScanQueue, msgId: string, seconds: number): Promise<void>;
+  /** Новое сообщение (read_ct = 0), видимое через delaySeconds — T3.4 пауза по бюджету. */
+  send(queue: ScanQueue, payload: ScanQueueMessage, delaySeconds: number): Promise<string>;
 }
 
 export interface Timer {
@@ -30,6 +32,7 @@ export interface ConsumerDeps {
 export type MessageOutcome =
   | { kind: 'processed'; outcome: RunOutcome }
   | { kind: 'deferred'; scanId: string }
+  | { kind: 'paused'; scanId: string }
   | { kind: 'dlq'; scanId: string }
   | { kind: 'retry'; scanId: string; error: string }
   | { kind: 'abandoned'; scanId: string };
@@ -106,6 +109,14 @@ export function createConsumer(deps: ConsumerDeps) {
         deps.log.error('pipeline job exceeded hard deadline, abandoning (message returns to queue by lease)', { ...base, deadline_ms: PIPELINE.jobDeadlineMs });
         work.catch(() => undefined);
         return { kind: 'abandoned', scanId };
+      }
+      if (outcome.status === 'deferred' && outcome.reason === 'budget_paused') {
+        // T3.4: бюджет ≥ 100 % — не попытка. Новое сообщение с задержкой (read_ct = 0), старое — ack. Порядок: send → ack,
+        // упадём между ними — дубликат, а не потеря (advisory lock + идемпотентность ступеней это переживут).
+        const newId = await deps.queue.send(queue, msg.payload, PIPELINE.budgetPauseSeconds);
+        await deps.queue.ack(queue, msg.msgId);
+        deps.log.warn('scan paused: daily budget exhausted, requeued', { ...base, new_msg_id: newId, delay_s: PIPELINE.budgetPauseSeconds });
+        return { kind: 'paused', scanId };
       }
       if (outcome.status === 'deferred') {
         // Скан держит другой процесс: вернуть через полный lease (он успеет доделать → следующее чтение будет no-op/ack).

@@ -19,6 +19,10 @@ export const PIPELINE = {
    * Бюджет: gate 20 с + main 30 с + escalation 45 с, каждая × 4 попытки × 2 провайдера + Storage/БД.
    */
   jobDeadlineMs: 600_000,
+  /** T3.4, бюджет ≥ 100 %: сообщение уходит обратно в очередь новым (read_ct=0) с задержкой — «обработаем в течение часа». */
+  budgetPauseSeconds: 600,
+  /** T3.4: кэш дневного расхода (sum scans.cost_usd) — чаще в БД не ходим. */
+  budgetCacheMs: 30_000,
   /** Graceful shutdown: сколько ждать фоновые задачи. */
   drainTimeoutMs: 120_000,
   /** Storage: таймаут одного скачивания и retry на временных ошибках (CLAUDE.md: внешние вызовы — таймаут + retry). */
@@ -52,5 +56,9 @@ export const SCAN_ERROR_CODES = [
   'photo_unavailable',
   'parent_not_found',
   'dlq',
+  // T3.4: лимит сканов (ставит SQL: триггер/RPC enqueue_scan, stage='failed').
+  'rate_limited',
+  // T3.4: бюджет ≥ 100 % — не отказ: stage остаётся, error='budget_paused', скан обработается позже.
+  'budget_paused',
 ] as const;
 export type ScanErrorCode = (typeof SCAN_ERROR_CODES)[number];
