@@ -2,7 +2,7 @@
 // При отказе Macrostrat: просроченная строка кэша (source='cache', «предварительно») или source='none' —
 // без исключения, воркер продолжает работу. Параллельные промахи одной ячейки дедуплицируются.
 import ngeohash from 'ngeohash';
-import { ROCK_CLASSES, WANDERER_MECHANISMS } from '@lithos/shared';
+import { GEOHASH_PRECISION, ROCK_CLASSES, WANDERER_MECHANISMS } from '@lithos/shared';
 import type { ExpectedRock, GeoContext, RockClass, WandererMechanism } from '@lithos/shared';
 import { pool } from './db.js';
 import { log } from './log.js';
@@ -11,7 +11,8 @@ import { normalize, wanderersFor, GLACIAL_LATITUDE, type Normalized } from './ge
 
 export { normalize } from './geo/normalize.js';
 
-export const GEOHASH_PRECISION = 6;
+// GEOHASH_PRECISION — из @lithos/shared (общий контракт с клиентом).
+export { GEOHASH_PRECISION };
 export const CACHE_TTL_DAYS = 30;
 /** После отказа Macrostrat / отсутствия данных ячейка не опрашивается повторно это время. */
 export const NEGATIVE_TTL_MS = 60_000;
