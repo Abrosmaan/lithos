@@ -1,5 +1,5 @@
-# Собирается из корня репо (context: .). Node 20 по dev-plan §1.
-FROM node:20-bookworm-slim
+# Собирается из корня репо (context: .). Node 22 (dev-plan §1 писал Node 20, но supabase-js@2.9x требует нативный WebSocket = Node 22+).
+FROM node:22-bookworm-slim
 RUN corepack enable && corepack prepare pnpm@10 --activate
 WORKDIR /app
 
