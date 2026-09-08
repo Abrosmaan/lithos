@@ -27,7 +27,7 @@ console.log(`[${exposed ? 'OK ' : 'FAIL'}] схема lithos в Exposed schemas:
 ok &&= exposed;
 
 // 2. RPC enqueue_scan виден (401/400/404 без сессии — нормально; 404 с PGRST202 = функции нет в exposed-схеме).
-const rpc = await fetch(`${url}/rest/v1/rpc/enqueue_scan`, { method: 'POST', headers: { ...headers, 'Content-Profile': 'lithos', 'Content-Type': 'application/json' }, body: '{}' });
+const rpc = await fetch(`${url}/rest/v1/rpc/enqueue_scan`, { method: 'POST', headers: { ...headers, 'Content-Profile': 'lithos', 'Content-Type': 'application/json' }, body: JSON.stringify({ p_scan_id: '00000000-0000-0000-0000-000000000000' }) });
 const rpcBody = await rpc.text();
 const rpcVisible = !rpcBody.includes('PGRST202') && !rpcBody.includes('PGRST106');
 console.log(`[${rpcVisible ? 'OK ' : 'FAIL'}] RPC lithos.enqueue_scan доступен через API: HTTP ${rpc.status}${rpcVisible ? '' : ` (${rpcBody.slice(0, 120)})`}`);
