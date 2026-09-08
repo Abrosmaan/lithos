@@ -1,8 +1,8 @@
 // Скачивание фото golden set по манифесту (dev-plan T2.4). Запускает человек, сеть нужна:
 //   pnpm --filter worker exec tsx src/eval/fetch.ts [--force] [--ids vc-01,vc-02] [--dry-run]
-// Источник — Wikimedia Commons (CC-лицензии, см. labels.json → source). Берём превью шириной 1280 через Special:FilePath,
+// Источник - Wikimedia Commons (CC-лицензии, см. labels.json → source). Берём превью шириной 1280 через Special:FilePath,
 // ужимаем sharp'ом до 1024 px по длинной стороне (как S0 на клиенте), JPEG q=85, кладём в supabase/seed/golden/images/<id>.jpg.
-// Уже скачанные пропускаются. Файлы — в git (≈ 60 × 150–300 КБ, меньше 50 МБ — см. docs/tasks/T2.4.md).
+// Уже скачанные пропускаются. Файлы - в git (≈ 60 × 150–300 КБ, меньше 50 МБ - см. docs/tasks/T2.4.md).
 import { mkdir, readdir, stat, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -11,7 +11,7 @@ import { EVAL_IMAGE_PX, EVAL_JPEG_QUALITY, fileExists } from './images.js';
 import { GOLDEN_DIR, GOLDEN_IMAGES_DIR, loadLabels, type GoldenLabel, type GoldenLabels } from './labels.js';
 
 /** Commons требует осмысленный User-Agent, иначе 403. */
-const USER_AGENT = 'LithosGoldenSet/0.1 (rock-collecting game eval; https://github.com/ — see repo docs/tasks/T2.4.md)';
+const USER_AGENT = 'LithosGoldenSet/0.1 (rock-collecting game eval; https://github.com/ - see repo docs/tasks/T2.4.md)';
 const FETCH_WIDTH = 1280;
 const TIMEOUT_MS = 30_000;
 const DELAY_MS = 300;
@@ -83,10 +83,10 @@ async function download(url: string): Promise<Buffer> {
   }
 }
 
-/** ATTRIBUTION.md — атрибуция по манифесту (id → автор, лицензия, ссылка); нужна для CC BY / CC BY-SA. */
+/** ATTRIBUTION.md - атрибуция по манифесту (id → автор, лицензия, ссылка); нужна для CC BY / CC BY-SA. */
 export function renderAttribution(labels: GoldenLabels): string {
   const lines = [
-    '# Golden set — источники и лицензии',
+    '# Golden set - источники и лицензии',
     '',
     'Генерируется `apps/worker/src/eval/fetch.ts` из `labels.json`. Фото изменены: обрезка не применялась, только сжатие до 1024 px по длинной стороне (JPEG q=85).',
     '',
@@ -95,7 +95,7 @@ export function renderAttribution(labels: GoldenLabels): string {
   ];
   for (const it of labels.items) {
     if (!it.source) {
-      lines.push(`| ${it.id} | ${it.rock_class} | — | — | снять вручную |`);
+      lines.push(`| ${it.id} | ${it.rock_class} | - | - | снять вручную |`);
       continue;
     }
     lines.push(`| ${it.id} | ${it.rock_class} | ${it.source.author} | ${it.source.license} | [${it.source.title ?? it.source.url}](${it.source.url}) |`);
@@ -159,7 +159,7 @@ async function main() {
   console.log(`  уже было:       ${report.skipped.length}`);
   console.log(`  снять вручную:  ${report.manual.length}${report.manual.length ? ` (${report.manual.join(', ')})` : ''}`);
   console.log(`  ошибки:         ${report.failed.length}${report.failed.length ? `\n    ${report.failed.join('\n    ')}` : ''}`);
-  console.log(`  images/: ${(size / 1024 / 1024).toFixed(1)} МБ${size > 50 * 1024 * 1024 ? ' — больше 50 МБ, добавьте supabase/seed/golden/images/ в .gitignore' : ''}`);
+  console.log(`  images/: ${(size / 1024 / 1024).toFixed(1)} МБ${size > 50 * 1024 * 1024 ? ' - больше 50 МБ, добавьте supabase/seed/golden/images/ в .gitignore' : ''}`);
   console.log(`  атрибуция: ${ATTRIBUTION_PATH}`);
   if (report.failed.length) process.exitCode = 1;
 }
