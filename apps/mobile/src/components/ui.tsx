@@ -118,6 +118,32 @@ export function Divider({ style }: { style?: StyleProp<ViewStyle> }) {
   return <View style={[styles.divider, style]} />;
 }
 
+/**
+ * Золотое сияние легендарной карточки (прототип: radial-gradient + `lhalo`, 0→.6→0 за 1.9с с задержкой .45с).
+ * RN не умеет radial-gradient без сторонней либы — приближаем стопкой полупрозрачных кругов убывающей плотности.
+ * Проигрывается один раз на смену `replayKey` (id карточки), не на каждый ре-рендер.
+ */
+export function LegendaryGlow({ replayKey }: { replayKey: string | number | null }) {
+  const v = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    v.setValue(0);
+    const anim = Animated.sequence([
+      Animated.delay(450),
+      Animated.timing(v, { toValue: 1, duration: 420, useNativeDriver: true }),
+      Animated.timing(v, { toValue: 0, duration: 1050, useNativeDriver: true }),
+    ]);
+    anim.start();
+    return () => anim.stop();
+  }, [v, replayKey]);
+  return (
+    <Animated.View style={[styles.glow, { opacity: v }]} pointerEvents="none">
+      <View style={styles.glowRing3} />
+      <View style={styles.glowRing2} />
+      <View style={styles.glowRing1} />
+    </Animated.View>
+  );
+}
+
 /** Пилюля-подсказка над камерой. */
 export function Pill({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'danger' }) {
   return (
@@ -191,6 +217,10 @@ const styles = StyleSheet.create({
   placeholder: { backgroundColor: '#1e2632', borderRadius: radius.lg, overflow: 'hidden', minHeight: density.tile, alignItems: 'center', justifyContent: 'center' },
   placeholderLabel: { fontFamily: fonts.monoRegular, fontSize: 10, letterSpacing: 1.2, color: '#7b8794' },
   linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 15, borderRadius: radius.md, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider },
+  glow: { position: 'absolute', top: '50%', left: '50%', marginLeft: -140, marginTop: -140, width: 280, height: 280, alignItems: 'center', justifyContent: 'center' },
+  glowRing1: { position: 'absolute', width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(224,165,38,0.55)' },
+  glowRing2: { position: 'absolute', width: 210, height: 210, borderRadius: 105, backgroundColor: 'rgba(224,165,38,0.28)' },
+  glowRing3: { position: 'absolute', width: 280, height: 280, borderRadius: 140, backgroundColor: 'rgba(224,165,38,0.12)' },
 });
 
 export { spacing };
