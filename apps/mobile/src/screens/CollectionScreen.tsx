@@ -1,18 +1,21 @@
-// Коллекция (spec §8, T3.1): сетка 2 колонки, фильтр по тиру (чипы), сортировка, скрытые не показываются.
-// Офлайн — кэш AsyncStorage с пометкой. Вход в дневник текущего места — сверху.
+// Коллекция (spec §8, T3.1; DESIGN_SYSTEM.md экран 10): H1 + mono-счётчик, вход в дневник места, чипы тиров
+// (со счётчиком) и сортировки, сетка 2 колонки. Скрытые карточки (родители после раскола) не показываются.
+// Офлайн — кэш AsyncStorage с пометкой. Логика загрузки/фильтра/сортировки не менялась при рестайле.
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BigButton } from '../components/BigButton';
 import { CardTile } from '../components/CardTile';
 import { Chip } from '../components/Chip';
+import { Note } from '../components/ui';
 import type { CardRow } from '../lib/card-types';
 import { countByFilter, filterCards, SORT_LABEL_RU, SORT_MODES, sortCards, type SortMode, TIER_FILTER_OPTIONS, type TierFilter } from '../lib/collection';
 import { logError, MSG, toUserMessage } from '../lib/errors';
 import { loadCards } from '../lib/offline-cache';
 import { fetchPrimaryPhotoUrls } from '../lib/photo-urls';
+import { cardsCountText } from '../lib/screen-text';
 import type { TabScreenProps } from '../navigation/types';
-import { colors, radius, spacing, tierColor } from '../theme';
+import { colors, density, fonts, placeholderStripes, radius, tierColor, type } from '../theme';
 
 type Props = TabScreenProps<'Collection'>;
 
@@ -66,8 +69,8 @@ export function CollectionScreen({ navigation }: Props) {
       <View style={styles.center}>
         {error ? (
           <>
-            <Text style={styles.muted}>{error}</Text>
-            <BigButton label="Обновить" onPress={() => { void load(); }} style={styles.stretch} />
+            <Text style={type.small}>{error}</Text>
+            <BigButton label="Обновить" onPress={() => { void load(); }} />
           </>
         ) : (
           <ActivityIndicator color={colors.accent} size="large" />
@@ -78,28 +81,41 @@ export function CollectionScreen({ navigation }: Props) {
 
   const header = (
     <View style={styles.header}>
-      {offline && <Text style={styles.note}>{OFFLINE_NOTE}</Text>}
-      {error && !offline && <Text style={styles.note}>{error}</Text>}
+      <View style={styles.titleRow}>
+        <Text style={styles.h1}>Коллекция</Text>
+        <Text style={styles.count}>{cardsCountText(total)}</Text>
+      </View>
+
+      {offline && <Note tone="neutral">{OFFLINE_NOTE}</Note>}
+      {error && !offline && <Note tone="danger">{error}</Note>}
+
       <Pressable onPress={() => navigation.navigate('Diary')} accessibilityRole="button" style={({ pressed }) => [styles.diary, pressed && styles.pressed]}>
-        <Text style={styles.diaryTitle}>Дневник места</Text>
-        <Text style={styles.diaryText}>Что ожидается там, где вы сейчас, и что уже найдено →</Text>
+        <View style={styles.diaryIcon}>
+          <View style={styles.diaryIconMark} />
+        </View>
+        <View style={styles.diaryBody}>
+          <Text style={styles.diaryTitle}>Дневник места</Text>
+          <Text style={styles.diaryText}>Что ожидается там, где вы сейчас, и что уже найдено</Text>
+        </View>
       </Pressable>
+
       {total > 0 && (
         <>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
             {TIER_FILTER_OPTIONS.map((o) => (
               <Chip
                 key={String(o.value)}
-                label={`${o.label} · ${counts.get(o.value) ?? 0}`}
+                label={o.label}
+                count={counts.get(o.value) ?? 0}
                 selected={filter === o.value}
-                color={o.value && o.value !== 'none' ? tierColor(o.value) : colors.accent}
+                color={o.value && o.value !== 'none' ? tierColor(o.value) : colors.accentBright}
                 onPress={() => setFilter(o.value)}
               />
             ))}
           </ScrollView>
           <View style={styles.chips}>
             {SORT_MODES.map((m) => (
-              <Chip key={m} label={SORT_LABEL_RU[m]} selected={sort === m} onPress={() => setSort(m)} />
+              <Chip key={m} label={SORT_LABEL_RU[m]} variant="sort" selected={sort === m} onPress={() => setSort(m)} />
             ))}
           </View>
         </>
@@ -120,14 +136,15 @@ export function CollectionScreen({ navigation }: Props) {
       ListEmptyComponent={
         total === 0 ? (
           <View style={styles.empty}>
-            <Text style={styles.h1}>Пока пусто</Text>
-            <Text style={styles.muted}>Отсканируйте первый камень — он появится здесь.</Text>
-            <BigButton label="Сканировать" onPress={toCamera} style={styles.stretch} />
+            <View style={styles.emptyStone} />
+            <Text style={styles.emptyTitle}>Пока пусто</Text>
+            <Text style={styles.emptyText}>Первый камень найдётся под ногами: галька на пляже, скол у тропы. Снимите — и здесь появится карточка.</Text>
+            <BigButton label="Сканировать" onPress={toCamera} />
           </View>
         ) : (
           <View style={styles.empty}>
-            <Text style={styles.muted}>Таких карточек пока нет.</Text>
-            <BigButton label="Показать все" variant="secondary" onPress={() => setFilter(null)} style={styles.stretch} />
+            <Text style={styles.emptyText}>Здесь появятся камни этого тира. Попробуйте другой фильтр или сходите за новым камнем.</Text>
+            <BigButton label="Показать все" variant="secondary" onPress={() => setFilter(null)} />
           </View>
         )
       }
@@ -140,19 +157,24 @@ export function CollectionScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: spacing.md, gap: spacing.sm, flexGrow: 1 },
-  column: { gap: spacing.sm },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, gap: spacing.md, backgroundColor: colors.bg },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, gap: spacing.md },
-  stretch: { alignSelf: 'stretch' },
-  h1: { color: colors.text, fontSize: 22, fontWeight: '700' },
-  muted: { color: colors.textMuted, fontSize: 15, textAlign: 'center' },
-  header: { gap: spacing.sm, paddingBottom: spacing.xs },
-  note: { color: '#e0c36a', fontSize: 14, textAlign: 'center' },
-  diary: { backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing.md, gap: 2, borderWidth: 1, borderColor: colors.border },
-  pressed: { opacity: 0.8 },
-  diaryTitle: { color: colors.text, fontSize: 17, fontWeight: '700' },
-  diaryText: { color: colors.textMuted, fontSize: 14 },
-  chips: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'nowrap' },
+  content: { padding: 16, gap: density.grid, flexGrow: 1 },
+  column: { gap: density.grid },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16, backgroundColor: colors.bg },
+  header: { gap: 14, paddingBottom: 6 },
+  titleRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  h1: { fontFamily: fonts.serif, fontSize: 27, lineHeight: 30, color: colors.text },
+  count: { fontFamily: fonts.mono, fontSize: 12, lineHeight: 14, color: colors.textDim },
+  diary: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: colors.surface, borderRadius: radius.lg, padding: 16, borderWidth: 1, borderColor: colors.divider },
+  pressed: { opacity: 0.85 },
+  diaryIcon: { width: 38, height: 38, borderRadius: 11, backgroundColor: colors.accentTint, alignItems: 'center', justifyContent: 'center' },
+  diaryIconMark: { width: 14, height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: colors.accentBright },
+  diaryBody: { flex: 1, gap: 2 },
+  diaryTitle: { fontFamily: fonts.sansSemi, fontSize: 15, lineHeight: 19, color: colors.text },
+  diaryText: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 18, color: colors.textMuted },
+  chips: { flexDirection: 'row', gap: 7, flexWrap: 'nowrap' },
   spacer: { flex: 1 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 52, paddingHorizontal: 30, gap: 14 },
+  emptyStone: { width: 52, height: 52, borderRadius: 24, backgroundColor: placeholderStripes.a },
+  emptyTitle: { fontFamily: fonts.serif, fontSize: 20, lineHeight: 24, color: colors.text },
+  emptyText: { fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 20, color: colors.textMuted, textAlign: 'center', maxWidth: 250 },
 });

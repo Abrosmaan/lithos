@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#07090c;font-family:'Golos Text',system-ui,sans-serif;text-wrap:pretty;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#3fbfa3;text-decoration:none}
+a:hover{color:#7ae0c8}
+@keyframes lspin{to{transform:rotate(360deg)}}
+@keyframes lpulse{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes lrise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes lcard{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes lseam{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes lfade{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+@keyframes lhalo{0%{opacity:0}45%{opacity:.6}100%{opacity:0}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start;justify-content:center;padding:40px 28px 72px">
+
+  <aside style="width:296px;flex:none;color:#9aa5b1;font-size:12.5px;line-height:1.6;display:flex;flex-direction:column;gap:24px">
+    <div>
+      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#5b6673;text-transform:uppercase;margin-bottom:12px">Lithos · iOS · волны 0–4</div>
+      <h1 style="margin:0 0 10px;font:600 25px/1.2 'Playfair Display',serif;color:#f2f4f6">Каждый камень под ногами — карточка с историей в миллионы лет</h1>
+      <p style="margin:0">Кликабельный прототип. Панель под телефоном переключает то, что в жизни приходит с сервера: ступени анализа, отказы, лимиты, офлайн.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#5b6673;text-transform:uppercase">Решения</div>
+      <div style="display:flex;gap:10px"><div style="width:3px;flex:none;background:#1f6f5f;border-radius:2px"></div><div><b style="color:#f2f4f6;font-weight:600">Тир — материал, а не наклейка.</b> В основном варианте цвет тира держит рамку карточки и один шов под фото; score живёт моноширинным шрифтом, как игровая цифра. В тик-панели есть два других варианта показа.</div></div>
+      <div style="display:flex;gap:10px"><div style="width:3px;flex:none;background:#1f6f5f;border-radius:2px"></div><div><b style="color:#f2f4f6;font-weight:600">Порода — музейная этикетка.</b> Названия и лор набраны Playfair, интерфейс — Golos Text, числа и ID — JetBrains Mono. Карточка должна читаться как артефакт, а не как лут.</div></div>
+      <div style="display:flex;gap:10px"><div style="width:3px;flex:none;background:#1f6f5f;border-radius:2px"></div><div><b style="color:#f2f4f6;font-weight:600">Отказ держит композицию карточки.</b> То же место, тот же ритм, но вместо тира — что именно сделать. Тексты отказов дословно из описания.</div></div>
+      <div style="display:flex;gap:10px"><div style="width:3px;flex:none;background:#1f6f5f;border-radius:2px"></div><div><b style="color:#f2f4f6;font-weight:600">Иконки — геометрия.</b> Эмодзи в таб-баре заменены примитивами: круги, сетка, ромб. Без псевдо-иллюстраций.</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#5b6673;text-transform:uppercase">Допущения</div>
+      <div>Фото камней и карта — полосатые плейсхолдеры с подписью, что туда встаёт: реальных снимков не было. Разбор score, лор и «странник» взяты из примеров описания. Проценты состава не показаны нигде.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#5b6673;text-transform:uppercase">Дальше</div>
+      <div>Светлая тема для пляжа под солнцем · анимация раскола до/после · статичная стена всех экранов для передачи в разработку · английская локаль.</div>
+    </div>
+  </aside>
+
+  <div style="display:flex;flex-direction:column;gap:18px;align-items:center;flex:none;max-width:100%">
+    <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" width="{{ 402 }}" height="{{ 874 }}" hint-size="402px,874px">
+
+      <div style="height:100%;display:flex;flex-direction:column;min-height:0;background:#0b0f14;color:#f2f4f6;font-family:'Golos Text',system-ui,sans-serif;overflow:hidden">
+        <div style="flex:1;min-height:0;overflow:auto;padding-top:54px">
+
+          <!-- ── ПРИВЕТСТВИЕ ────────────────────────────────── -->
+          <sc-if value="{{ isWelcome }}" hint-placeholder-val="{{ false }}">
+            <div style="min-height:100%;display:flex;flex-direction:column;gap:26px;padding:18px 22px 26px">
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.34em;color:#3fbfa3">LITHOS</div>
+                <div style="height:158px;border-radius:20px;position:relative;overflow:hidden;background:repeating-linear-gradient(122deg,#1a222c 0 10px,#212b37 10px 20px)">
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                    <div style="width:88px;height:74px;border-radius:46% 54% 58% 42% / 52% 48% 52% 48%;background:repeating-linear-gradient(58deg,#2a3543 0 7px,#333f4f 7px 14px);border:1px solid rgba(242,244,246,.08)"></div>
+                  </div>
+                  <div style="position:absolute;left:12px;bottom:10px;font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6f7b88">снимок камня на галечнике</div>
+                </div>
+                <h2 style="margin:0;font:600 29px/1.18 'Playfair Display',serif">Каждый камень под ногами — карточка с историей в миллионы лет</h2>
+                <p style="margin:0;font-size:14.5px;line-height:1.55;color:#9aa5b1">Сфотографируйте камень на пляже или у тропы. Через несколько секунд получите породу, редкость и короткую историю о том, как он здесь оказался. Находки собираются в коллекцию и привязываются к месту.</p>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <sc-for list="{{ welcomeSteps }}" as="w" hint-placeholder-count="3">
+                  <div style="display:flex;gap:13px;align-items:flex-start">
+                    <div style="width:24px;height:24px;flex:none;border-radius:50%;border:1px solid rgba(63,191,163,.4);display:flex;align-items:center;justify-content:center;font:700 11px/1 'JetBrains Mono',monospace;color:#3fbfa3">{{ w.n }}</div>
+                    <div style="display:flex;flex-direction:column;gap:2px">
+                      <div style="font-size:14.5px;font-weight:600">{{ w.title }}</div>
+                      <div style="font-size:13px;line-height:1.45;color:#9aa5b1">{{ w.body }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="padding:16px;border-radius:16px;background:#161c24;border:1px solid rgba(242,244,246,.09);display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:15px;height:15px;flex:none;border-radius:3px;border:1.5px solid #3fbfa3"></div>
+                  <div style="font-size:14.5px;font-weight:600">Что мы делаем с фото</div>
+                </div>
+                <p style="margin:0;font-size:13.5px;line-height:1.5;color:#9aa5b1">Мы храним все снимки камней и учим на них модель определять породы точнее — без этого вердикт остаётся приблизительным. Снимки не привязаны к имени, не публикуются и не показываются другим пользователям.</p>
+                <div onClick="{{ openPrivacy }}" style="font-size:13.5px;font-weight:600;color:#3fbfa3;cursor:pointer">Подробнее о данных</div>
+              </div>
+
+              <div style="flex:1"></div>
+
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div onClick="{{ startApp }}" style="padding:18px;border-radius:16px;background:#1f6f5f;color:#eafff8;font-size:16px;font-weight:600;text-align:center;cursor:pointer">Найти первый камень</div>
+                <div style="text-align:center;font-size:12.5px;line-height:1.45;color:#6f7b88">Регистрация не нужна. Продолжая, вы соглашаетесь на хранение снимков для обучения модели.</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── НЕТ РАЗРЕШЕНИЯ ─────────────────────────────── -->
+          <sc-if value="{{ isPerm }}" hint-placeholder-val="{{ false }}">
+            <div style="min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:34px 28px;text-align:center">
+              <div style="align-self:center;width:98px;height:72px;border-radius:18px;border:1.5px solid rgba(242,244,246,.28);display:flex;align-items:center;justify-content:center;position:relative">
+                <div style="width:30px;height:30px;border-radius:50%;border:1.5px solid rgba(242,244,246,.28)"></div>
+                <div style="position:absolute;width:118px;height:1.5px;background:#b03a2e;transform:rotate(-30deg)"></div>
+              </div>
+              <h2 style="margin:0;font:600 23px/1.3 'Playfair Display',serif">Lithos нужна камера,<br>чтобы определить камень</h2>
+              <p style="margin:0;font-size:14px;color:#9aa5b1;line-height:1.5">Геопозицию спросим позже — только при первом снимке.</p>
+              <div onClick="{{ grantCam }}" style="margin-top:6px;padding:17px;border-radius:16px;background:#1f6f5f;color:#eafff8;font-size:16px;font-weight:600;cursor:pointer">Разрешить камеру</div>
+            </div>
+          </sc-if>
+
+          <!-- ── КАМЕРА ─────────────────────────────────────── -->
+          <sc-if value="{{ isCamera }}" hint-placeholder-val="{{ true }}">
+            <div style="min-height:100%;margin-top:-54px;padding-top:54px;display:flex;flex-direction:column;position:relative">
+              <div style="position:absolute;inset:0;background:repeating-linear-gradient(122deg,#141a22 0 9px,#1a222c 9px 18px)"></div>
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+                <div style="width:214px;height:214px;border:1px dashed rgba(242,244,246,.26);border-radius:28px;display:flex;align-items:center;justify-content:center">
+                  <div style="width:66px;height:66px;border-radius:47% 53% 51% 49%;background:rgba(31,111,95,.16);border:1px solid rgba(63,191,163,.3)"></div>
+                </div>
+                <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#6f7b88">живое превью камеры</div>
+              </div>
+
+              <sc-if value="{{ firstRun }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;inset:0;z-index:5;background:rgba(7,9,12,.86);display:flex;flex-direction:column;justify-content:flex-end;gap:20px;padding:54px 22px 26px;animation:lfade .35s ease">
+                  <div style="display:flex;flex-direction:column;gap:9px">
+                    <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#3fbfa3;text-transform:uppercase">первый камень</div>
+                    <h2 style="margin:0;font:600 27px/1.2 'Playfair Display',serif">Снимите камень — получите карточку</h2>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:13px">
+                    <sc-for list="{{ firstRunSteps }}" as="fs" hint-placeholder-count="3">
+                      <div style="display:flex;gap:13px;align-items:flex-start">
+                        <div style="width:24px;height:24px;flex:none;border-radius:50%;border:1px solid rgba(63,191,163,.45);display:flex;align-items:center;justify-content:center;font:700 11px/1 'JetBrains Mono',monospace;color:#3fbfa3">{{ fs.n }}</div>
+                        <div style="font-size:14.5px;line-height:1.45;color:#dfe4e9">{{ fs.text }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div onClick="{{ dismissFirstRun }}" style="padding:17px;border-radius:16px;background:#1f6f5f;color:#eafff8;font-size:16px;font-weight:600;text-align:center;cursor:pointer">Понятно</div>
+                </div>
+              </sc-if>
+
+              <div style="position:relative;padding:14px 16px 0;display:flex;flex-direction:column;gap:9px;align-items:center">
+                <div style="padding:10px 17px;border-radius:999px;background:rgba(11,15,20,.74);border:1px solid rgba(242,244,246,.1);font-size:14.5px;font-weight:500">{{ camHint }}</div>
+                <sc-if value="{{ splitMode }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:7px 14px;border-radius:999px;background:rgba(176,58,46,.15);border:1px solid rgba(176,58,46,.45);color:#f0a99f;font-size:12px;font-weight:500">гео и мини-тесты берём из исходной карточки</div>
+                </sc-if>
+              </div>
+
+              <div style="flex:1"></div>
+
+              <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+                <div style="position:relative;margin:0 16px 12px;padding:13px 15px;border-radius:14px;background:#2a1a18;border:1px solid rgba(176,58,46,.5);display:flex;gap:11px;align-items:flex-start;animation:lrise .22s ease">
+                  <div style="width:17px;height:17px;flex:none;border-radius:50%;background:#b03a2e;margin-top:2px"></div>
+                  <div style="font-size:13.5px;line-height:1.45;color:#f7d9d4">{{ toast }}</div>
+                </div>
+              </sc-if>
+
+              <div style="position:relative;padding:0 16px 16px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(to top,rgba(11,15,20,.94) 24%,rgba(11,15,20,0))">
+                <div style="text-align:center;font-size:12.5px;color:#9aa5b1">Одно фото — с монетой или пальцем для масштаба</div>
+
+                <sc-if value="{{ hasPhotos }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:9px;justify-content:center">
+                    <sc-for list="{{ photos }}" as="p" hint-placeholder-count="2">
+                      <div style="position:relative;width:60px;height:60px;border-radius:12px;overflow:hidden;border:1px solid rgba(242,244,246,.14);background:repeating-linear-gradient(120deg,#1e2632 0 7px,#26303e 7px 14px)">
+                        <div style="position:absolute;left:5px;bottom:4px;font:400 8px/1 'JetBrains Mono',monospace;color:#7b8794">{{ p.tag }}</div>
+                        <div onClick="{{ p.remove }}" style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(11,15,20,.85);display:flex;align-items:center;justify-content:center;cursor:pointer">
+                          <div style="position:absolute;width:9px;height:1.5px;background:#f2f4f6;transform:rotate(45deg)"></div>
+                          <div style="position:absolute;width:9px;height:1.5px;background:#f2f4f6;transform:rotate(-45deg)"></div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:86px;font:500 12.5px/1 'JetBrains Mono',monospace;color:#9aa5b1">{{ shotCounter }}</div>
+                  <div onClick="{{ shoot }}" style="flex:none;width:74px;height:74px;border-radius:50%;border:3px solid rgba(242,244,246,.85);display:flex;align-items:center;justify-content:center;cursor:pointer">
+                    <div style="width:58px;height:58px;border-radius:50%;background:#f2f4f6"></div>
+                  </div>
+                  <div style="width:86px;display:flex;justify-content:flex-end">
+                    <div onClick="{{ goReview }}" style="padding:12px 18px;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;background:{{ nextBg }};color:{{ nextFg }}">Далее</div>
+                  </div>
+                </div>
+
+                <sc-if value="{{ splitMode }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ cancelSplit }}" style="text-align:center;font-size:13.5px;color:#9aa5b1;cursor:pointer;padding:2px">Отменить раскол</div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── ПРОВЕРКА ───────────────────────────────────── -->
+          <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:10px 16px 30px;display:flex;flex-direction:column;gap:{{ d.gap }}px">
+              <div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+                <div onClick="{{ back }}" style="width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                  <div style="width:11px;height:11px;border-left:2px solid #f2f4f6;border-bottom:2px solid #f2f4f6;transform:rotate(45deg)"></div>
+                </div>
+                <div style="font-size:17px;font-weight:600">Проверка</div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <sc-for list="{{ photos }}" as="p" hint-placeholder-count="2">
+                    <div onClick="{{ p.toggleScale }}" style="position:relative;width:94px;height:94px;border-radius:14px;overflow:hidden;cursor:pointer;background:repeating-linear-gradient(120deg,#1e2632 0 8px,#26303e 8px 16px);border:1.5px solid {{ p.border }}">
+                      <div style="position:absolute;left:6px;bottom:5px;font:400 8px/1 'JetBrains Mono',monospace;color:#7b8794">{{ p.tag }}</div>
+                      <sc-if value="{{ p.scale }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;left:5px;top:5px;padding:3px 7px;border-radius:7px;background:#1f6f5f;color:#eafff8;font-size:10px;font-weight:600">масштаб</div>
+                      </sc-if>
+                      <div onClick="{{ p.remove }}" style="position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:rgba(11,15,20,.85);display:flex;align-items:center;justify-content:center">
+                        <div style="position:absolute;width:10px;height:1.5px;background:#f2f4f6;transform:rotate(45deg)"></div>
+                        <div style="position:absolute;width:10px;height:1.5px;background:#f2f4f6;transform:rotate(-45deg)"></div>
+                      </div>
+                    </div>
+                  </sc-for>
+                  <div onClick="{{ back }}" style="width:94px;height:94px;border-radius:14px;border:1.5px dashed rgba(242,244,246,.22);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:#9aa5b1">
+                    <div style="position:relative;width:18px;height:18px">
+                      <div style="position:absolute;top:8px;left:0;width:18px;height:2px;background:#9aa5b1"></div>
+                      <div style="position:absolute;left:8px;top:0;width:2px;height:18px;background:#9aa5b1"></div>
+                    </div>
+                    <div style="font-size:11px;text-align:center;line-height:1.25">Добавить<br>или переснять</div>
+                  </div>
+                </div>
+                <div style="font-size:12.5px;color:#9aa5b1;line-height:1.45">Тап по фото отмечает его как снимок с масштабом — монета или палец рядом с камнем.</div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:15px">
+                <sc-for list="{{ segments }}" as="s" hint-placeholder-count="3">
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">{{ s.label }}</div>
+                    <div style="display:flex;gap:7px">
+                      <sc-for list="{{ s.options }}" as="o" hint-placeholder-count="3">
+                        <div onClick="{{ o.pick }}" style="flex:1;padding:13px 4px;border-radius:12px;text-align:center;font-size:13.5px;font-weight:500;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1px solid {{ o.border }}">{{ o.label }}</div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+                <div style="font-size:12.5px;color:#6f7b88">Все три подсказки необязательны. Повторный тап снимает выбор.</div>
+              </div>
+
+              <sc-if value="{{ showGeoBanner }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:11px;padding:14px;border-radius:14px;background:#1c2029;border:1px solid rgba(224,165,38,.38)">
+                  <div style="width:15px;height:15px;flex:none;margin-top:2px;background:#e0a526;transform:rotate(45deg);border-radius:3px"></div>
+                  <div style="font-size:13.5px;line-height:1.45;color:#e8d5aa">Без геопозиции карточка будет без редкости</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ limitHit }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:14px;border-radius:14px;background:#251b1a;border:1px solid rgba(176,58,46,.5);font-size:13.5px;line-height:1.45;color:#f0c8c1">Лимит сканов на сегодня исчерпан — возвращайтесь завтра</div>
+              </sc-if>
+
+              <div onClick="{{ identify }}" style="padding:18px;border-radius:16px;background:{{ identBg }};color:{{ identFg }};font-size:17px;font-weight:600;text-align:center;cursor:pointer">{{ identLabel }}</div>
+            </div>
+          </sc-if>
+
+          <!-- ── АНАЛИЗ ─────────────────────────────────────── -->
+          <sc-if value="{{ isAnalyzing }}" hint-placeholder-val="{{ false }}">
+            <div style="min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:32px;padding:34px">
+              <div style="position:relative;width:118px;height:118px;display:flex;align-items:center;justify-content:center">
+                <div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(242,244,246,.09)"></div>
+                <div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid transparent;border-top-color:#3fbfa3;animation:lspin 1.15s linear infinite"></div>
+                <div style="width:56px;height:56px;border-radius:44% 56% 52% 48%;background:repeating-linear-gradient(120deg,#26303e 0 6px,#2f3a4a 6px 12px)"></div>
+              </div>
+              <div style="text-align:center;display:flex;flex-direction:column;gap:9px">
+                <h2 style="margin:0;font:600 24px/1.2 'Playfair Display',serif">Определяем камень…</h2>
+                <div style="font-size:14.5px;color:#9aa5b1">{{ stageLabel }}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:262px">
+                <sc-for list="{{ stages }}" as="st" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:11px">
+                    <div style="width:9px;height:9px;flex:none;border-radius:50%;background:{{ st.dot }}"></div>
+                    <div style="font-size:13px;color:{{ st.fg }}">{{ st.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── РЕЗУЛЬТАТ: КАРТОЧКА ────────────────────────── -->
+          <sc-if value="{{ isResultCard }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:14px 16px 30px;display:flex;flex-direction:column;gap:{{ d.gap }}px;animation:lrise .32s ease">
+
+              <div style="position:relative;border-radius:22px;overflow:hidden;background:#161c24;border:1px solid {{ rc.frame }};animation:lcard .6s cubic-bezier(.2,.8,.25,1) both">
+                <sc-if value="{{ rc.isLegend }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute;inset:-40%;z-index:3;pointer-events:none;background:radial-gradient(circle at 50% 32%,rgba(224,165,38,.45),rgba(224,165,38,0) 62%);animation:lhalo 1.9s .45s ease-out both"></div>
+                </sc-if>
+                <div style="height:206px;position:relative;background:repeating-linear-gradient(122deg,#1e2632 0 10px,#26303e 10px 20px)">
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#7b8794">фото камня, лицевая сторона</div>
+                  <sc-if value="{{ refining }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:rgba(11,15,20,.82);border:1px solid rgba(242,244,246,.14)">
+                      <div style="width:7px;height:7px;border-radius:50%;background:#3fbfa3;animation:lpulse 1.1s ease-in-out infinite"></div>
+                      <div style="font-size:12px;font-weight:600">Уточняем</div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ seamOn }}" hint-placeholder-val="{{ true }}">
+                    <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:{{ rc.tierColor }};transform-origin:left;animation:lseam .6s .5s cubic-bezier(.2,.8,.25,1) both"></div>
+                  </sc-if>
+                </div>
+
+                <div style="padding:{{ d.pad }}px 17px {{ d.pad }}px;display:flex;flex-direction:column;gap:{{ d.gap }}px">
+                  <div style="display:flex;flex-direction:column;gap:5px;animation:lfade .45s .18s ease both">
+                    <h2 style="margin:0;font:600 24px/1.2 'Playfair Display',serif">{{ rc.name }}</h2>
+                    <div style="font-size:14px;color:#9aa5b1">{{ rc.rock }}</div>
+                  </div>
+
+                  <!-- тир: вариант «шов и цифра» -->
+                  <sc-if value="{{ tierPlain }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;padding-bottom:2px;border-bottom:1px solid rgba(242,244,246,.08)">
+                      <div style="display:flex;flex-direction:column;gap:4px">
+                        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">тир</div>
+                        <div style="font:600 19px/1.1 'Playfair Display',serif;color:{{ rc.tierColor }}">{{ rc.tierName }}</div>
+                      </div>
+                      <div style="text-align:right;display:flex;align-items:baseline;gap:5px">
+                        <div style="font:700 34px/1 'JetBrains Mono',monospace;color:#f2f4f6">{{ rc.scoreText }}</div>
+                        <div style="font-size:12px;color:#6f7b88">/ 100</div>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <!-- тир: вариант «классический бейдж» -->
+                  <sc-if value="{{ tierBadge }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                      <div style="padding:8px 14px;border-radius:11px;background:{{ rc.tierColor }};color:#0b0f14;font-size:13.5px;font-weight:700">{{ rc.tierName }}</div>
+                      <div style="padding:8px 14px;border-radius:11px;background:#1f2733;font:700 13.5px/1 'JetBrains Mono',monospace;color:#f2f4f6">{{ rc.scoreText }} очков</div>
+                    </div>
+                  </sc-if>
+
+                  <!-- тир: вариант «печать-медальон» -->
+                  <sc-if value="{{ tierSeal }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:15px">
+                      <div style="width:74px;height:74px;flex:none;border-radius:50%;border:2px solid {{ rc.tierColor }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px">
+                        <div style="font:700 26px/1 'JetBrains Mono',monospace;color:{{ rc.tierColor }}">{{ rc.scoreText }}</div>
+                        <div style="font:400 8px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#6f7b88">SCORE</div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:3px">
+                        <div style="font:600 20px/1.1 'Playfair Display',serif;color:{{ rc.tierColor }}">{{ rc.tierName }}</div>
+                        <div style="font-size:12.5px;color:#9aa5b1">{{ rc.tierHint }}</div>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ rc.note }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding:11px 13px;border-radius:12px;background:#1c2029;border:1px solid rgba(224,165,38,.3);font-size:13px;line-height:1.45;color:#e8d5aa">{{ rc.note }}</div>
+                  </sc-if>
+
+                  <sc-if value="{{ rc.delta }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding:12px 14px;border-radius:12px;background:rgba(31,111,95,.16);border:1px solid rgba(63,191,163,.32);font:500 13.5px/1 'JetBrains Mono',monospace;color:#7ae0c8">{{ rc.delta }}</div>
+                  </sc-if>
+
+                  <div style="display:flex;flex-direction:column;gap:11px;animation:lfade .45s .62s ease both">
+                    <sc-for list="{{ rc.facts }}" as="f" hint-placeholder-count="3">
+                      <div style="display:flex;gap:11px;align-items:flex-start">
+                        <div style="width:6px;height:6px;flex:none;margin-top:7px;border-radius:50%;background:#3fbfa3"></div>
+                        <div style="font-size:14px;line-height:1.45">{{ f.text }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <div style="padding-top:2px;border-top:1px solid rgba(242,244,246,.08);animation:lfade .45s .78s ease both">
+                    <p style="margin:13px 0 0;font:400 15px/1.55 'Playfair Display',serif;color:#dfe4e9">{{ rc.lore }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div onClick="{{ toCollection }}" style="padding:17px;border-radius:16px;background:#1f6f5f;color:#eafff8;font-size:16px;font-weight:600;text-align:center;cursor:pointer">В коллекцию</div>
+                <div style="display:flex;gap:9px">
+                  <div onClick="{{ openResultCard }}" style="flex:1;padding:15px;border-radius:14px;background:#161c24;border:1px solid rgba(242,244,246,.1);font-size:14.5px;font-weight:600;text-align:center;cursor:pointer">Открыть карточку</div>
+                  <div onClick="{{ newScan }}" style="flex:1;padding:15px;border-radius:14px;background:#161c24;border:1px solid rgba(242,244,246,.1);font-size:14.5px;font-weight:600;text-align:center;cursor:pointer">Новый скан</div>
+                </div>
+                <sc-if value="{{ rc.canSplit }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ startSplit }}" style="padding:15px;border-radius:14px;background:rgba(176,58,46,.14);border:1px solid rgba(176,58,46,.45);color:#f0a99f;font-size:14.5px;font-weight:600;text-align:center;cursor:pointer">Расколоть и пересканировать</div>
+                </sc-if>
+              </div>
+              <div style="text-align:center;font-size:12px;color:#6f7b88">Карточка уже сохранена в коллекции</div>
+            </div>
+          </sc-if>
+
+          <!-- ── РАСКОЛ: ДО И ПОСЛЕ ─────────────────────────── -->
+          <sc-if value="{{ isCompare }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:14px 16px 30px;display:flex;flex-direction:column;gap:18px;animation:lrise .32s ease">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#6f7b88;text-transform:uppercase">камень расколот</div>
+                <h2 style="margin:0;font:600 26px/1.2 'Playfair Display',serif">{{ cmp.headline }}</h2>
+              </div>
+
+              <div style="display:flex;gap:10px;align-items:stretch">
+                <sc-for list="{{ cmp.sides }}" as="sd" hint-placeholder-count="2">
+                  <div style="flex:1;border-radius:18px;overflow:hidden;background:#161c24;border:1px solid {{ sd.frame }};opacity:{{ sd.opacity }};animation:lcard .55s cubic-bezier(.2,.8,.25,1) both">
+                    <div style="height:118px;position:relative;background:repeating-linear-gradient(122deg,#1e2632 0 10px,#26303e 10px 20px)">
+                      <div style="position:absolute;left:8px;top:8px;padding:4px 8px;border-radius:7px;background:rgba(11,15,20,.8);font-size:10px;font-weight:600;color:#c3cbd4">{{ sd.when }}</div>
+                      <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:{{ sd.tierColor }}"></div>
+                    </div>
+                    <div style="padding:12px 12px 14px;display:flex;flex-direction:column;gap:6px">
+                      <div style="font-size:12.5px;color:#9aa5b1">{{ sd.rock }}</div>
+                      <div style="font:600 15px/1.15 'Playfair Display',serif;color:{{ sd.tierColor }}">{{ sd.tierName }}</div>
+                      <div style="display:flex;align-items:baseline;gap:4px">
+                        <div style="font:700 26px/1 'JetBrains Mono',monospace">{{ sd.score }}</div>
+                        <div style="font-size:11px;color:#6f7b88">/ 100</div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="padding:15px;border-radius:15px;background:{{ cmp.deltaBg }};border:1px solid {{ cmp.deltaBorder }};display:flex;flex-direction:column;gap:5px;animation:lfade .45s .3s ease both">
+                <div style="font:700 20px/1 'JetBrains Mono',monospace;color:{{ cmp.deltaColor }}">{{ cmp.delta }}</div>
+                <div style="font-size:13px;line-height:1.45;color:#9aa5b1">{{ cmp.deltaNote }}</div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:9px;animation:lfade .45s .42s ease both">
+                <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">Что изменилось в разборе</div>
+                <sc-for list="{{ cmp.changes }}" as="ch" hint-placeholder-count="3">
+                  <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 13px;border-radius:12px;background:#161c24;border:1px solid rgba(242,244,246,.07)">
+                    <div style="width:44px;flex:none;font:700 13px/1.3 'JetBrains Mono',monospace;color:{{ ch.color }}">{{ ch.pts }}</div>
+                    <div style="display:flex;flex-direction:column;gap:2px">
+                      <div style="font-size:13.5px;font-weight:600">{{ ch.label }}</div>
+                      <div style="font-size:12.5px;line-height:1.4;color:#9aa5b1">{{ ch.why }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="font-size:12.5px;line-height:1.45;color:#6f7b88">Закрытая версия карточки исчезла — осталась раскрытая. Ссылка «До раскола» ведёт на родительскую карточку.</div>
+
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div onClick="{{ cmp.openCard }}" style="padding:17px;border-radius:16px;background:#1f6f5f;color:#eafff8;font-size:16px;font-weight:600;text-align:center;cursor:pointer">Открыть карточку</div>
+                <div style="display:flex;gap:9px">
+                  <div onClick="{{ toCollection }}" style="flex:1;padding:15px;border-radius:14px;background:#161c24;border:1px solid rgba(242,244,246,.1);font-size:14.5px;font-weight:600;text-align:center;cursor:pointer">В коллекцию</div>
+                  <div onClick="{{ newScan }}" style="flex:1;padding:15px;border-radius:14px;background:#161c24;border:1px solid rgba(242,244,246,.1);font-size:14.5px;font-weight:600;text-align:center;cursor:pointer">Новый скан</div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── РЕЗУЛЬТАТ: ОТКАЗ / ОСОБОЕ ──────────────────── -->
+          <sc-if value="{{ isRefusal }}" hint-placeholder-val="{{ false }}">
+            <div style="min-height:100%;padding:14px 16px 30px;display:flex;flex-direction:column;gap:18px;animation:lrise .3s ease">
+              <div style="border-radius:22px;overflow:hidden;background:#161c24;border:1px solid {{ ref.border }}">
+                <div style="height:150px;position:relative;background:repeating-linear-gradient(122deg,#171d26 0 10px,#1d242e 10px 20px);display:flex;align-items:center;justify-content:center">
+                  <div style="width:52px;height:52px;border-radius:50%;border:1.5px solid {{ ref.border }};display:flex;align-items:center;justify-content:center;font:700 22px/1 'JetBrains Mono',monospace;color:{{ ref.accent }}">{{ ref.glyph }}</div>
+                </div>
+                <div style="padding:20px 18px 22px;display:flex;flex-direction:column;gap:12px">
+                  <h2 style="margin:0;font:600 22px/1.3 'Playfair Display',serif">{{ ref.title }}</h2>
+                  <p style="margin:0;font-size:14.5px;line-height:1.5;color:#9aa5b1">{{ ref.body }}</p>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div onClick="{{ ref.primary }}" style="padding:17px;border-radius:16px;background:#1f6f5f;color:#eafff8;font-size:16px;font-weight:600;text-align:center;cursor:pointer">{{ ref.primaryLabel }}</div>
+                <sc-if value="{{ ref.secondaryLabel }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ ref.secondary }}" style="padding:15px;border-radius:14px;background:#161c24;border:1px solid rgba(242,244,246,.1);font-size:14.5px;font-weight:600;text-align:center;cursor:pointer">{{ ref.secondaryLabel }}</div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── КАРТОЧКА ───────────────────────────────────── -->
+          <sc-if value="{{ isCard }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:0 0 30px;display:flex;flex-direction:column;gap:{{ d.gap }}px">
+
+              <div style="position:relative">
+                <div style="display:flex;gap:8px;overflow:auto;padding:0 16px;scroll-snap-type:x mandatory">
+                  <sc-for list="{{ cd.photos }}" as="ph" hint-placeholder-count="2">
+                    <div style="flex:none;width:300px;height:224px;border-radius:18px;overflow:hidden;position:relative;background:repeating-linear-gradient(122deg,#1e2632 0 10px,#26303e 10px 20px);scroll-snap-align:center">
+                      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#7b8794">{{ ph.label }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div onClick="{{ back }}" style="position:absolute;top:10px;left:24px;width:34px;height:34px;border-radius:50%;background:rgba(11,15,20,.72);display:flex;align-items:center;justify-content:center;cursor:pointer">
+                  <div style="width:10px;height:10px;border-left:2px solid #f2f4f6;border-bottom:2px solid #f2f4f6;transform:rotate(45deg)"></div>
+                </div>
+              </div>
+
+              <div style="padding:0 16px;display:flex;flex-direction:column;gap:{{ d.gap }}px">
+
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <h2 style="margin:0;font:600 25px/1.2 'Playfair Display',serif">{{ cd.name }}</h2>
+                  <sc-if value="{{ editingName }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;gap:8px">
+                      <input value="{{ nameDraft }}" onChange="{{ onNameChange }}" placeholder="Своё имя камня" style="flex:1;padding:12px 13px;border-radius:12px;background:#161c24;border:1px solid rgba(63,191,163,.4);color:#f2f4f6;font-size:14.5px;font-family:'Golos Text',sans-serif;outline:none">
+                      <div onClick="{{ saveName }}" style="padding:12px 16px;border-radius:12px;background:#1f6f5f;color:#eafff8;font-size:14.5px;font-weight:600;cursor:pointer">Сохранить</div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ notEditingName }}" hint-placeholder-val="{{ true }}">
+                    <div onClick="{{ editName }}" style="display:flex;align-items:center;gap:9px;cursor:pointer">
+                      <div style="font-size:14px;color:{{ cd.ownNameColor }}">{{ cd.ownName }}</div>
+                      <div style="font-size:12px;color:#6f7b88">изменить</div>
+                    </div>
+                  </sc-if>
+                  <div style="font:400 11px/1 'JetBrains Mono',monospace;color:#5b6673;letter-spacing:.06em">{{ cd.id }}</div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:12px;padding:15px;border-radius:16px;background:#161c24;border:1px solid {{ cd.frame }}">
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">тир</div>
+                      <div style="font:600 19px/1.1 'Playfair Display',serif;color:{{ cd.tierColor }}">{{ cd.tierName }}</div>
+                    </div>
+                    <div style="display:flex;align-items:baseline;gap:5px">
+                      <div style="font:700 32px/1 'JetBrains Mono',monospace">{{ cd.scoreText }}</div>
+                      <div style="font-size:12px;color:#6f7b88">/ 100</div>
+                    </div>
+                  </div>
+                  <div style="height:1px;background:rgba(242,244,246,.08)"></div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <div style="padding:6px 11px;border-radius:8px;background:#1f2733;font-size:12px;color:#c3cbd4">{{ cd.verification }}</div>
+                    <div style="padding:6px 11px;border-radius:8px;background:#1f2733;font-size:12px;color:#c3cbd4">{{ cd.splitState }}</div>
+                  </div>
+                  <div onClick="{{ toggleScore }}" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding-top:2px">
+                    <div style="font-size:14px;font-weight:600">Разбор score</div>
+                    <div style="width:9px;height:9px;border-right:2px solid #9aa5b1;border-bottom:2px solid #9aa5b1;transform:{{ chevron }}"></div>
+                  </div>
+                  <sc-if value="{{ scoreOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:10px;padding-top:2px">
+                      <sc-for list="{{ cd.layers }}" as="l" hint-placeholder-count="4">
+                        <div style="display:flex;gap:11px;align-items:flex-start">
+                          <div style="width:42px;flex:none;font:700 13px/1.3 'JetBrains Mono',monospace;color:#3fbfa3">{{ l.pts }}</div>
+                          <div style="display:flex;flex-direction:column;gap:2px">
+                            <div style="font-size:13.5px;font-weight:600">{{ l.label }}</div>
+                            <div style="font-size:12.5px;line-height:1.4;color:#9aa5b1">{{ l.why }}</div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+
+                <sc-for list="{{ cd.sections }}" as="sec" hint-placeholder-count="4">
+                  <div style="display:flex;flex-direction:column;gap:9px">
+                    <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">{{ sec.title }}</div>
+                    <sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="2">
+                      <div style="display:flex;gap:12px;justify-content:space-between;align-items:baseline;padding:2px 0">
+                        <div style="font-size:13.5px;color:#9aa5b1;flex:none">{{ r.k }}</div>
+                        <div style="font-size:14px;text-align:right">{{ r.v }}</div>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{ sec.text }}" hint-placeholder-val="{{ false }}">
+                      <p style="margin:0;font:400 15px/1.55 'Playfair Display',serif;color:#dfe4e9">{{ sec.text }}</p>
+                    </sc-if>
+                  </div>
+                </sc-for>
+
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">История версий</div>
+                  <sc-for list="{{ cd.history }}" as="h" hint-placeholder-count="2">
+                    <div style="display:flex;gap:11px;align-items:flex-start">
+                      <div style="width:7px;height:7px;flex:none;margin-top:6px;border-radius:50%;background:{{ h.dot }}"></div>
+                      <div style="display:flex;flex-direction:column;gap:2px">
+                        <div style="font-size:13.5px">{{ h.title }}</div>
+                        <div style="font-size:12.5px;color:#6f7b88">{{ h.meta }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div onClick="{{ openDiary }}" style="display:flex;align-items:center;justify-content:space-between;padding:15px;border-radius:14px;background:#161c24;border:1px solid rgba(242,244,246,.08);cursor:pointer">
+                  <div style="font-size:14.5px;font-weight:600">Дневник этого места</div>
+                  <div style="width:9px;height:9px;border-right:2px solid #9aa5b1;border-top:2px solid #9aa5b1;transform:rotate(45deg)"></div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <sc-if value="{{ cd.canSplit }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ startSplit }}" style="padding:16px;border-radius:15px;background:rgba(176,58,46,.14);border:1px solid rgba(176,58,46,.45);color:#f0a99f;font-size:15px;font-weight:600;text-align:center;cursor:pointer">Расколоть и пересканировать</div>
+                  </sc-if>
+                  <div onClick="{{ toggleShowcase }}" style="padding:16px;border-radius:15px;background:#161c24;border:1px solid rgba(242,244,246,.1);font-size:15px;font-weight:600;text-align:center;cursor:pointer">{{ showcaseLabel }}</div>
+                  <sc-if value="{{ showcaseAlert }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding:13px;border-radius:13px;background:#251b1a;border:1px solid rgba(176,58,46,.5);font-size:13.5px;color:#f0c8c1;text-align:center">Витрина заполнена</div>
+                  </sc-if>
+                  <div onClick="{{ toCollection }}" style="padding:16px;border-radius:15px;background:#1f6f5f;color:#eafff8;font-size:15px;font-weight:600;text-align:center;cursor:pointer">В коллекцию</div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── КОЛЛЕКЦИЯ ──────────────────────────────────── -->
+          <sc-if value="{{ isCollection }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 0 30px;display:flex;flex-direction:column;gap:{{ d.gap }}px">
+              <div style="padding:0 16px;display:flex;align-items:baseline;justify-content:space-between">
+                <h2 style="margin:0;font:600 27px/1.1 'Playfair Display',serif">Коллекция</h2>
+                <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#6f7b88">{{ collCount }}</div>
+              </div>
+
+              <sc-if value="{{ offline }}" hint-placeholder-val="{{ false }}">
+                <div style="margin:0 16px;padding:11px 13px;border-radius:12px;background:#1c2029;border:1px solid rgba(242,244,246,.12);font-size:13px;color:#9aa5b1">Нет связи — показаны сохранённые карточки</div>
+              </sc-if>
+
+              <div onClick="{{ openDiary }}" style="margin:0 16px;padding:16px;border-radius:16px;background:#161c24;border:1px solid rgba(242,244,246,.08);display:flex;align-items:center;gap:13px;cursor:pointer">
+                <div style="width:38px;height:38px;flex:none;border-radius:11px;background:rgba(31,111,95,.2);display:flex;align-items:center;justify-content:center">
+                  <div style="width:14px;height:14px;border:1.5px solid #3fbfa3;border-radius:3px"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:15px;font-weight:600">Дневник места</div>
+                  <div style="font-size:12.5px;color:#9aa5b1">Ячейка «Побережье, Сукко» · 5 из 8</div>
+                </div>
+                <div style="width:9px;height:9px;border-right:2px solid #9aa5b1;border-top:2px solid #9aa5b1;transform:rotate(45deg)"></div>
+              </div>
+
+              <div style="display:flex;gap:7px;overflow:auto;padding:0 16px 2px">
+                <sc-for list="{{ tierChips }}" as="c" hint-placeholder-count="7">
+                  <div onClick="{{ c.pick }}" style="flex:none;display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:999px;cursor:pointer;background:{{ c.bg }};border:1px solid {{ c.border }};color:{{ c.fg }};font-size:13px;font-weight:500">
+                    <span>{{ c.label }}</span>
+                    <span style="font:500 11px/1 'JetBrains Mono',monospace;opacity:.75">{{ c.count }}</span>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;gap:7px;padding:0 16px">
+                <sc-for list="{{ sortChips }}" as="s" hint-placeholder-count="3">
+                  <div onClick="{{ s.pick }}" style="padding:8px 13px;border-radius:999px;cursor:pointer;background:{{ s.bg }};border:1px solid {{ s.border }};color:{{ s.fg }};font-size:12.5px;font-weight:500">{{ s.label }}</div>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{ collEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:52px 30px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+                  <div style="width:52px;height:52px;border-radius:47% 53% 51% 49%;background:repeating-linear-gradient(120deg,#1e2632 0 6px,#26303e 6px 12px)"></div>
+                  <div style="font:600 20px/1.2 'Playfair Display',serif">{{ emptyTitle }}</div>
+                  <div style="font-size:13.5px;line-height:1.5;color:#9aa5b1;max-width:250px">{{ emptyBody }}</div>
+                  <div onClick="{{ emptyAction }}" style="padding:14px 24px;border-radius:14px;background:#1f6f5f;color:#eafff8;font-size:15px;font-weight:600;cursor:pointer">{{ emptyLabel }}</div>
+                </div>
+              </sc-if>
+
+              <div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:{{ d.grid }}px">
+                <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="6">
+                  <div onClick="{{ t.open }}" style="border-radius:16px;overflow:hidden;background:#161c24;border:1px solid {{ t.frame }};cursor:pointer">
+                    <div style="height:{{ d.tile }}px;position:relative;background:{{ t.photoBg }}">
+                      <div style="position:absolute;left:8px;bottom:7px;font:400 8px/1 'JetBrains Mono',monospace;color:#8a949f">{{ t.photoLabel }}</div>
+                      <sc-if value="{{ t.flag }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;top:7px;left:7px;padding:4px 8px;border-radius:7px;background:rgba(11,15,20,.8);font-size:10px;font-weight:600;color:#e8d5aa">{{ t.flag }}</div>
+                      </sc-if>
+                      <div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:{{ t.tierColor }}"></div>
+                    </div>
+                    <div style="padding:11px 11px 13px;display:flex;flex-direction:column;gap:5px">
+                      <div style="font:600 14.5px/1.25 'Playfair Display',serif">{{ t.name }}</div>
+                      <div style="font-size:11.5px;color:#9aa5b1">{{ t.rock }}</div>
+                      <div style="display:flex;align-items:center;justify-content:space-between;padding-top:3px">
+                        <div style="font-size:11px;font-weight:600;color:{{ t.tierColor }}">{{ t.tierName }}</div>
+                        <div style="font:700 12px/1 'JetBrains Mono',monospace;color:#c3cbd4">{{ t.scoreText }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── ДНЕВНИК МЕСТА ──────────────────────────────── -->
+          <sc-if value="{{ isDiary }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:10px 16px 30px;display:flex;flex-direction:column;gap:{{ d.gap }}px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div onClick="{{ back }}" style="width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                  <div style="width:11px;height:11px;border-left:2px solid #f2f4f6;border-bottom:2px solid #f2f4f6;transform:rotate(45deg)"></div>
+                </div>
+                <div style="font-size:17px;font-weight:600">Дневник места</div>
+              </div>
+
+              <sc-if value="{{ diaryNoGeo }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:14px;border-radius:14px;background:#1c2029;border:1px solid rgba(224,165,38,.35);font-size:13.5px;line-height:1.45;color:#e8d5aa">Нет геопозиции — показана ячейка последней находки. Включите геопозицию, чтобы видеть дневник места, где вы стоите.</div>
+              </sc-if>
+
+              <div style="display:flex;flex-direction:column;gap:13px;padding:17px;border-radius:18px;background:#161c24;border:1px solid rgba(242,244,246,.08)">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    <h2 style="margin:0;font:600 22px/1.2 'Playfair Display',serif">Побережье, Сукко</h2>
+                    <div style="font:400 11px/1 'JetBrains Mono',monospace;color:#6f7b88">ячейка ≈1 км · 44.79 N, 37.36 E</div>
+                  </div>
+                  <div onClick="{{ toggleDiaryGeo }}" style="flex:none;padding:8px 11px;border-radius:10px;background:#1f2733;font-size:11.5px;color:#c3cbd4;cursor:pointer">моё место</div>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:8px">
+                  <div style="font:700 26px/1 'JetBrains Mono',monospace">5</div>
+                  <div style="font-size:14px;color:#9aa5b1">из 8 ожидаемых пород</div>
+                </div>
+                <div style="height:8px;border-radius:999px;background:#0f141b;overflow:hidden">
+                  <div style="width:62.5%;height:100%;background:#1f6f5f"></div>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">Ожидаемые породы</div>
+                <sc-for list="{{ expected }}" as="e" hint-placeholder-count="8">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:12px;background:{{ e.bg }};border:1px solid {{ e.border }}">
+                    <div style="width:20px;height:20px;flex:none;border-radius:50%;border:1.5px solid {{ e.markBorder }};background:{{ e.markBg }};display:flex;align-items:center;justify-content:center">
+                      <div style="width:7px;height:4px;border-left:1.5px solid {{ e.tick }};border-bottom:1.5px solid {{ e.tick }};transform:rotate(-45deg);margin-top:-2px"></div>
+                    </div>
+                    <div style="flex:1;font-size:14.5px;color:{{ e.fg }}">{{ e.name }}</div>
+                    <div style="font-size:12px;color:#6f7b88">{{ e.note }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">Сверх списка</div>
+                <div style="padding:14px;border-radius:12px;background:#161c24;border:1px dashed rgba(63,191,163,.35);display:flex;flex-direction:column;gap:4px">
+                  <div style="font-size:14.5px">Кремень с окаменелостью</div>
+                  <div style="font-size:12.5px;color:#9aa5b1">странник: приплыл морем</div>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">Находки в ячейке</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:{{ d.grid }}px">
+                  <sc-for list="{{ diaryFinds }}" as="t" hint-placeholder-count="4">
+                    <div onClick="{{ t.open }}" style="border-radius:14px;overflow:hidden;background:#161c24;border:1px solid rgba(242,244,246,.07);cursor:pointer">
+                      <div style="height:82px;position:relative;background:{{ t.photoBg }}">
+                        <div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:{{ t.tierColor }}"></div>
+                      </div>
+                      <div style="padding:9px 10px 11px;display:flex;flex-direction:column;gap:3px">
+                        <div style="font:600 13px/1.25 'Playfair Display',serif">{{ t.name }}</div>
+                        <div style="font-size:10.5px;color:{{ t.tierColor }};font-weight:600">{{ t.tierName }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div onClick="{{ newScan }}" style="padding:17px;border-radius:16px;background:#1f6f5f;color:#eafff8;font-size:16px;font-weight:600;text-align:center;cursor:pointer">Сканировать здесь</div>
+            </div>
+          </sc-if>
+
+          <!-- ── КАРТА ──────────────────────────────────────── -->
+          <sc-if value="{{ isMap }}" hint-placeholder-val="{{ false }}">
+            <div style="min-height:100%;display:flex;flex-direction:column">
+              <div style="flex:1;position:relative;background:repeating-linear-gradient(58deg,#101720 0 14px,#141c26 14px 28px);min-height:420px">
+                <div style="position:absolute;top:14px;left:16px;font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6f7b88">карта Apple Maps · точки сканов</div>
+                <div style="position:absolute;left:16%;top:44%;width:118px;height:82px;border-radius:14px;background:rgba(224,165,38,.14);border:1px solid rgba(224,165,38,.45)"></div>
+                <sc-for list="{{ mapDots }}" as="m" hint-placeholder-count="6">
+                  <div onClick="{{ m.open }}" style="position:absolute;left:{{ m.x }}%;top:{{ m.y }}%;width:18px;height:18px;border-radius:50%;background:{{ m.color }};border:2px solid #0b0f14;cursor:pointer;display:flex;align-items:center;justify-content:center;font:700 10px/1 'JetBrains Mono',monospace;color:#0b0f14">{{ m.mark }}</div>
+                </sc-for>
+              </div>
+              <div style="padding:16px;display:flex;flex-direction:column;gap:11px;background:#0f141b;border-top:1px solid rgba(242,244,246,.07)">
+                <div style="font:500 13px/1 'JetBrains Mono',monospace;color:#c3cbd4">14 точек · 1 ячейка закрыта</div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap">
+                  <sc-for list="{{ legend }}" as="lg" hint-placeholder-count="6">
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <div style="width:9px;height:9px;border-radius:50%;background:{{ lg.color }}"></div>
+                      <div style="font-size:11.5px;color:#9aa5b1">{{ lg.label }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── ПРОФИЛЬ ────────────────────────────────────── -->
+          <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 30px;display:flex;flex-direction:column;gap:{{ d.gap }}px">
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <h2 style="margin:0;font:600 27px/1.1 'Playfair Display',serif">{{ profileName }}</h2>
+                <sc-if value="{{ editingName }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:8px">
+                    <input value="{{ nameDraft }}" onChange="{{ onNameChange }}" placeholder="Ваше имя" style="flex:1;padding:12px 13px;border-radius:12px;background:#161c24;border:1px solid rgba(63,191,163,.4);color:#f2f4f6;font-size:14.5px;font-family:'Golos Text',sans-serif;outline:none">
+                    <div onClick="{{ saveName }}" style="padding:12px 16px;border-radius:12px;background:#1f6f5f;color:#eafff8;font-size:14.5px;font-weight:600;cursor:pointer">Сохранить</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ notEditingName }}" hint-placeholder-val="{{ true }}">
+                  <div onClick="{{ editName }}" style="font-size:13px;color:#6f7b88;cursor:pointer">тап, чтобы изменить · до 40 символов</div>
+                </sc-if>
+              </div>
+
+              <div style="display:flex;gap:9px">
+                <sc-for list="{{ stats }}" as="s" hint-placeholder-count="3">
+                  <div style="flex:1;padding:15px 13px;border-radius:15px;background:#161c24;border:1px solid rgba(242,244,246,.07);display:flex;flex-direction:column;gap:5px">
+                    <div style="font:700 24px/1 'JetBrains Mono',monospace">{{ s.value }}</div>
+                    <div style="font-size:12px;color:#9aa5b1">{{ s.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:11px;padding:17px;border-radius:18px;background:#161c24;border:1px solid rgba(242,244,246,.07)">
+                <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">Распределение по тирам</div>
+                <sc-for list="{{ dist }}" as="row" hint-placeholder-count="6">
+                  <div style="display:flex;align-items:center;gap:11px">
+                    <div style="width:92px;flex:none;font-size:12.5px;color:#c3cbd4">{{ row.label }}</div>
+                    <div style="flex:1;height:9px;border-radius:999px;background:#0f141b;overflow:hidden">
+                      <div style="width:{{ row.pct }}%;height:100%;background:{{ row.color }}"></div>
+                    </div>
+                    <div style="width:22px;text-align:right;font:500 12px/1 'JetBrains Mono',monospace;color:#9aa5b1">{{ row.n }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;gap:9px">
+                <sc-for list="{{ highlights }}" as="h" hint-placeholder-count="2">
+                  <div onClick="{{ h.open }}" style="flex:1;border-radius:16px;overflow:hidden;background:#161c24;border:1px solid {{ h.frame }};cursor:pointer">
+                    <div style="height:96px;position:relative;background:{{ h.photoBg }}">
+                      <div style="position:absolute;top:8px;left:8px;padding:4px 8px;border-radius:7px;background:rgba(11,15,20,.8);font-size:10px;font-weight:600">{{ h.kind }}</div>
+                      <div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:{{ h.tierColor }}"></div>
+                    </div>
+                    <div style="padding:11px;display:flex;flex-direction:column;gap:4px">
+                      <div style="font:600 13.5px/1.25 'Playfair Display',serif">{{ h.name }}</div>
+                      <div style="font-size:11.5px;color:#9aa5b1">{{ h.meta }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between">
+                  <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">Витрина</div>
+                  <div style="font:500 11px/1 'JetBrains Mono',monospace;color:#6f7b88">{{ showcaseCount }} / 12</div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                  <sc-for list="{{ showcase }}" as="s" hint-placeholder-count="6">
+                    <div onClick="{{ s.open }}" style="border-radius:12px;overflow:hidden;background:#161c24;border:1px solid {{ s.frame }};cursor:pointer">
+                      <div style="height:70px;position:relative;background:{{ s.photoBg }}">
+                        <div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:{{ s.tierColor }}"></div>
+                      </div>
+                      <div style="padding:7px 8px 9px;font:600 11px/1.25 'Playfair Display',serif">{{ s.name }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="font-size:12.5px;color:#6f7b88;line-height:1.45">Витрина собирается на экране карточки. В прототипе она локальная — без шеринга.</div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">Аккаунт</div>
+                <div style="padding:16px;border-radius:16px;background:#161c24;border:1px solid rgba(242,244,246,.07);display:flex;flex-direction:column;gap:13px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;flex:none;border-radius:50%;background:#1f2733;display:flex;align-items:center;justify-content:center">
+                      <div style="width:12px;height:12px;border-radius:50%;border:1.5px solid #6f7b88"></div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:2px">
+                      <div style="font-size:14.5px;font-weight:600">{{ accountTitle }}</div>
+                      <div style="font-size:12.5px;color:#9aa5b1">{{ accountNote }}</div>
+                    </div>
+                  </div>
+                  <div onClick="{{ toggleAccount }}" style="padding:14px;border-radius:13px;background:{{ accountBtnBg }};border:1px solid {{ accountBtnBorder }};color:{{ accountBtnFg }};font-size:14.5px;font-weight:600;text-align:center;cursor:pointer">{{ accountBtnLabel }}</div>
+                  <div style="font-size:12px;line-height:1.45;color:#6f7b88">Регистрация не нужна: приложение работает анонимно. Вход только для того, чтобы коллекция пережила смену телефона.</div>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#6f7b88;text-transform:uppercase">Настройки</div>
+                <div style="border-radius:16px;overflow:hidden;background:#161c24;border:1px solid rgba(242,244,246,.07);display:flex;flex-direction:column">
+                  <sc-for list="{{ settings }}" as="st" hint-placeholder-count="6">
+                    <div onClick="{{ st.tap }}" style="display:flex;align-items:center;gap:12px;padding:15px 15px;border-top:1px solid {{ st.divider }};cursor:pointer">
+                      <div style="flex:1;font-size:14.5px;color:{{ st.fg }}">{{ st.label }}</div>
+                      <div style="font-size:13.5px;color:#6f7b88">{{ st.value }}</div>
+                      <div style="width:8px;height:8px;flex:none;border-right:1.6px solid #4d5764;border-top:1.6px solid #4d5764;transform:rotate(45deg)"></div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="font-size:12px;color:#5b6673;font-family:'JetBrains Mono',monospace;letter-spacing:.04em">Lithos 0.4.1 · сборка 226</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── БЕЗОПАСНОСТЬ ───────────────────────────────── -->
+          <sc-if value="{{ isSafety }}" hint-placeholder-val="{{ false }}">
+            <div style="min-height:100%;display:flex;flex-direction:column;gap:22px;padding:30px 22px 26px">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#e0a526;text-transform:uppercase">перед первым расколом</div>
+                <h2 style="margin:0;font:600 26px/1.2 'Playfair Display',serif">Раскол — необратимый шаг</h2>
+                <p style="margin:0;font-size:14px;line-height:1.5;color:#9aa5b1">Закрытая версия карточки исчезнет. Score может вырасти или упасть.</p>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <sc-for list="{{ safetyRules }}" as="r" hint-placeholder-count="3">
+                  <div style="display:flex;gap:13px;padding:16px;border-radius:15px;background:#161c24;border:1px solid rgba(242,244,246,.07)">
+                    <div style="width:28px;height:28px;flex:none;border-radius:50%;background:rgba(224,165,38,.16);display:flex;align-items:center;justify-content:center;font:700 13px/1 'JetBrains Mono',monospace;color:#e0a526">{{ r.n }}</div>
+                    <div style="display:flex;flex-direction:column;gap:3px">
+                      <div style="font-size:15px;font-weight:600">{{ r.title }}</div>
+                      <div style="font-size:13px;line-height:1.45;color:#9aa5b1">{{ r.body }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="flex:1"></div>
+              <div onClick="{{ acceptSafety }}" style="padding:18px;border-radius:16px;background:{{ safetyBg }};color:{{ safetyFg }};font-size:16px;font-weight:600;text-align:center;cursor:pointer">{{ safetyLabel }}</div>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- ── ТАБ-БАР ────────────────────────────────────── -->
+        <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:none;display:flex;background:rgba(15,20,27,.96);border-top:1px solid rgba(242,244,246,.07);padding:9px 6px 4px">
+            <div onClick="{{ tabCamera }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:4px 0">
+              <div style="width:22px;height:17px;border-radius:5px;border:1.6px solid {{ tc.camera }};display:flex;align-items:center;justify-content:center">
+                <div style="width:7px;height:7px;border-radius:50%;border:1.6px solid {{ tc.camera }}"></div>
+              </div>
+              <div style="font-size:10.5px;color:{{ tc.camera }}">Камера</div>
+            </div>
+            <div onClick="{{ tabCollection }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:4px 0">
+              <div style="width:19px;height:17px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px">
+                <div style="background:{{ tc.collection }};border-radius:2px"></div>
+                <div style="background:{{ tc.collection }};border-radius:2px"></div>
+                <div style="background:{{ tc.collection }};border-radius:2px"></div>
+                <div style="background:{{ tc.collection }};border-radius:2px"></div>
+              </div>
+              <div style="font-size:10.5px;color:{{ tc.collection }}">Коллекция</div>
+            </div>
+            <div onClick="{{ tabMap }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:4px 0">
+              <div style="width:17px;height:17px;display:flex;align-items:center;justify-content:center">
+                <div style="width:12px;height:12px;background:{{ tc.map }};border-radius:3px 3px 3px 10px;transform:rotate(45deg)"></div>
+              </div>
+              <div style="font-size:10.5px;color:{{ tc.map }}">Карта</div>
+            </div>
+            <div onClick="{{ tabProfile }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:4px 0">
+              <div style="width:17px;height:17px;display:flex;flex-direction:column;align-items:center;gap:2px">
+                <div style="width:8px;height:8px;border-radius:50%;background:{{ tc.profile }}"></div>
+                <div style="width:15px;height:7px;border-radius:8px 8px 0 0;background:{{ tc.profile }}"></div>
+              </div>
+              <div style="font-size:10.5px;color:{{ tc.profile }}">Профиль</div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </x-import>
+
+    <div style="width:402px;max-width:100%;display:flex;flex-direction:column;gap:14px">
+      <sc-for list="{{ jumpGroups }}" as="g" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#4d5764;text-transform:uppercase">{{ g.label }}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ g.items }}" as="j" hint-placeholder-count="4">
+              <div onClick="{{ j.go }}" style="padding:7px 11px;border-radius:9px;background:{{ j.bg }};border:1px solid {{ j.border }};color:{{ j.fg }};font-size:11.5px;font-weight:500;cursor:pointer">{{ j.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:800,&quot;height&quot;:1100},&quot;tierStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Шов и цифра&quot;,&quot;Классический бейдж&quot;,&quot;Печать-медальон&quot;],&quot;default&quot;:&quot;Шов и цифра&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Вариации&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Просторная&quot;,&quot;Компактная&quot;],&quot;default&quot;:&quot;Просторная&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Вариации&quot;}}">
+const T = {
+  common:  { name: 'Обычный',      color: '#8f9aa6' },
+  uncommon:{ name: 'Необычный',    color: '#3fa06a' },
+  rare:    { name: 'Редкий',       color: '#3b82f6' },
+  epic:    { name: 'Эпический',    color: '#9b5de5' },
+  legend:  { name: 'Легендарный',  color: '#e0a526' },
+  none:    { name: 'Без редкости', color: '#5b6673' },
+  review:  { name: 'На ревью',     color: '#9b5de5' },
+};
+const stripes = (a, b) => `repeating-linear-gradient(122deg,${a} 0 9px,${b} 9px 18px)`;
+const PH = stripes('#1e2632', '#26303e');
+
+const CARDS = [
+  { id: 'LTH-4A7C', name: 'Миндалекаменный базальт, побережье', own: 'Пузырчатый', rock: 'Базальт миндалекаменный', group: 'Магматическая', surface: 'Окатан морем',
+    tier: 'uncommon', score: 44, place: 'Побережье, Сукко', date: '7 сентября 2026', epoch: 'Эоцен',
+    inclusions: 'Цеолит — заметно, в миндалинах · Пирит — следы',
+    lore: 'Застывшая лава с пузырьками газа: за миллионы лет пустоты заполнились цеолитом. Море обточило камень и вынесло на галечник, где вы его и подняли.',
+    facts: ['Магматическая порода — застывшая лава', 'Цеолит в миндалинах — главное включение', 'Порода ожидаема здесь'],
+    layers: [
+      { label: 'Форма 20', pts: '+20', why: 'сквозное отверстие — «куриный бог»' },
+      { label: 'Место 5',  pts: '+5',  why: 'порода ожидаема здесь' },
+      { label: 'Состав 17', pts: '+17', why: 'базальт: обычная порода региона 10, цеолит заметно 7' },
+      { label: 'Раскрытие 2', pts: '+2', why: 'фото с масштабом' },
+    ],
+    verification: 'AI-вердикт', split: 'Закрытый', canSplit: true, km: 0,
+    photos: [{ label: 'фото камня, лицевая сторона' }, { label: 'фото с монетой для масштаба' }],
+    history: [
+      { title: 'Первичный вердикт — базальт, 38 очков', meta: '7 сентября, 14:02' },
+      { title: 'Уточнение — цеолит подтверждён, 44 очка', meta: '7 сентября, 14:02 · дорогая модель' },
+    ] },
+  { id: 'LTH-91B2', name: 'Куриный бог, галечник', own: '', rock: 'Кремень со сквозным отверстием', group: 'Осадочная', surface: 'Окатан морем',
+    tier: 'legend', score: 88, place: 'Побережье, Сукко', date: '5 сентября 2026', epoch: 'Мел',
+    inclusions: 'Окаменелость — уверенно, отпечаток раковины',
+    lore: 'Кремневая конкреция из меловых отложений. Отверстие пробила не вода, а мягкое включение, которое вымылось первым.',
+    facts: ['Осадочная порода — кремень', 'Сквозное отверстие и отпечаток раковины', 'Порода ожидаема здесь'],
+    layers: [
+      { label: 'Форма 20', pts: '+20', why: 'сквозное отверстие' },
+      { label: 'Место 5', pts: '+5', why: 'порода ожидаема здесь' },
+      { label: 'Состав 61', pts: '+61', why: 'кремень 20, окаменелость 40 (уверенно)' },
+      { label: 'Раскрытие 2', pts: '+2', why: 'фото с масштабом' },
+    ],
+    verification: 'Оценено экспертом', split: 'Закрытый', canSplit: false, km: 0.4,
+    photos: [{ label: 'фото камня, отверстие в свету' }],
+    history: [{ title: 'Первичный вердикт — кремень, 88 очков', meta: '5 сентября, 11:20' }] },
+  { id: 'LTH-77D0', name: 'Агат в миндалине', own: 'Половинка', rock: 'Агат', group: 'Магматическая', surface: 'Свежий скол',
+    tier: 'epic', score: 71, place: 'Побережье, Сукко', date: '6 сентября 2026', epoch: 'Эоцен',
+    inclusions: 'Агатовые полосы — уверенно',
+    lore: 'Снаружи серая галька, внутри — полосчатый кремнезём, слой за слоем осевший в газовой пустоте. Раскол показал рисунок, который никто не видел.',
+    facts: ['Агат в базальтовой миндалине', 'Свежий скол раскрыл полосы', 'Порода ожидаема здесь'],
+    layers: [
+      { label: 'Форма 10', pts: '+10', why: 'полосчатость' },
+      { label: 'Место 5', pts: '+5', why: 'порода ожидаема здесь' },
+      { label: 'Состав 48', pts: '+48', why: 'агат 30, полосы уверенно 12, множитель региона' },
+      { label: 'Раскрытие 8', pts: '+8', why: 'свежий скол 6, фото с масштабом 2' },
+    ],
+    verification: 'Подтверждено сообществом', split: 'Раскрытый', canSplit: false, km: 0.4,
+    photos: [{ label: 'фото скола, полосы агата' }, { label: 'фото камня до раскола' }],
+    history: [
+      { title: 'До раскола — базальт, 23 очка', meta: '6 сентября, 09:41' },
+      { title: 'После раскола — агат, 71 очко', meta: '6 сентября, 10:05' },
+    ] },
+  { id: 'LTH-2E15', name: 'Кремень, странник', own: '', rock: 'Кремень', group: 'Осадочная', surface: 'Окатан рекой',
+    tier: 'rare', score: 58, place: 'Побережье, Сукко', date: '4 сентября 2026', epoch: 'Мел',
+    inclusions: 'Без уверенных включений',
+    lore: 'Для этого берега порода редкая: скорее всего, её принесло морем вдоль косы. Речная окатанность выдаёт долгий путь до воды.',
+    facts: ['Осадочная порода — кремень', 'Речная окатанность', 'Странник: приплыл морем'],
+    layers: [
+      { label: 'Форма 3', pts: '+3', why: 'обычная галька' },
+      { label: 'Место 20', pts: '+20', why: 'странник: приплыла морем' },
+      { label: 'Состав 30', pts: '+30', why: 'кремень: редкая порода региона' },
+      { label: 'Раскрытие 5', pts: '+5', why: 'пройдены мини-тесты, фото с масштабом' },
+    ],
+    verification: 'AI-вердикт', split: 'Закрытый', canSplit: true, km: 1.2,
+    photos: [{ label: 'фото камня, мокрый' }],
+    history: [{ title: 'Первичный вердикт — кремень, 58 очков', meta: '4 сентября, 16:10' }] },
+  { id: 'LTH-5C33', name: 'Песчаник, без геопозиции', own: '', rock: 'Песчаник', group: 'Осадочная', surface: 'Выветрен',
+    tier: 'none', score: null, place: 'Место не записано', date: '3 сентября 2026', epoch: '',
+    inclusions: 'Без уверенных включений',
+    lore: 'Спрессованный песок древнего пляжа. Без геопозиции нельзя сказать, свой он здесь или принесённый, поэтому редкость не считаем.',
+    facts: ['Осадочная порода — песчаник', 'Слоистость видна на сколе', 'Место не записано — редкость не считаем'],
+    layers: [{ label: 'Редкость не считалась', pts: '—', why: 'нет геопозиции: слой «Место» и итоговый score недоступны' }],
+    verification: 'AI-вердикт', split: 'Закрытый', canSplit: false, km: 0,
+    photos: [{ label: 'фото камня на нейтральном фоне' }],
+    history: [{ title: 'Первичный вердикт — песчаник', meta: '3 сентября, 18:44' }] },
+  { id: 'LTH-8F40', name: 'Гранитная галька', own: '', rock: 'Гранит', group: 'Магматическая', surface: 'Окатан морем',
+    tier: 'common', score: 14, place: 'Побережье, Сукко', date: '2 сентября 2026', epoch: 'Палеозой',
+    inclusions: 'Без уверенных включений',
+    lore: 'Крупные зёрна кварца и слюды — камень остывал в глубине очень медленно. На этом берегу такие встречаются постоянно.',
+    facts: ['Магматическая порода — гранит', 'Крупнозернистая структура', 'Порода ожидаема здесь'],
+    layers: [
+      { label: 'Форма 3', pts: '+3', why: 'обычная галька' },
+      { label: 'Место 5', pts: '+5', why: 'порода ожидаема здесь' },
+      { label: 'Состав 5', pts: '+5', why: 'гранит: обычная порода региона' },
+      { label: 'Раскрытие 1', pts: '+1', why: 'без масштаба и тестов' },
+    ],
+    verification: 'AI-вердикт', split: 'Закрытый', canSplit: false, km: 0.1,
+    photos: [{ label: 'фото камня, сухой' }],
+    history: [{ title: 'Первичный вердикт — гранит, 14 очков', meta: '2 сентября, 08:15' }] },
+  { id: 'LTH-6B08', name: 'Сланец, предварительно', own: '', rock: 'Сланец', group: 'Метаморфическая', surface: 'Свежий скол',
+    tier: 'rare', score: 51, place: 'Побережье, Сукко', date: '1 сентября 2026', epoch: 'Эоцен',
+    inclusions: 'Пирит — следы',
+    lore: 'Глина, спрессованная и перекристаллизованная давлением. Расслаивается ровными плитками — по ним и опознаётся.',
+    facts: ['Метаморфическая порода — сланец', 'Пирит по трещинам — следы', 'Порода ожидаема здесь'],
+    layers: [
+      { label: 'Форма 10', pts: '+10', why: 'полосчатость' },
+      { label: 'Место 5', pts: '+5', why: 'порода ожидаема здесь' },
+      { label: 'Состав 30', pts: '+30', why: 'сланец: нечастая порода региона 20, пирит следы 3, множитель' },
+      { label: 'Раскрытие 6', pts: '+6', why: 'свежий скол' },
+    ],
+    verification: 'AI-вердикт · резервный провайдер', split: 'Закрытый', canSplit: true, km: 0.8, prelim: true,
+    photos: [{ label: 'фото скола, плитки сланца' }],
+    history: [
+      { title: 'Первичный вердикт — сланец, 51 очко', meta: '1 сентября, 12:30 · резервный провайдер' },
+      { title: 'Ожидает пересчёта редкости', meta: 'тир ограничен «Редким»' },
+    ] },
+  { id: 'LTH-3A9E', name: 'Аномалия на ревью', own: '', rock: 'Обсидиан', group: 'Магматическая', surface: 'Свежий скол',
+    tier: 'review', score: null, place: 'Побережье, Сукко', date: '31 августа 2026', epoch: 'Эоцен',
+    inclusions: 'Стекловатая масса — уверенно',
+    lore: 'Вулканическое стекло, застывшее слишком быстро для кристаллов. Здесь такой породы быть не может, поэтому карточка ждёт проверки.',
+    facts: ['Магматическая порода — обсидиан', 'Раковистый излом', 'Не совпадает с местом — карточка на ревью'],
+    layers: [{ label: 'Тир на ревью', pts: '?', why: 'гео-аномалия: эпический камень там, где такой породы быть не может' }],
+    verification: 'На ревью', split: 'Раскрытый', canSplit: false, km: 0.6,
+    photos: [{ label: 'фото скола, чёрное стекло' }],
+    history: [{ title: 'Первичный вердикт — обсидиан, отправлен на ревью', meta: '31 августа, 19:02' }] },
+];
+
+const STAGES = ['Готовим фото', 'Проверяем, что это камень', 'Определяем породу', 'Уточняем детали', 'Считаем редкость'];
+
+const REFUSALS = {
+  notstone: { glyph: '?', title: 'Похоже, это не камень', body: 'Сфотографируйте камень крупно на нейтральном фоне.' },
+  blur:     { glyph: '~', title: 'Фото размыто', body: 'Переснимите ближе и при хорошем свете — камень должен быть в фокусе.' },
+  dark:     { glyph: '·', title: 'Слишком темно или нет деталей', body: 'Переснимите при хорошем свете: в тени модель не различает структуру.' },
+  far:      { glyph: '·', title: 'Камень слишком далеко', body: 'Подойдите ближе, чтобы камень занимал хотя бы пятую часть кадра.' },
+  screen:   { glyph: '□', title: 'Фото с экрана не принимаем', body: 'Снимите камень с натуры — по снимку экрана породу определить нельзя.' },
+  many:     { glyph: '∷', title: 'В кадре несколько объектов', body: 'Оставьте один камень в кадре и переснимите.' },
+  nophoto:  { glyph: '×', title: 'Не удалось получить фото', body: 'Переснимите — снимок не дошёл до обработки.' },
+  fail:     { glyph: '!', title: 'Не удалось обработать', body: 'Попробуйте ещё раз — мы ничего не потеряли.' },
+};
+
+class Component extends DCLogic {
+  state = {
+    screen: 'welcome', tab: 'camera',
+    photos: [{ id: 1, scale: false }],
+    seg: { weight: null, scratch: null, wet: null },
+    geo: true, limit: false, offline: false, sending: false,
+    stage: 4, refining: false, toast: null,
+    resultId: 'LTH-4A7C', resultScore: 44, refusal: null, special: null,
+    cardId: 'LTH-4A7C', scoreOpen: false, editingName: false, nameDraft: '',
+    profileName: 'Без имени', cardOwn: {},
+    filter: 'Все', sort: 'Новые',
+    showcase: ['LTH-91B2', 'LTH-77D0', 'LTH-2E15', 'LTH-8F40'], showcaseAlert: false,
+    splitMode: false, seenSafety: false, safetyReady: false,
+    diaryGeo: true, camPerm: true, delta: null,
+    firstRun: false, compareDir: 'up', signedIn: false,
+  };
+
+  componentWillUnmount() { clearInterval(this._t); clearTimeout(this._s); }
+
+  set(p) { this.setState(p); }
+  flash(msg) { this.setState({ toast: msg }); clearTimeout(this._s); this._s = setTimeout(() => this.setState({ toast: null }), 3600); }
+
+  tier(k) { return T[k] || T.none; }
+
+  runAnalysis() {
+    clearInterval(this._t);
+    this.setState({ screen: 'analyzing', stage: 0, refining: false, refusal: null, special: null });
+    this._t = setInterval(() => {
+      const s = this.state.stage + 1;
+      if (s >= STAGES.length) {
+        clearInterval(this._t);
+        const split = this.state.splitMode;
+        this.setState({
+          screen: split ? 'compare' : 'result', refining: !split, splitMode: false,
+          compareDir: 'up',
+          resultId: split ? 'LTH-77D0' : 'LTH-4A7C',
+          resultScore: split ? 71 : 38,
+          delta: split ? 'было 23 → стало 71 (+48)' : null,
+        });
+        if (!split) this._s = setTimeout(() => this.setState({ refining: false, resultScore: 44 }), 2600);
+      } else this.setState({ stage: s });
+    }, 900);
+  }
+
+  startSafetyTimer() {
+    this.setState({ screen: 'safety', safetyReady: false });
+    clearTimeout(this._s);
+    this._s = setTimeout(() => this.setState({ safetyReady: true }), 5000);
+  }
+
+  jump(key) {
+    const g = { geo: true, limit: false, offline: false, refusal: null, special: null, splitMode: false };
+    const M = {
+      camera:     { ...g, screen: 'camera', tab: 'camera', photos: [{ id: 1, scale: false }] },
+      perm:       { ...g, screen: 'perm', camPerm: false },
+      camsplit:   { ...g, screen: 'camera', tab: 'camera', splitMode: true, photos: [] },
+      review:     { ...g, screen: 'review', photos: [{ id: 1, scale: true }, { id: 2, scale: false }] },
+      nogeo:      { ...g, screen: 'review', geo: false, photos: [{ id: 1, scale: false }] },
+      limit:      { ...g, screen: 'review', limit: true, photos: [{ id: 1, scale: false }] },
+      analyzing:  { ...g, screen: 'analyzing', stage: 2 },
+      prelim:     { ...g, screen: 'result', refining: true, resultId: 'LTH-4A7C', resultScore: 38, delta: null },
+      final:      { ...g, screen: 'result', refining: false, resultId: 'LTH-4A7C', resultScore: 44, delta: null },
+      norare:     { ...g, screen: 'result', refining: false, resultId: 'LTH-5C33', resultScore: null, delta: null },
+      reviewtier: { ...g, screen: 'result', refining: false, resultId: 'LTH-3A9E', resultScore: null, delta: null },
+      prelimtier: { ...g, screen: 'result', refining: false, resultId: 'LTH-6B08', resultScore: 51, delta: null },
+      afterSplit: { ...g, screen: 'result', refining: false, resultId: 'LTH-77D0', resultScore: 71, delta: 'было 23 → стало 71 (+48)' },
+      compareUp:  { ...g, screen: 'compare', compareDir: 'up' },
+      compareDown:{ ...g, screen: 'compare', compareDir: 'down' },
+      welcome:    { ...g, screen: 'welcome' },
+      firstrun:   { ...g, screen: 'camera', tab: 'camera', firstRun: true, photos: [] },
+      legend:     { ...g, screen: 'result', refining: false, resultId: 'LTH-91B2', resultScore: 88, delta: null },
+      card:       { ...g, screen: 'card', cardId: 'LTH-4A7C', scoreOpen: true },
+      cardsplit:  { ...g, screen: 'card', cardId: 'LTH-77D0', scoreOpen: false },
+      collection: { ...g, screen: 'collection', tab: 'collection', filter: 'Все' },
+      collempty:  { ...g, screen: 'collection', tab: 'collection', filter: 'Пусто' },
+      colloffline:{ ...g, screen: 'collection', tab: 'collection', offline: true },
+      diary:      { ...g, screen: 'diary', diaryGeo: true },
+      diarynogeo: { ...g, screen: 'diary', diaryGeo: false },
+      map:        { ...g, screen: 'map', tab: 'map' },
+      profile:    { ...g, screen: 'profile', tab: 'profile' },
+      safety:     null,
+    };
+    if (key === 'safety') { this.startSafetyTimer(); return; }
+    Object.keys(REFUSALS).forEach(k => { M[k] = { ...g, screen: 'result', refusal: k }; });
+    ['slow', 'overload', 'nonet'].forEach(k => { M[k] = { ...g, screen: 'result', special: k }; });
+    clearInterval(this._t); clearTimeout(this._s);
+    this.setState(M[key] || M.camera);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const p = this.props;
+    const tierStyle = p.tierStyle ?? 'Шов и цифра';
+    const compact = (p.density ?? 'Просторная') === 'Компактная';
+    const d = compact ? { gap: 13, pad: 14, tile: 112, grid: 9 } : { gap: 19, pad: 19, tile: 134, grid: 12 };
+
+    const card = CARDS.find(c => c.id === s.cardId) || CARDS[0];
+    const rcard = CARDS.find(c => c.id === s.resultId) || CARDS[0];
+    const own = id => s.cardOwn[id] ?? (CARDS.find(c => c.id === id) || {}).own ?? '';
+
+    const screen = s.screen;
+    const scoreTxt = (c, override) => {
+      const v = override !== undefined ? override : c.score;
+      return v == null ? (c.tier === 'review' ? '?' : '—') : String(v);
+    };
+
+    // ── камера
+    const photos = s.photos.map((ph, i) => ({
+      n: i + 1, tag: ph.scale ? 'масштаб' : 'фото ' + (i + 1), scale: ph.scale,
+      border: ph.scale ? '#1f6f5f' : 'rgba(242,244,246,.14)',
+      remove: e => { e.stopPropagation(); this.setState({ photos: s.photos.filter(x => x.id !== ph.id) }); },
+      toggleScale: () => this.setState({ photos: s.photos.map(x => x.id === ph.id ? { ...x, scale: !x.scale } : { ...x, scale: false }) }),
+    }));
+    const full = s.photos.length >= 3;
+    const shoot = () => {
+      if (full) return;
+      const bad = s.photos.length === 1 && !s.splitMode;
+      if (bad) { this.flash('Фото размыто — переснимите ближе и при хорошем свете'); return; }
+      const next = [...s.photos, { id: Date.now(), scale: false }];
+      if (next.length >= 3) this.setState({ photos: next, screen: 'review' });
+      else this.setState({ photos: next, toast: null });
+    };
+
+    // ── проверка
+    const segDefs = [
+      { key: 'weight', label: 'Вес в руке', options: ['Легче', 'Обычный', 'Тяжелее'] },
+      { key: 'scratch', label: 'Царапина', options: ['Ногтем', 'Монетой', 'Не царапается'] },
+      { key: 'wet', label: 'Состояние', options: ['Сухой', 'Мокрый'] },
+    ];
+    const segments = segDefs.map(sd => ({
+      label: sd.label,
+      options: sd.options.map(o => {
+        const on = s.seg[sd.key] === o;
+        return {
+          label: o, bg: on ? '#1f6f5f' : '#161c24', fg: on ? '#eafff8' : '#c3cbd4',
+          border: on ? '#1f6f5f' : 'rgba(242,244,246,.09)',
+          pick: () => this.setState({ seg: { ...s.seg, [sd.key]: on ? null : o } }),
+        };
+      }),
+    }));
+
+    // ── коллекция
+    const visible = CARDS.filter(c => c.split !== 'Скрыт');
+    const counts = {};
+    visible.forEach(c => { const n = this.tier(c.tier).name; counts[n] = (counts[n] || 0) + 1; });
+    const chipNames = ['Все', 'Легендарный', 'Эпический', 'Редкий', 'Необычный', 'Обычный', 'Без редкости'];
+    const chipColor = n => (Object.values(T).find(t => t.name === n) || { color: '#9aa5b1' }).color;
+    const tierChips = chipNames.map(n => {
+      const on = s.filter === n;
+      const col = n === 'Все' ? '#3fbfa3' : chipColor(n);
+      return {
+        label: n, count: n === 'Все' ? visible.length : (counts[n] || 0), pick: () => this.setState({ filter: n }),
+        bg: on ? col : '#161c24', fg: on ? '#0b0f14' : '#c3cbd4', border: on ? col : 'rgba(242,244,246,.09)',
+      };
+    });
+    const sortChips = ['Новые', 'По score', 'По тиру'].map(n => {
+      const on = s.sort === n;
+      return { label: n, pick: () => this.setState({ sort: n }), bg: on ? '#1f2733' : 'transparent', fg: on ? '#f2f4f6' : '#9aa5b1', border: on ? 'rgba(242,244,246,.16)' : 'rgba(242,244,246,.08)' };
+    });
+    const order = ['legend', 'epic', 'rare', 'uncommon', 'common', 'none', 'review'];
+    let list = s.filter === 'Пусто' ? [] : visible.filter(c => s.filter === 'Все' || this.tier(c.tier).name === s.filter);
+    if (s.sort === 'По score') list = [...list].sort((a, b) => (b.score || 0) - (a.score || 0));
+    if (s.sort === 'По тиру') list = [...list].sort((a, b) => order.indexOf(a.tier) - order.indexOf(b.tier));
+    const tileOf = c => ({
+      name: own(c.id) || c.name, rock: c.rock, tierName: this.tier(c.tier).name, tierColor: this.tier(c.tier).color,
+      scoreText: scoreTxt(c), frame: 'rgba(242,244,246,.07)', photoBg: PH,
+      photoLabel: c.photos[0].label.replace('фото камня, ', '').slice(0, 26),
+      flag: c.prelim ? 'предварительно' : (c.split === 'Раскрытый' ? 'раскрыт' : null),
+      open: () => this.setState({ screen: 'card', cardId: c.id, scoreOpen: false, editingName: false }),
+    });
+    const tiles = list.map(tileOf);
+
+    // ── карточка
+    const cd = {
+      id: card.id, name: card.name, rock: card.rock,
+      ownName: own(card.id) || 'Дать своё имя',
+      ownNameColor: own(card.id) ? '#f2f4f6' : '#3fbfa3',
+      tierName: this.tier(card.tier).name, tierColor: this.tier(card.tier).color,
+      frame: this.tier(card.tier).color, scoreText: scoreTxt(card),
+      verification: card.verification, splitState: card.split, canSplit: card.canSplit,
+      photos: card.photos, layers: card.layers, history: card.history.map((h, i) => ({ ...h, dot: i === 0 ? '#5b6673' : '#3fbfa3' })),
+      sections: [
+        { title: 'Порода', rows: [{ k: 'Порода', v: card.rock }, { k: 'Группа', v: card.group }, { k: 'Поверхность', v: card.surface }] },
+        { title: 'Состав', rows: [{ k: 'Включения', v: card.inclusions }] },
+        { title: 'Место и дата', rows: [{ k: 'Место', v: card.place }, { k: 'Дата', v: card.date }, { k: 'Возраст региона', v: card.epoch || 'неизвестен' }] },
+        { title: 'Лор', rows: [], text: card.lore },
+      ],
+    };
+
+    // ── результат
+    const rc = {
+      name: own(rcard.id) || rcard.name, rock: rcard.rock,
+      tierName: this.tier(rcard.tier).name, tierColor: this.tier(rcard.tier).color,
+      frame: s.refining ? 'rgba(242,244,246,.1)' : this.tier(rcard.tier).color,
+      scoreText: scoreTxt(rcard, s.resultScore),
+      tierHint: rcard.tier === 'legend' ? '85–100 очков' : rcard.tier === 'epic' ? '70–84 очка' : rcard.tier === 'rare' ? '50–69 очков' : rcard.tier === 'uncommon' ? '30–49 очков' : '0–29 очков',
+      facts: rcard.facts.map(t => ({ text: t })),
+      isLegend: rcard.tier === 'legend' && !s.refining,
+      lore: rcard.lore, canSplit: rcard.canSplit, delta: s.delta,
+      note: rcard.tier === 'none' ? 'Без редкости — скан без геопозиции. Порода и лор есть, score не считаем.'
+        : rcard.tier === 'review' ? 'Тир «?» — гео-аномалия ушла на ревью. Порода здесь не встречается.'
+        : rcard.prelim ? 'Предварительно — результат от резервного провайдера. Тир ограничен «Редким», позже пересчитается.' : null,
+    };
+
+    // ── раскол: до и после
+    const up = s.compareDir === 'up';
+    const before = { rock: 'Базальт', tierName: 'Обычный', tierColor: T.common.color, score: '23' };
+    const cmp = up ? {
+      headline: 'Внутри оказался агат',
+      sides: [
+        { ...before, when: 'до раскола', frame: 'rgba(242,244,246,.07)', opacity: '.55' },
+        { rock: 'Агат', tierName: 'Эпический', tierColor: T.epic.color, score: '71', when: 'после раскола', frame: T.epic.color, opacity: '1' },
+      ],
+      delta: 'было 23 → стало 71 (+48)',
+      deltaNote: 'Полосы агата видны только на свежем сколе — модель увидела то, чего снаружи не было.',
+      deltaBg: 'rgba(31,111,95,.14)', deltaBorder: 'rgba(63,191,163,.32)', deltaColor: '#7ae0c8',
+      changes: [
+        { pts: '+30', color: '#7ae0c8', label: 'Состав: агат', why: 'вместо обычного базальта региона' },
+        { pts: '+12', color: '#7ae0c8', label: 'Состав: полосы уверенно', why: 'включение подтверждено на сколе' },
+        { pts: '+6', color: '#7ae0c8', label: 'Раскрытие: свежий скол', why: 'слой раскрытия закрыт почти полностью' },
+      ],
+      cardId: 'LTH-77D0',
+    } : {
+      headline: 'Внутри тот же базальт',
+      sides: [
+        { ...before, when: 'до раскола', frame: 'rgba(242,244,246,.07)', opacity: '.55' },
+        { rock: 'Базальт', tierName: 'Обычный', tierColor: T.common.color, score: '15', when: 'после раскола', frame: T.common.color, opacity: '1' },
+      ],
+      delta: 'было 23 → стало 15 (−8)',
+      deltaNote: 'Скол не показал включений, а форма перестала быть цельной: слой «Форма» обнулился.',
+      deltaBg: 'rgba(176,58,46,.12)', deltaBorder: 'rgba(176,58,46,.4)', deltaColor: '#f0a99f',
+      changes: [
+        { pts: '−14', color: '#f0a99f', label: 'Форма: силуэт потерян', why: 'узнаваемая форма разрушена расколом' },
+        { pts: '+6', color: '#7ae0c8', label: 'Раскрытие: свежий скол', why: 'слой раскрытия частично закрыт' },
+        { pts: '0', color: '#9aa5b1', label: 'Состав без изменений', why: 'включений на сколе не найдено' },
+      ],
+      cardId: 'LTH-8F40',
+    };
+    cmp.openCard = () => this.setState({ screen: 'card', cardId: cmp.cardId, scoreOpen: true });
+
+    // ── отказы и особые состояния
+    const R = REFUSALS[s.refusal];
+    const SPEC = {
+      slow: { glyph: '…', title: 'Обрабатываем дольше обычного', body: 'Карточка появится в коллекции, как только будет готова. Можно закрыть экран.', primaryLabel: 'В коллекцию', primary: () => this.jump('collection') },
+      overload: { glyph: '≡', title: 'Сервис перегружен', body: 'Обработаем в течение часа — карточка придёт в коллекцию.', primaryLabel: 'В коллекцию', primary: () => this.jump('collection'), secondaryLabel: 'Новый скан', secondary: () => this.jump('camera') },
+      nonet: { glyph: '⌁', title: 'Нет связи', body: 'Скан сохранён и отправится сам, когда сеть вернётся.', primaryLabel: 'Обновить', primary: () => this.jump('final'), secondaryLabel: 'В коллекцию', secondary: () => this.jump('collection') },
+    }[s.special];
+    const ref = R
+      ? { ...R, border: 'rgba(176,58,46,.5)', accent: '#e0857a', primaryLabel: 'Переснять', primary: () => this.jump('camera'), secondaryLabel: 'В коллекцию', secondary: () => this.jump('collection') }
+      : (SPEC ? { ...SPEC, border: 'rgba(242,244,246,.12)', accent: '#9aa5b1' } : { border: 'transparent', accent: '#9aa5b1', glyph: '', title: '', body: '', primaryLabel: '', primary: () => {}, secondaryLabel: null, secondary: () => {} });
+
+    // ── дневник
+    const expectedRaw = [
+      ['Базальт', true, 'найдено'], ['Базальт миндалекаменный', true, 'найдено'], ['Гранит', true, 'найдено'],
+      ['Кремень', true, 'найдено'], ['Сланец', true, 'найдено'], ['Песчаник', false, 'ожидается'],
+      ['Мергель', false, 'ожидается'], ['Известняк', false, 'ожидается'],
+    ];
+    const expected = expectedRaw.map(([name, done, note]) => ({
+      name, note, fg: done ? '#f2f4f6' : '#9aa5b1',
+      bg: done ? 'rgba(31,111,95,.1)' : '#161c24',
+      border: done ? 'rgba(63,191,163,.3)' : 'rgba(242,244,246,.07)',
+      markBorder: done ? '#3fbfa3' : 'rgba(242,244,246,.2)',
+      markBg: done ? '#1f6f5f' : 'transparent', tick: done ? '#eafff8' : 'transparent',
+    }));
+    const diaryFinds = ['LTH-91B2', 'LTH-77D0', 'LTH-2E15', 'LTH-8F40'].map(id => tileOf(CARDS.find(c => c.id === id)));
+
+    // ── профиль
+    const distRaw = [['legend', 1], ['epic', 1], ['rare', 2], ['uncommon', 1], ['common', 1], ['none', 1]];
+    const maxN = 2;
+    const dist = distRaw.map(([k, n]) => ({ label: T[k].name, color: T[k].color, n, pct: Math.round(n / maxN * 100) }));
+    const showcase = s.showcase.map(id => tileOf(CARDS.find(c => c.id === id))).filter(Boolean);
+    const inShowcase = s.showcase.includes(card.id);
+    const highlights = [
+      { ...tileOf(CARDS[1]), kind: 'Редчайшая', meta: '88 очков' },
+      { ...tileOf(CARDS[3]), kind: 'Самая далёкая', meta: '1,2 км от первой находки' },
+    ];
+
+    // ── навигация
+    const tabColor = k => s.tab === k ? '#3fbfa3' : '#5b6673';
+    const goTab = k => () => this.jump(k === 'camera' ? 'camera' : k);
+
+    const jumpDefs = [
+      ['Поток', [['Приветствие', 'welcome'], ['Подсказка на камере', 'firstrun'], ['Камера', 'camera'], ['Проверка', 'review'], ['Анализ', 'analyzing'], ['Уточняем', 'prelim'], ['Финал', 'final'], ['Легендарный', 'legend'], ['Безопасность', 'safety'], ['Камера: раскол', 'camsplit']]],
+      ['Раскол', [['Score вырос', 'compareUp'], ['Score упал', 'compareDown'], ['Карточка после раскола', 'afterSplit']]],
+      ['Особые карточки', [['Без редкости', 'norare'], ['Тир «?»', 'reviewtier'], ['Предварительно', 'prelimtier'], ['Карточка', 'card'], ['Раскрытая карточка', 'cardsplit']]],
+      ['Отказы', [['Не камень', 'notstone'], ['Размыто', 'blur'], ['Темно', 'dark'], ['Далеко', 'far'], ['С экрана', 'screen'], ['Несколько', 'many'], ['Нет фото', 'nophoto'], ['Сбой', 'fail']]],
+      ['Границы', [['Дольше обычного', 'slow'], ['Перегружен', 'overload'], ['Нет сети', 'nonet'], ['Лимит сканов', 'limit'], ['Без гео', 'nogeo'], ['Нет камеры', 'perm'], ['Пустая коллекция', 'collempty'], ['Офлайн', 'colloffline'], ['Дневник без гео', 'diarynogeo']]],
+      ['Вкладки', [['Коллекция', 'collection'], ['Дневник', 'diary'], ['Карта', 'map'], ['Профиль', 'profile']]],
+    ];
+    const jumpGroups = jumpDefs.map(([label, items]) => ({
+      label,
+      items: items.map(([lb, key]) => ({
+        label: lb, go: () => this.jump(key),
+        bg: '#12181f', border: 'rgba(242,244,246,.08)', fg: '#9aa5b1',
+      })),
+    }));
+
+    return {
+      d, photos, segments, tierChips, sortChips, tiles, expected, diaryFinds, dist, showcase, highlights, cd, rc, ref, cmp,
+      isCompare: screen === 'compare',
+      isWelcome: screen === 'welcome',
+      startApp: () => this.setState({ screen: 'camera', tab: 'camera', firstRun: true, photos: [] }),
+      openPrivacy: () => {},
+      welcomeSteps: [
+        { n: '1', title: 'Снимите камень', body: 'Крупно, на нейтральном фоне. Одно фото — с монетой или пальцем для масштаба.' },
+        { n: '2', title: 'Получите карточку', body: 'Порода, редкость, три факта и короткая история происхождения.' },
+        { n: '3', title: 'Соберите место', body: 'Дневник показывает, какие породы здесь ожидаемы и что уже найдено.' },
+      ],
+      firstRun: s.firstRun && screen === 'camera',
+      dismissFirstRun: () => this.setState({ firstRun: false }),
+      firstRunSteps: [
+        { n: '1', text: 'Снимите камень крупно, на нейтральном фоне — не в горсти с другими.' },
+        { n: '2', text: 'Одно фото сделайте с монетой или пальцем рядом: так мы поймём размер и добавим очков.' },
+        { n: '3', text: 'Через несколько секунд получите карточку: породу, редкость и историю камня.' },
+      ],
+      stages: STAGES.map((l, i) => ({ label: l, dot: i <= s.stage ? '#3fbfa3' : 'rgba(242,244,246,.14)', fg: i <= s.stage ? '#f2f4f6' : '#5b6673' })),
+      stageLabel: STAGES[Math.min(s.stage, STAGES.length - 1)],
+      jumpGroups,
+
+      isPerm: screen === 'perm', isCamera: screen === 'camera', isReview: screen === 'review',
+      isAnalyzing: screen === 'analyzing', isCard: screen === 'card', isCollection: screen === 'collection',
+      isDiary: screen === 'diary', isMap: screen === 'map', isProfile: screen === 'profile', isSafety: screen === 'safety',
+      isResultCard: screen === 'result' && !s.refusal && !s.special,
+      isRefusal: screen === 'result' && (!!s.refusal || !!s.special),
+      showTabs: ['camera', 'collection', 'map', 'profile'].includes(screen),
+
+      tierPlain: tierStyle === 'Шов и цифра', tierBadge: tierStyle === 'Классический бейдж',
+      tierSeal: tierStyle === 'Печать-медальон', seamOn: tierStyle !== 'Классический бейдж',
+
+      camHint: s.splitMode ? 'Раскол: снимите свежий скол' : 'Наведите на камень',
+      splitMode: s.splitMode, toast: s.toast, hasPhotos: s.photos.length > 0,
+      shotCounter: s.photos.length + ' / 3',
+      nextBg: s.photos.length ? '#1f6f5f' : '#1a212a', nextFg: s.photos.length ? '#eafff8' : '#5b6673',
+      shoot, goReview: () => { if (s.photos.length) this.setState({ screen: 'review' }); },
+      cancelSplit: () => this.setState({ splitMode: false, photos: [{ id: 1, scale: false }] }),
+      grantCam: () => this.setState({ camPerm: true, screen: 'camera' }),
+
+      showGeoBanner: !s.geo, limitHit: s.limit, offline: s.offline,
+      identLabel: s.limit ? 'Лимит исчерпан' : 'Определить',
+      identBg: s.limit ? '#1a212a' : '#1f6f5f', identFg: s.limit ? '#5b6673' : '#eafff8',
+      identify: () => { if (!s.limit) this.runAnalysis(); },
+
+      refining: s.refining,
+      toCollection: () => this.jump('collection'),
+      newScan: () => this.jump('camera'),
+      openResultCard: () => this.setState({ screen: 'card', cardId: s.resultId, scoreOpen: false }),
+      startSplit: () => s.seenSafety ? this.setState({ screen: 'camera', tab: 'camera', splitMode: true, photos: [] }) : (this.setState({ seenSafety: true }), this.startSafetyTimer()),
+
+      scoreOpen: s.scoreOpen, chevron: s.scoreOpen ? 'rotate(-135deg)' : 'rotate(45deg)',
+      toggleScore: () => this.setState({ scoreOpen: !s.scoreOpen }),
+      editingName: s.editingName, notEditingName: !s.editingName, nameDraft: s.nameDraft,
+      editName: () => this.setState({ editingName: true, nameDraft: screen === 'profile' ? (s.profileName === 'Без имени' ? '' : s.profileName) : own(card.id) }),
+      onNameChange: e => this.setState({ nameDraft: e.target.value.slice(0, 40) }),
+      saveName: () => screen === 'profile'
+        ? this.setState({ profileName: s.nameDraft.trim() || 'Без имени', editingName: false })
+        : this.setState({ cardOwn: { ...s.cardOwn, [card.id]: s.nameDraft.trim() }, editingName: false }),
+      profileName: s.profileName,
+
+      openDiary: () => this.setState({ screen: 'diary' }),
+      diaryNoGeo: !s.diaryGeo, toggleDiaryGeo: () => this.setState({ diaryGeo: !s.diaryGeo }),
+      back: () => this.setState({ screen: s.tab === 'camera' ? 'camera' : s.tab, refusal: null, special: null }),
+
+      collCount: visible.length + ' карточек',
+      collEmpty: list.length === 0,
+      emptyTitle: s.filter === 'Все' || s.filter === 'Пусто' ? 'Пока пусто' : 'В этом тире пока пусто',
+      emptyBody: s.filter === 'Все' || s.filter === 'Пусто'
+        ? 'Первый камень найдётся под ногами: галька на пляже, скол у тропы. Снимите — и здесь появится карточка.'
+        : 'Здесь появятся камни этого тира. Попробуйте другой фильтр или сходите за новым камнем.',
+      emptyLabel: s.filter === 'Все' || s.filter === 'Пусто' ? 'Сканировать' : 'Показать все',
+      emptyAction: () => (s.filter === 'Все' || s.filter === 'Пусто') ? this.jump('camera') : this.setState({ filter: 'Все' }),
+
+      showcaseCount: s.showcase.length,
+      showcaseLabel: inShowcase ? 'Убрать из витрины' : 'В витрину',
+      showcaseAlert: s.showcaseAlert,
+      toggleShowcase: () => {
+        if (inShowcase) return this.setState({ showcase: s.showcase.filter(x => x !== card.id), showcaseAlert: false });
+        if (s.showcase.length >= 12) { this.setState({ showcaseAlert: true }); return; }
+        this.setState({ showcase: [...s.showcase, card.id], showcaseAlert: false });
+      },
+
+      mapDots: [
+        { x: 22, y: 48, id: 'LTH-91B2' }, { x: 34, y: 56, id: 'LTH-77D0' }, { x: 28, y: 63, id: 'LTH-4A7C' },
+        { x: 58, y: 36, id: 'LTH-2E15' }, { x: 68, y: 58, id: 'LTH-8F40' }, { x: 46, y: 72, id: 'LTH-3A9E' },
+      ].map(m => {
+        const c = CARDS.find(x => x.id === m.id);
+        return { x: m.x, y: m.y, color: c.tier === 'review' ? '#5b6673' : this.tier(c.tier).color, mark: c.tier === 'review' ? '?' : '',
+          open: () => this.setState({ screen: 'card', cardId: m.id, scoreOpen: false }) };
+      }),
+      legend: ['legend', 'epic', 'rare', 'uncommon', 'common', 'none'].map(k => ({ label: T[k].name, color: T[k].color })),
+
+      stats: [{ value: '21', label: 'Сканов' }, { value: '8', label: 'Карточек' }, { value: '3', label: 'Ячеек' }],
+
+      accountTitle: s.signedIn ? 'Вход через Apple' : 'Анонимный профиль',
+      accountNote: s.signedIn ? 'Коллекция синхронизируется — 8 карточек' : 'Коллекция хранится только на этом телефоне',
+      accountBtnLabel: s.signedIn ? 'Выйти' : 'Сохранить коллекцию через Apple',
+      accountBtnBg: s.signedIn ? 'transparent' : '#f2f4f6',
+      accountBtnFg: s.signedIn ? '#9aa5b1' : '#0b0f14',
+      accountBtnBorder: s.signedIn ? 'rgba(242,244,246,.14)' : '#f2f4f6',
+      toggleAccount: () => this.setState({ signedIn: !s.signedIn }),
+
+      settings: [
+        ['Сканов сегодня', '4 из 10', false],
+        ['Язык', 'Русский', false],
+        ['Уведомления', 'Выключены', false],
+        ['Доступ к камере', 'Разрешён', false],
+        ['Геопозиция', 'При использовании', false],
+        ['О приложении', '', false],
+        ['Приватность и данные', '', false],
+        ['Удалить все данные', '', true],
+      ].map(([label, value, danger], i) => ({
+        label, value, tap: () => {}, fg: danger ? '#e0857a' : '#f2f4f6',
+        divider: i === 0 ? 'transparent' : 'rgba(242,244,246,.06)',
+      })),
+
+      safetyRules: [
+        { n: '1', title: 'Очки или защита глаз', body: 'Осколки камня летят непредсказуемо и остаются острыми.' },
+        { n: '2', title: 'Отвернитесь и отойдите', body: 'Люди и животные — не ближе трёх метров от места удара.' },
+        { n: '3', title: 'Не бейте по руке', body: 'Положите камень на твёрдую опору, руку уберите.' },
+      ],
+      safetyLabel: s.safetyReady ? 'Понимаю' : 'Понимаю · через 5 секунд',
+      safetyBg: s.safetyReady ? '#1f6f5f' : '#1a212a', safetyFg: s.safetyReady ? '#eafff8' : '#5b6673',
+      acceptSafety: () => { if (s.safetyReady) this.setState({ screen: 'camera', tab: 'camera', splitMode: true, photos: [] }); },
+
+      tc: { camera: tabColor('camera'), collection: tabColor('collection'), map: tabColor('map'), profile: tabColor('profile') },
+      tabCamera: goTab('camera'), tabCollection: goTab('collection'), tabMap: goTab('map'), tabProfile: goTab('profile'),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

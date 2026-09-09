@@ -18,9 +18,10 @@ describe('rejectText', () => {
   it('ключевые формулировки из постановки', () => {
     expect(rejectText('not_rock').title).toMatch(/не камень/);
     expect(rejectText('screen_photo').title).toBe('Фото с экрана не принимаем');
-    expect(rejectText('dlq').hint).toBe('Не удалось обработать, попробуйте ещё раз.');
+    expect(rejectText('dlq').title).toBe('Не удалось обработать');
+    expect(rejectText('dlq').hint).toBe('Попробуйте ещё раз — мы ничего не потеряли.');
     expect(rejectText('photo_unavailable').title).toBe('Не удалось получить фото');
-    expect(rejectText('photo_unavailable').hint).toMatch(/переснимите/);
+    expect(rejectText('photo_unavailable').hint).toMatch(/переснимите/i);
     expect(rejectText('parent_not_found').title).toBe('Исходная карточка не найдена');
   });
 
@@ -34,7 +35,8 @@ describe('rejectText', () => {
 describe('лимиты T3.4', () => {
   it('rate_limited / budget_paused — русские тексты из постановки', () => {
     expect(rejectText('rate_limited').hint).toBe('Лимит сканов на сегодня исчерпан — возвращайтесь завтра.');
-    expect(rejectText('budget_paused').hint).toMatch(/^Сервис перегружен, обработаем в течение часа/);
+    expect(rejectText('budget_paused').title).toBe('Сервис перегружен');
+    expect(rejectText('budget_paused').hint).toMatch(/^Обработаем в течение часа/);
   });
   it('limitErrorCode: код в сообщении RPC (raise exception rate_limited, миграция 0006), иначе null', () => {
     expect(limitErrorCode('rate_limited')).toBe('rate_limited');

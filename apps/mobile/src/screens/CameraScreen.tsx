@@ -1,4 +1,6 @@
-// Экран 1 (spec §12): живое превью, до 3 фото, S0 preflight сразу после съёмки.
+// Экран камеры (spec §12, DESIGN_SYSTEM.md экраны 2–3): живое превью, до 3 фото, S0 preflight сразу после съёмки.
+// Пилюли-подсказки сверху, оверлей первого запуска, тост отказа, нижний блок с затемнением: подсказка про масштаб,
+// миниатюры 60px, ряд «n / 3» · спуск 74px · «Далее», в режиме раскола — «Отменить раскол».
 import { useFocusEffect } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { StatusBar } from 'expo-status-bar';
@@ -6,18 +8,25 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigButton } from '../components/BigButton';
+import { FadeIn } from '../components/FadeIn';
+import { FirstRunOverlay } from '../components/FirstRunOverlay';
 import { PhotoThumb } from '../components/PhotoThumb';
+import { Pill } from '../components/ui';
 import { logError, MSG } from '../lib/errors';
 import { prefetchGeo } from '../lib/location';
+import { isFirstRunHintSeen, markFirstRunHintSeen } from '../lib/prefs';
 import { deleteFileQuietly, preparePhoto } from '../lib/preflight';
 import { MAX_PHOTOS } from '../lib/scan';
 import { useScanDraft } from '../lib/scan-draft';
 import type { TabScreenProps } from '../navigation/types';
-import { colors, radius, spacing } from '../theme';
+import { colors, fonts, radius } from '../theme';
 
 type Props = TabScreenProps<'Camera'>;
 
 const CAPTURE_QUALITY = 0.9;
+const TOAST_MS = 3_500;
+/** Затемнение снизу без expo-linear-gradient: ступени прозрачности сверху вниз (24 % высоты — почти плотный низ). */
+const FADE_STEPS = [0, 0.14, 0.34, 0.58, 0.8, 0.94] as const;
 
 export function CameraScreen({ navigation, route }: Props) {
   const [permission, requestPermission] = useCameraPermissions();
@@ -25,9 +34,19 @@ export function CameraScreen({ navigation, route }: Props) {
   const { photos, parentCardId, addPhoto, removePhoto, startSplit, reset } = useScanDraft();
   const [busy, setBusy] = useState(false);
   const [active, setActive] = useState(true);
+  const [firstRun, setFirstRun] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const insets = useSafeAreaInsets();
 
   useFocusEffect(useCallback(() => { setActive(true); return () => setActive(false); }, []));
+
+  useEffect(() => {
+    let alive = true;
+    isFirstRunHintSeen().then((seen) => { if (alive) setFirstRun(!seen); });
+    return () => { alive = false; };
+  }, []);
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
 
   // Раскол (T2.3): пришли с parentCardId → новый черновик со ссылкой на родителя; параметр гасим,
   // чтобы возврат на камеру после этого скана не начинал раскол заново.
@@ -39,6 +58,15 @@ export function CameraScreen({ navigation, route }: Props) {
   }, [splitParam, startSplit, navigation]);
 
   const full = photos.length >= MAX_PHOTOS;
+  const split = parentCardId !== null;
+
+  const showToast = (text: string) => {
+    setToast(text);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), TOAST_MS);
+  };
+
+  const dismissFirstRun = () => { setFirstRun(false); void markFirstRunHintSeen(); };
 
   const cancelSplit = () => {
     if (photos.length === 0) { reset(); return; }
@@ -61,26 +89,31 @@ export function CameraScreen({ navigation, route }: Props) {
         deleteFileQuietly(pic.uri); // полноразмерный кадр больше не нужен — есть копия 1024 px
       }
       if (!res.ok) {
-        Alert.alert(res.reason === 'dark' ? 'Слишком темно' : 'Фото размыто', res.reason === 'dark' ? MSG.dark : MSG.blurry);
+        showToast(res.reason === 'dark' ? MSG.dark : MSG.blurry);
         return;
       }
       addPhoto(res.photo);
       if (photos.length + 1 >= MAX_PHOTOS) navigation.navigate('Review');
     } catch (e) {
       logError('capture', e);
-      Alert.alert('Ошибка', MSG.captureFailed);
+      showToast(MSG.captureFailed);
     } finally {
       setBusy(false);
     }
   };
 
-  if (!permission) return <View style={styles.center} />;
+  if (!permission) return <View style={styles.permScreen} />;
 
   if (!permission.granted) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.permText}>Lithos нужна камера, чтобы определить камень.</Text>
-        <BigButton label="Разрешить камеру" onPress={() => { void requestPermission(); }} />
+      <View style={[styles.permScreen, styles.permCenter]}>
+        <View style={styles.camIcon}>
+          <View style={styles.camLens} />
+          <View style={styles.camStrike} />
+        </View>
+        <Text style={styles.permTitle}>Lithos нужна камера,{'\n'}чтобы определить камень</Text>
+        <Text style={styles.permText}>Геопозицию спросим позже — только при первом снимке.</Text>
+        <BigButton label="Разрешить камеру" onPress={() => { void requestPermission(); }} style={styles.permButton} />
         <StatusBar style="light" />
       </View>
     );
@@ -90,29 +123,35 @@ export function CameraScreen({ navigation, route }: Props) {
     <View style={styles.container}>
       {active && <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="back" />}
 
-      <View style={[styles.top, { paddingTop: insets.top + spacing.sm }]}>
-        <View style={styles.hint}>
-          <Text style={styles.hintText}>{parentCardId ? 'Раскол: снимите свежий скол крупно' : 'Одно фото — с монетой или пальцем для масштаба'}</Text>
-        </View>
-        {parentCardId && (
-          <Pressable onPress={cancelSplit} accessibilityRole="button" style={styles.counter}>
-            <Text style={styles.counterText}>Отменить раскол</Text>
-          </Pressable>
-        )}
-        <View style={styles.counter}>
-          <Text style={styles.counterText}>{photos.length} / {MAX_PHOTOS}</Text>
-        </View>
+      <View style={[styles.top, { paddingTop: insets.top + 14 }]} pointerEvents="none">
+        <Pill>{split ? 'Раскол: снимите свежий скол' : 'Наведите на камень'}</Pill>
+        {split && <Pill tone="danger">гео и мини-тесты берём из исходной карточки</Pill>}
       </View>
 
-      <View style={[styles.bottom, { paddingBottom: spacing.md }]}>
-        <View style={styles.strip}>
-          {photos.map((p, i) => (
-            <PhotoThumb key={p.uri} uri={p.uri} size={56} isScale={p.isScale} onRemove={() => removePhoto(i)} />
-          ))}
+      <View style={[styles.bottomWrap, { paddingBottom: insets.bottom + 16 }]}>
+        {toast && (
+          <FadeIn duration={220} rise={8} replayKey={toast} style={styles.toast}>
+            <View style={styles.toastDot} />
+            <Text style={styles.toastText}>{toast}</Text>
+          </FadeIn>
+        )}
+
+        <View style={styles.fade} pointerEvents="none">
+          {FADE_STEPS.map((a, i) => <View key={i} style={[styles.fadeStep, { backgroundColor: `rgba(11,15,20,${a})` }]} />)}
         </View>
 
+        <Text style={styles.scaleHint}>Одно фото — с монетой или пальцем для масштаба</Text>
+
+        {photos.length > 0 && (
+          <View style={styles.strip}>
+            {photos.map((p, i) => (
+              <PhotoThumb key={p.uri} uri={p.uri} size={60} tag={String(i + 1)} isScale={p.isScale} onRemove={() => removePhoto(i)} />
+            ))}
+          </View>
+        )}
+
         <View style={styles.controls}>
-          <View style={styles.side} />
+          <Text style={styles.counter}>{photos.length} / {MAX_PHOTOS}</Text>
           <Pressable
             onPress={() => { void shoot(); }}
             disabled={busy || full}
@@ -123,15 +162,22 @@ export function CameraScreen({ navigation, route }: Props) {
             {busy ? <ActivityIndicator color={colors.bg} /> : <View style={styles.shutterInner} />}
           </Pressable>
           <View style={styles.side}>
-            {photos.length > 0 && (
-              <Pressable onPress={() => navigation.navigate('Review')} disabled={busy} accessibilityRole="button" style={[styles.next, busy && styles.shutterOff]}>
-                <Text style={styles.nextText}>Далее</Text>
-              </Pressable>
-            )}
+            <Pressable
+              onPress={() => navigation.navigate('Review')}
+              disabled={busy || photos.length === 0}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: busy || photos.length === 0 }}
+              style={({ pressed }) => [styles.next, photos.length === 0 && styles.nextOff, pressed && photos.length > 0 && styles.pressed]}
+            >
+              <Text style={[styles.nextText, photos.length === 0 && styles.nextTextOff]}>Далее</Text>
+            </Pressable>
           </View>
         </View>
-        {full && <Text style={styles.fullText}>Максимум {MAX_PHOTOS} фото — нажмите «Далее»</Text>}
+
+        {split && <BigButton label="Отменить раскол" variant="ghost" onPress={cancelSplit} />}
       </View>
+
+      {firstRun && <FirstRunOverlay onDismiss={dismissFirstRun} />}
       <StatusBar style="light" />
     </View>
   );
@@ -139,22 +185,38 @@ export function CameraScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, backgroundColor: colors.bg, gap: spacing.md },
-  permText: { color: colors.text, fontSize: 17, textAlign: 'center' },
-  top: { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.md },
-  hint: { backgroundColor: 'rgba(0,0,0,0.55)', paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.lg },
-  hintText: { color: '#fff', fontSize: 15, textAlign: 'center' },
-  counter: { backgroundColor: 'rgba(0,0,0,0.55)', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.lg },
-  counterText: { color: '#fff', fontSize: 14, fontWeight: '600' },
-  bottom: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: spacing.md, gap: spacing.md },
-  strip: { flexDirection: 'row', gap: spacing.md, minHeight: 56, paddingLeft: spacing.sm },
-  controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  side: { width: 96, alignItems: 'center' },
-  shutter: { width: 84, height: 84, borderRadius: radius.full, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: 'rgba(255,255,255,0.5)' },
-  shutterInner: { width: 64, height: 64, borderRadius: radius.full, backgroundColor: '#fff', borderWidth: 2, borderColor: colors.bg },
+  // Нет разрешения
+  permScreen: { flex: 1, backgroundColor: colors.bg },
+  permCenter: { alignItems: 'center', justifyContent: 'center', paddingVertical: 34, paddingHorizontal: 28, gap: 18 },
+  camIcon: { width: 98, height: 72, borderRadius: 18, borderWidth: 1.5, borderColor: 'rgba(242,244,246,0.28)', alignItems: 'center', justifyContent: 'center' },
+  camLens: { width: 30, height: 30, borderRadius: 15, borderWidth: 1.5, borderColor: 'rgba(242,244,246,0.28)' },
+  camStrike: { position: 'absolute', width: 118, height: 1.5, backgroundColor: colors.danger, transform: [{ rotate: '-30deg' }] },
+  permTitle: { fontFamily: fonts.serif, fontSize: 23, lineHeight: 30, color: colors.text, textAlign: 'center' },
+  permText: { fontFamily: fonts.sans, fontSize: 14, lineHeight: 21, color: colors.textMuted, textAlign: 'center' },
+  permButton: { alignSelf: 'stretch', marginTop: 6 },
+  // Камера
+  top: { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center', gap: 9, paddingHorizontal: 16 },
+  bottomWrap: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 16, gap: 14 },
+  fade: { ...StyleSheet.absoluteFill, top: -40, flexDirection: 'column' },
+  fadeStep: { flex: 1 },
+  toast: {
+    flexDirection: 'row', gap: 11, alignItems: 'flex-start', padding: 13, paddingHorizontal: 15, borderRadius: radius.md,
+    backgroundColor: colors.dangerToastBg, borderWidth: 1, borderColor: 'rgba(176,58,46,0.5)', marginBottom: -2,
+  },
+  toastDot: { width: 17, height: 17, borderRadius: 8.5, backgroundColor: colors.danger, marginTop: 2 },
+  toastText: { flex: 1, fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 19.5, color: '#f7d9d4' },
+  scaleHint: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 17, color: colors.textMuted, textAlign: 'center' },
+  strip: { flexDirection: 'row', gap: 9, justifyContent: 'center' },
+  controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+  counter: { width: 86, fontFamily: fonts.mono, fontSize: 12.5, lineHeight: 14, color: colors.textMuted },
+  side: { width: 86, alignItems: 'flex-end' },
+  shutter: { width: 74, height: 74, borderRadius: 37, borderWidth: 3, borderColor: 'rgba(242,244,246,0.85)', alignItems: 'center', justifyContent: 'center' },
+  shutterInner: { width: 58, height: 58, borderRadius: 29, backgroundColor: colors.text },
   shutterOff: { opacity: 0.5 },
   shutterPressed: { transform: [{ scale: 0.94 }] },
-  next: { backgroundColor: colors.accent, paddingHorizontal: spacing.md, paddingVertical: spacing.sm + 2, borderRadius: radius.md },
-  nextText: { color: colors.accentText, fontSize: 16, fontWeight: '600' },
-  fullText: { color: '#fff', textAlign: 'center', fontSize: 13, opacity: 0.8 },
+  next: { paddingVertical: 12, paddingHorizontal: 18, borderRadius: radius.md, backgroundColor: colors.accent },
+  nextOff: { backgroundColor: colors.surfaceDim },
+  nextText: { fontFamily: fonts.sansSemi, fontSize: 15, lineHeight: 18, color: colors.accentText },
+  nextTextOff: { color: colors.textFaint },
+  pressed: { opacity: 0.85 },
 });
