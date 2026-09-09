@@ -6,6 +6,7 @@ import { getForegroundPermissionsAsync } from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigButton } from '../components/BigButton';
 import { CardTile } from '../components/CardTile';
 import { SettingsList } from '../components/SettingsList';
@@ -46,6 +47,7 @@ export function ProfileScreen({ navigation }: Props) {
   const [locPerm, setLocPerm] = useState<string>('unknown');
   const [showPrivacy, setShowPrivacy] = useState(false);
   const seq = useRef(0);
+  const insets = useSafeAreaInsets(); // вкладка без хедера: верх контента ушёл бы под Dynamic Island
 
   const load = useCallback(async (isFocused: () => boolean = () => true) => {
     const my = ++seq.current;
@@ -168,7 +170,7 @@ export function ProfileScreen({ navigation }: Props) {
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 8 }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(); }} tintColor={colors.text} />}
     >
       {offline && <Note tone="neutral">Нет связи — показаны сохранённые данные.</Note>}

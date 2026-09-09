@@ -3,6 +3,7 @@
 // миниатюры 60px, ряд «n / 3» · спуск 74px · «Далее», в режиме раскола — «Отменить раскол».
 import { useFocusEffect } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -25,8 +26,9 @@ type Props = TabScreenProps<'Camera'>;
 
 const CAPTURE_QUALITY = 0.9;
 const TOAST_MS = 3_500;
-/** Затемнение снизу без expo-linear-gradient: ступени прозрачности сверху вниз (24 % высоты — почти плотный низ). */
-const FADE_STEPS = [0, 0.14, 0.34, 0.58, 0.8, 0.94] as const;
+/** Затемнение снизу (прототип: linear-gradient to top, rgba(11,15,20,.94) 24 % → прозрачность). */
+const FADE_COLORS = ['transparent', 'rgba(11,15,20,0.94)'] as const;
+const FADE_LOCATIONS = [0, 0.76] as const;
 
 export function CameraScreen({ navigation, route }: Props) {
   const [permission, requestPermission] = useCameraPermissions();
@@ -136,9 +138,7 @@ export function CameraScreen({ navigation, route }: Props) {
           </FadeIn>
         )}
 
-        <View style={styles.fade} pointerEvents="none">
-          {FADE_STEPS.map((a, i) => <View key={i} style={[styles.fadeStep, { backgroundColor: `rgba(11,15,20,${a})` }]} />)}
-        </View>
+        <LinearGradient colors={FADE_COLORS} locations={FADE_LOCATIONS} style={styles.fade} pointerEvents="none" />
 
         <Text style={styles.scaleHint}>Одно фото — с монетой или пальцем для масштаба</Text>
 
@@ -197,8 +197,7 @@ const styles = StyleSheet.create({
   // Камера
   top: { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center', gap: 9, paddingHorizontal: 16 },
   bottomWrap: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 16, gap: 14 },
-  fade: { ...StyleSheet.absoluteFill, top: -40, flexDirection: 'column' },
-  fadeStep: { flex: 1 },
+  fade: { ...StyleSheet.absoluteFill, top: -40 },
   toast: {
     flexDirection: 'row', gap: 11, alignItems: 'flex-start', padding: 13, paddingHorizontal: 15, borderRadius: radius.md,
     backgroundColor: colors.dangerToastBg, borderWidth: 1, borderColor: 'rgba(176,58,46,0.5)', marginBottom: -2,
