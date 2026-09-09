@@ -1,7 +1,7 @@
 // Строки таблиц lithos.scans / cards / scan_results / scan_photos, как их видит клиент (миграция 0001),
 // и безопасный разбор jsonb-полей. Контракт с воркером T2.1 — docs/tasks/T2.2.md.
-import type { Inclusion, ScanStage, ScoreBreakdown, Tier } from '@lithos/shared';
-import { SCAN_STAGES, TIERS } from '@lithos/shared';
+import type { Inclusion, ScanResult, ScanStage, ScoreBreakdown, Tier } from '@lithos/shared';
+import { SCAN_STAGES, ScanResultSchema, TIERS } from '@lithos/shared';
 
 /** Коды scans.error при stage='failed' (контракт T2.1). */
 export const SCAN_ERROR_CODES = ['not_rock', 'blurry', 'dark', 'too_far', 'screen_photo', 'multiple_objects', 'photo_unavailable', 'parent_not_found', 'rate_limited', 'budget_paused', 'dlq'] as const;
@@ -21,6 +21,9 @@ export interface ScanRow {
   updated_at: string;
 }
 
+/** rock_class карточки + score_breakdown.meta.{confidence, alternatives} (воркер T5.0) — вход для identificationCandidates из shared. */
+export type IdentificationMeta = ScanResult['rock_class'];
+
 export interface CardRow {
   id: string;
   scan_id: string;
@@ -32,6 +35,8 @@ export interface CardRow {
   split_recommended: boolean | null;
   /** score_breakdown.split_delta = score − score родителя (раскол, T2.1); null — нет поля или нет score. */
   split_delta: number | null;
+  /** Кандидаты определения из score_breakdown.meta (воркер T5.0); null — meta нет (старые карточки) или не по схеме. */
+  identification: IdentificationMeta | null;
   inclusions: Inclusion[];
   shape: Record<string, unknown>;
   lore: string | null;
@@ -142,6 +147,18 @@ export function parseSplitRecommended(breakdownRaw: unknown): boolean | null {
   return typeof v === 'boolean' ? v : null;
 }
 
+/**
+ * Кандидаты определения из breakdown.meta: primary — rock_class карточки (по инварианту воркера это primary
+ * последнего вердикта), confidence и alternatives — из meta. Проверка zod-схемой rock_class из shared (safeParse):
+ * нет meta.confidence (старые карточки), порода вне enum, confidence вне [0, 1], кривые alternatives → null.
+ */
+export function parseIdentificationMeta(rockClass: string, breakdownRaw: unknown): IdentificationMeta | null {
+  if (!isRecord(breakdownRaw) || !isRecord(breakdownRaw.meta) || breakdownRaw.meta.confidence === undefined) return null;
+  const { confidence, alternatives } = breakdownRaw.meta;
+  const r = ScanResultSchema.shape.rock_class.safeParse({ primary: rockClass, confidence, alternatives });
+  return r.success ? r.data : null;
+}
+
 export function parseInclusions(raw: unknown): Inclusion[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter(isRecord).flatMap((i) => {
@@ -172,6 +189,7 @@ export function parseCardRow(raw: unknown): CardRow | null {
     score_breakdown: parseBreakdown(raw.score_breakdown),
     split_recommended: parseSplitRecommended(raw.score_breakdown),
     split_delta: isRecord(raw.score_breakdown) ? num(raw.score_breakdown.split_delta) : null,
+    identification: parseIdentificationMeta(rock_class, raw.score_breakdown),
     inclusions: parseInclusions(raw.inclusions),
     shape: isRecord(raw.shape) ? raw.shape : {},
     lore: str(raw.lore),

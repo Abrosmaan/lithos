@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseBreakdown, parseCardRow, parseScanRow } from './card-types';
+import { parseBreakdown, parseCardRow, parseIdentificationMeta, parseScanRow } from './card-types';
 
 describe('parseCardRow', () => {
   it('минимальная строка: null tier/score, пустые jsonb, verification по умолчанию', () => {
@@ -44,5 +44,28 @@ describe('parseBreakdown / parseScanRow', () => {
   it('scan: неизвестный stage → preflight', () => {
     expect(parseScanRow({ id: 's', stage: 'bogus', error: null })?.stage).toBe('preflight');
     expect(parseScanRow({ id: 's', stage: 'failed', error: 'not_rock' })).toMatchObject({ stage: 'failed', error: 'not_rock' });
+  });
+});
+
+describe('parseIdentificationMeta — кандидаты из breakdown.meta (T5.0)', () => {
+  const alt = [{ name: 'andesite', confidence: 0.15, reason: 'plagioclase laths' }];
+  it('rock_class карточки + meta.confidence/alternatives → rock_class-вход по zod-схеме shared', () => {
+    expect(parseIdentificationMeta('basalt', { meta: { confidence: 0.8, alternatives: alt } })).toEqual({ primary: 'basalt', confidence: 0.8, alternatives: alt });
+    // Без alternatives (воркер до T5.0 их не писал) — пустой список по умолчанию схемы.
+    expect(parseIdentificationMeta('basalt', { meta: { confidence: 0.8 } })).toEqual({ primary: 'basalt', confidence: 0.8, alternatives: [] });
+  });
+  it('нет meta / нет confidence / не по схеме → null', () => {
+    expect(parseIdentificationMeta('basalt', null)).toBeNull();
+    expect(parseIdentificationMeta('basalt', { shape: {} })).toBeNull();
+    expect(parseIdentificationMeta('basalt', { meta: { alternatives: alt } })).toBeNull();
+    expect(parseIdentificationMeta('kryptonite', { meta: { confidence: 0.8 } })).toBeNull();
+    expect(parseIdentificationMeta('basalt', { meta: { confidence: 1.4 } })).toBeNull();
+    expect(parseIdentificationMeta('basalt', { meta: { confidence: 0.8, alternatives: [{ name: 'kryptonite', confidence: 0.1 }] } })).toBeNull();
+  });
+  it('parseCardRow кладёт identification рядом с split_recommended', () => {
+    const base = { id: 'c', scan_id: 's', rock_class: 'basalt' };
+    expect(parseCardRow({ ...base, score_breakdown: { meta: { confidence: 0.6, alternatives: alt } } })?.identification).toEqual({ primary: 'basalt', confidence: 0.6, alternatives: alt });
+    expect(parseCardRow({ ...base, score_breakdown: { meta: { split_recommendation: { recommended: true } } } })?.identification).toBeNull();
+    expect(parseCardRow({ ...base, score_breakdown: null })?.identification).toBeNull();
   });
 });

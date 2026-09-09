@@ -7,6 +7,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigButton } from '../components/BigButton';
+import { IdentificationList, IdentificationNote } from '../components/IdentificationList';
 import { Line, Section } from '../components/Section';
 import { TierBadge } from '../components/TierBadge';
 import {
@@ -17,6 +18,7 @@ import type { CardRow } from '../lib/card-types';
 import { type CardPhoto, fetchAgeRange, fetchCard, fetchScanPhotos, fetchScanResults, updateCardUserName } from '../lib/cards';
 import { logError, MSG, toUserMessage } from '../lib/errors';
 import { splitRecommended, type VersionEntry, versionHistory } from '../lib/history';
+import { cardIdentification, identificationBefore, type IdentificationView } from '../lib/identification-view';
 import { readShowcase, SHOWCASE_MAX, toggleShowcaseCard } from '../lib/showcase';
 import type { RootStackParamList } from '../navigation/types';
 import { useSplitFlow } from '../navigation/useSplitFlow';
@@ -28,6 +30,10 @@ interface Loaded {
   card: CardRow;
   photos: CardPhoto[];
   history: VersionEntry[];
+  /** Список кандидатов: meta карточки, иначе scan_results (старые карточки); null — нечего показать. */
+  identification: IdentificationView | null;
+  /** «было: …» — первичный список, если уточнение его изменило. */
+  identificationBefore: string | null;
   split: boolean;
   age: string | null;
   parent: CardRow | null;
@@ -59,7 +65,11 @@ export function CardScreen({ navigation, route }: Props) {
         readShowcase(),
       ]);
       if (!isAlive()) return;
-      setData({ card, photos, history: versionHistory(rows), split: card.split_recommended ?? splitRecommended(rows), age, parent });
+      setData({
+        card, photos, history: versionHistory(rows),
+        identification: cardIdentification(card, rows), identificationBefore: identificationBefore(rows),
+        split: card.split_recommended ?? splitRecommended(rows), age, parent,
+      });
       setInShowcase(showcase.includes(card.id));
       setError(null);
     } catch (e) {
@@ -116,7 +126,7 @@ export function CardScreen({ navigation, route }: Props) {
     );
   }
 
-  const { card, photos, history, split, age, parent } = data;
+  const { card, photos, history, identification, identificationBefore: wasBefore, split, age, parent } = data;
   const accent = card.verification === 'pending_review' ? tierColor(null) : tierColor(card.tier);
   const place = formatCoords(card.lat, card.lng);
   const date = formatDateRu(card.created_at);
@@ -200,9 +210,11 @@ export function CardScreen({ navigation, route }: Props) {
         </View>
       )}
 
+      {/* Список с заголовком «Уверены: это базальт» заменяет строку породы — не дублируем. */}
       <Section title="Порода">
-        <Line>{rockClassRu(card.rock_class)}</Line>
+        {identification ? <IdentificationList view={identification} accent={accent} /> : <Line>{rockClassRu(card.rock_class)}</Line>}
         <Line muted>{rockGroupRu(card.rock_class)}{shape.surface ? ` · ${shape.surface.toLowerCase()}` : ''}{shape.naturalHole ? ' · сквозное отверстие' : ''}</Line>
+        {identification && <IdentificationNote />}
       </Section>
 
       <Section title="Состав">
@@ -232,6 +244,7 @@ export function CardScreen({ navigation, route }: Props) {
             <View key={h.stage} style={styles.version}>
               <Line>{h.title}{h.rockClassRu ? `: ${h.rockClassRu}` : ''}</Line>
               {h.note && <Line muted>{h.note}</Line>}
+              {h.stage === 'escalation' && wasBefore && <Line muted>{wasBefore}</Line>}
               {h.usedFallback && <Line muted>резервный провайдер</Line>}
             </View>
           ))}

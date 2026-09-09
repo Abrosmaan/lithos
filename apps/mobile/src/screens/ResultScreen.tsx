@@ -1,16 +1,18 @@
 // Экран результата (spec §4.3, dev-plan T2.2): Realtime/polling по scan_id → «Определяем…» →
 // карточка с пометкой «уточняем» (после Main) → финал (done). Отказы — по коду scans.error.
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigButton } from '../components/BigButton';
+import { IdentificationList, IdentificationNote, IdentificationSkeleton } from '../components/IdentificationList';
 import { TierBadge } from '../components/TierBadge';
 import { cardFacts, displayName, rockClassRu, splitDelta } from '../lib/card-facts';
-import type { CardRow } from '../lib/card-types';
+import type { CardRow, ScanResultRow } from '../lib/card-types';
 import { fetchCard, fetchScanResults } from '../lib/cards';
 import { logError } from '../lib/errors';
 import { splitRecommended } from '../lib/history';
+import { cardIdentification } from '../lib/identification-view';
 import { isCardCollected, markCardCollected } from '../lib/prefs';
 import { rejectText, RESULT_MSG, RESULT_TIMEOUT_MS, resultPhase, stageStatusText } from '../lib/result-text';
 import { useScanWatch } from '../lib/scan-watch';
@@ -25,7 +27,8 @@ export function ResultScreen({ navigation, route }: Props) {
   const { scan, card, error, gaveUp, reload } = useScanWatch(scanId);
   const phase = resultPhase(scan?.stage ?? null, card !== null, scan?.error ?? null);
   const [slow, setSlow] = useState(false);
-  const [split, setSplit] = useState(false);
+  // scan_results (запасной путь для старых карточек без meta); null — ещё не читали.
+  const [rows, setRows] = useState<ScanResultRow[] | null>(null);
   const [parent, setParent] = useState<CardRow | null>(null);
   const [collected, setCollected] = useState(false);
   const insets = useSafeAreaInsets();
@@ -41,20 +44,22 @@ export function ResultScreen({ navigation, route }: Props) {
   }, [scanId, reloadKey]);
   const retry = () => { setReloadKey((k) => k + 1); reload(); };
 
-  // Рекомендация раскола — из scan_results (последний вердикт); перечитываем при смене ступени.
-  // Рекомендация раскола: из breakdown.meta карточки (T2.1); если поля нет — из scan_results.
+  // Кандидаты определения и рекомендация раскола — из самой карточки (score_breakdown.meta, воркер T2.1/T5.0):
+  // ни запроса, ни гонки с watcher'ом; после escalation карточка приходит новой и список обновляется сам.
+  // scan_results — только запасной путь для старых карточек без meta, и тогда один раз, не на каждый тик.
   const stage = scan?.stage ?? null;
-  const cardUpdatedAt = card?.updated_at ?? null;
-  const cardSplit = card?.split_recommended ?? null;
+  const needsRows = card !== null && (card.identification === null || card.split_recommended === null);
   useEffect(() => {
-    if (!cardUpdatedAt) return;
-    if (cardSplit !== null) { setSplit(cardSplit); return; }
+    if (!needsRows) return;
     let alive = true;
     fetchScanResults(scanId)
-      .then((rows) => { if (alive) setSplit(splitRecommended(rows)); })
-      .catch((e) => logError('result.split', e));
+      .then((r) => { if (alive) setRows(r); })
+      .catch((e) => { logError('result.results', e); if (alive) setRows([]); });
     return () => { alive = false; };
-  }, [scanId, stage, cardUpdatedAt, cardSplit]);
+  }, [scanId, needsRows]);
+  const identification = useMemo(() => (card ? cardIdentification(card, rows) : null), [card, rows]);
+  const rowsSplit = useMemo(() => (rows ? splitRecommended(rows) : false), [rows]);
+  const split = card?.split_recommended ?? rowsSplit;
 
   // Раскол: родительская карточка для дельты score.
   const parentId = scan?.parent_card_id ?? null;
@@ -156,7 +161,20 @@ export function ResultScreen({ navigation, route }: Props) {
           {card.verification === 'pending_review' && <Tag text="На проверке" color={tierColor(null)} />}
         </View>
         <Text style={styles.name}>{displayName(card)}</Text>
-        <Text style={styles.rock}>{rockClassRu(card.rock_class)}</Text>
+        {/* Список с заголовком («Уверены: это базальт») вместо строки породы; cardIdentification гарантирует
+            primary === rock_class, иначе (гонка со старой карточкой) — порода строкой без списка. Пока запасной
+            путь грузится — skeleton того же размера, чтобы hero не прыгал. */}
+        {identification ? (
+          <View style={styles.identification}>
+            <IdentificationList view={identification} accent={accent} />
+          </View>
+        ) : card.identification === null && rows === null ? (
+          <View style={styles.identification}>
+            <IdentificationSkeleton />
+          </View>
+        ) : (
+          <Text style={styles.rock}>{rockClassRu(card.rock_class)}</Text>
+        )}
         <Text style={[styles.score, { color: accent }]}>{card.score !== null ? `${card.score} очков` : 'без редкости — нет геопозиции'}</Text>
         {delta && (
           <Text style={[styles.delta, delta.sign === 'up' ? styles.deltaUp : delta.sign === 'down' ? styles.deltaDown : null]}>
@@ -164,8 +182,9 @@ export function ResultScreen({ navigation, route }: Props) {
           </Text>
         )}
         {phase === 'refining' && (
-          <Text style={styles.refine}>{stage === 'escalation' ? 'Проверяем вердикт второй моделью — карточка может уточниться.' : 'Досчитываем редкость — карточка может уточниться.'}</Text>
+          <Text style={styles.refine}>{stage === 'escalation' ? 'Проверяем вердикт второй моделью — порода, проценты и карточка могут уточниться.' : 'Досчитываем редкость — карточка может уточниться.'}</Text>
         )}
+        {identification && <IdentificationNote />}
       </View>
 
       <View style={styles.facts}>
@@ -210,6 +229,7 @@ const styles = StyleSheet.create({
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, alignItems: 'center' },
   name: { color: colors.text, fontSize: 28, fontWeight: '800', lineHeight: 34 },
   rock: { color: colors.textMuted, fontSize: 17 },
+  identification: { paddingVertical: spacing.xs },
   score: { fontSize: 22, fontWeight: '700' },
   delta: { color: colors.text, fontSize: 16, fontWeight: '600' },
   deltaUp: { color: '#5ccb8a' },
