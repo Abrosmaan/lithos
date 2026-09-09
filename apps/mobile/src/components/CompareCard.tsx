@@ -5,7 +5,7 @@ import type { Tier } from '@lithos/shared';
 import { StyleSheet, Text, View } from 'react-native';
 import { compareCards, type CompareCard as CompareCardInput } from '../lib/compare';
 import { rockClassRu, tierLabel } from '../lib/card-facts';
-import { colors, fonts, radius, tierColor } from '../theme';
+import { colors, fonts, placeholderStripes, radius, tierColor } from '../theme';
 import { BigButton } from './BigButton';
 import { FadeIn } from './FadeIn';
 import { DeltaPill, SectionLabel } from './ui';
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   sides: { flexDirection: 'row', gap: 10, alignItems: 'stretch' },
   mini: { flex: 1, borderRadius: radius.lg, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: 1 },
   miniDim: { opacity: 0.55 },
-  miniPhoto: { height: 118, backgroundColor: '#1e2632', justifyContent: 'flex-start' },
+  miniPhoto: { height: 118, backgroundColor: placeholderStripes.a, justifyContent: 'flex-start' },
   miniWhen: { position: 'absolute', left: 8, top: 8, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 7, backgroundColor: 'rgba(11,15,20,0.8)', fontFamily: fonts.sansSemi, fontSize: 10, lineHeight: 12, color: colors.chipText },
   miniSeam: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 3 },
   miniBody: { padding: 12, paddingTop: 12, gap: 6 },

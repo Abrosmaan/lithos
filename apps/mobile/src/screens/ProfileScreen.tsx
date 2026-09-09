@@ -8,6 +8,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { BigButton } from '../components/BigButton';
 import { CardTile } from '../components/CardTile';
+import { SettingsList } from '../components/SettingsList';
 import { Note, SectionLabel } from '../components/ui';
 import type { CardRow } from '../lib/card-types';
 import { logError, MSG, toUserMessage } from '../lib/errors';
@@ -269,20 +270,7 @@ export function ProfileScreen({ navigation }: Props) {
 
       <View style={styles.block}>
         <SectionLabel>Настройки</SectionLabel>
-        <View style={styles.settingsCard}>
-          {settings.map((row, i) => (
-            <Pressable
-              key={row.key}
-              onPress={() => onSettingPress(row.key)}
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.settingRow, i > 0 && styles.settingDivider, pressed && styles.pressed]}
-            >
-              <Text style={[styles.settingLabel, row.danger && styles.settingDanger]}>{row.label}</Text>
-              {row.value ? <Text style={styles.settingValue} numberOfLines={1}>{row.value}</Text> : null}
-              <View style={styles.chevron} />
-            </Pressable>
-          ))}
-        </View>
+        <SettingsList rows={settings} onPress={onSettingPress} />
         {showPrivacy && <Text style={styles.privacyText}>{PRIVACY_TEXT}</Text>}
         <Text style={styles.version}>{APP_VERSION}</Text>
       </View>
@@ -333,14 +321,6 @@ const styles = StyleSheet.create({
   accountDot: { width: 12, height: 12, borderRadius: 6, borderWidth: 1.5, borderColor: colors.textDim },
   accountTitle: { fontFamily: fonts.sansSemi, fontSize: 14.5, lineHeight: 19, color: colors.text },
   accountNote: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 17, color: colors.textMuted },
-  settingsCard: { borderRadius: radius.lg, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider },
-  settingRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15 },
-  settingDivider: { borderTopWidth: 1, borderTopColor: colors.divider },
-  pressed: { opacity: 0.85 },
-  settingLabel: { flex: 1, fontFamily: fonts.sans, fontSize: 14.5, lineHeight: 19, color: colors.text },
-  settingDanger: { color: colors.dangerAccent },
-  settingValue: { fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 18, color: colors.textDim, maxWidth: 140 },
-  chevron: { width: 8, height: 8, borderRightWidth: 1.6, borderTopWidth: 1.6, borderColor: '#4d5764', transform: [{ rotate: '45deg' }] },
   privacyText: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 19, color: colors.textMuted },
   version: { fontFamily: fonts.monoRegular, fontSize: 12, letterSpacing: 0.5, color: colors.textFaint, textAlign: 'center' },
 });

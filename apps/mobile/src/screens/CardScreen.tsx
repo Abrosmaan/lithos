@@ -21,7 +21,7 @@ import { breakdownRows, cardShortId, historyLines, scoreText, STATE_RU } from '.
 import { readShowcase, SHOWCASE_MAX, toggleShowcaseCard } from '../lib/showcase';
 import type { RootStackParamList } from '../navigation/types';
 import { useSplitFlow } from '../navigation/useSplitFlow';
-import { colors, density, fonts, radius, spacing, tierColor, type } from '../theme';
+import { colors, density, fonts, placeholderStripes, radius, spacing, tierColor, type } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Card'>;
 
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   pad: { paddingHorizontal: spacing.md },
   pressed: { opacity: 0.8 },
   gallery: { paddingHorizontal: spacing.md, gap: PHOTO_GAP },
-  photo: { width: PHOTO_W, height: PHOTO_H, borderRadius: 18, backgroundColor: '#1e2632', overflow: 'hidden' },
+  photo: { width: PHOTO_W, height: PHOTO_H, borderRadius: 18, backgroundColor: placeholderStripes.a, overflow: 'hidden' },
   back: { position: 'absolute', top: 10, left: 24, width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(11,15,20,0.72)', alignItems: 'center', justifyContent: 'center' },
   body: { paddingHorizontal: spacing.md, gap: density.gap },
   nameBlock: { gap: 7 },

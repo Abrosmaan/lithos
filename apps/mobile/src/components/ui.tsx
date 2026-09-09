@@ -3,7 +3,7 @@
 import type { Tier } from '@lithos/shared';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
-import { colors, density, fonts, radius, spacing, tierColor, type } from '../theme';
+import { colors, density, fonts, placeholderStripes, radius, spacing, tierColor, type } from '../theme';
 
 /** Подпись секции: mono 10, uppercase, разрядка. «ПОРОДА», «ОЖИДАЕМЫЕ ПОРОДЫ». */
 export function SectionLabel({ children, color, style }: { children: ReactNode; color?: string; style?: StyleProp<TextStyle> }) {
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: colors.divider },
   pill: { paddingVertical: 10, paddingHorizontal: 17, borderRadius: radius.full, backgroundColor: 'rgba(11,15,20,0.74)', borderWidth: 1, borderColor: 'rgba(242,244,246,0.1)' },
   pillDanger: { paddingVertical: 7, paddingHorizontal: 14, backgroundColor: 'rgba(176,58,46,0.15)', borderColor: colors.dangerBorder },
-  placeholder: { backgroundColor: '#1e2632', borderRadius: radius.lg, overflow: 'hidden', minHeight: density.tile, alignItems: 'center', justifyContent: 'center' },
+  placeholder: { backgroundColor: placeholderStripes.a, borderRadius: radius.lg, overflow: 'hidden', minHeight: density.tile, alignItems: 'center', justifyContent: 'center' },
   placeholderLabel: { fontFamily: fonts.monoRegular, fontSize: 10, letterSpacing: 1.2, color: '#7b8794' },
   linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 15, borderRadius: radius.md, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider },
   glow: { position: 'absolute', top: '50%', left: '50%', marginLeft: -140, marginTop: -140, width: 280, height: 280, alignItems: 'center', justifyContent: 'center' },

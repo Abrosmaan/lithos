@@ -2,7 +2,7 @@
 // плашка «масштаб» accent, крестик из примитивов (две повёрнутые полоски) вместо глифа.
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, fonts } from '../theme';
+import { colors, fonts, placeholderStripes } from '../theme';
 
 interface Props {
   uri: string;
@@ -60,7 +60,7 @@ export function PhotoThumb({ uri, size = 94, isScale, tag, onPress, onRemove }: 
 }
 
 const styles = StyleSheet.create({
-  frame: { overflow: 'hidden', backgroundColor: '#1e2632', borderWidth: 1.5, borderColor: 'rgba(242,244,246,0.14)' },
+  frame: { overflow: 'hidden', backgroundColor: placeholderStripes.a, borderWidth: 1.5, borderColor: 'rgba(242,244,246,0.14)' },
   frameScale: { borderColor: colors.accent },
   tag: { position: 'absolute', fontFamily: fonts.monoRegular, fontSize: 8, lineHeight: 9, color: '#7b8794' },
   tagSmall: { left: 5, bottom: 4 },

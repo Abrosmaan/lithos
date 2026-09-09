@@ -24,7 +24,7 @@ import { REFUSAL_ACTION_LABEL, refusalView, type RefusalAction, RESULT_MSG, RESU
 import { useScanWatch } from '../lib/scan-watch';
 import type { RootStackParamList } from '../navigation/types';
 import { useSplitFlow } from '../navigation/useSplitFlow';
-import { colors, fonts, spacing, tierColor } from '../theme';
+import { colors, fonts, placeholderStripes, spacing, tierColor } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Result'>;
 
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, gap: 18 },
   center: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: 16, justifyContent: 'center' },
   escapeHatch: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
-  photo: { height: 206, backgroundColor: '#1e2632' },
+  photo: { height: 206, backgroundColor: placeholderStripes.a },
   photoFill: { height: 206, borderRadius: 0 },
   refiningPill: { position: 'absolute', top: 12, left: 12, flexDirection: 'row', alignItems: 'center', gap: 7, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 999, backgroundColor: 'rgba(11,15,20,0.82)', borderWidth: 1, borderColor: 'rgba(242,244,246,0.14)' },
   pulseDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: colors.accentBright },
