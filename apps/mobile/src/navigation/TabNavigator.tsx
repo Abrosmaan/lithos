@@ -1,19 +1,21 @@
-// Таб-бар волны 3 (dev-plan T3.x): Камера / Коллекция / Карта / Профиль. Вкладки ленивые — карта монтируется
-// при первом открытии. Иконки — эмодзи: в проекте нет набора векторных иконок, а тянуть его ради четырёх глифов не стали.
+// Таб-бар (DESIGN_SYSTEM.md «Tab bar»): Камера / Коллекция / Карта / Профиль. Иконки — примитивы из TabIcons,
+// подпись 10.5, активный accentBright, неактивный textFaint, фон colors.tabBar, тонкая линия сверху.
+// Нативных заголовков у вкладок нет — H1 рисуют сами экраны. Вкладки ленивые — карта монтируется при первом открытии.
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StyleSheet, Text } from 'react-native';
+import { TAB_ICONS } from '../components/TabIcons';
 import { CameraScreen } from '../screens/CameraScreen';
 import { CollectionScreen } from '../screens/CollectionScreen';
 import { MapScreen } from '../screens/MapScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { colors } from '../theme';
+import { colors, fonts } from '../theme';
 import type { TabParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
-function icon(glyph: string) {
-  return function TabIcon({ focused }: { focused: boolean }) {
-    return <Text style={[styles.icon, !focused && styles.iconOff]}>{glyph}</Text>;
+function icon(name: keyof TabParamList) {
+  const Icon = TAB_ICONS[name];
+  return function TabIcon({ color }: { color: string }) {
+    return <Icon color={color} />;
   };
 }
 
@@ -22,27 +24,19 @@ export function TabNavigator() {
     <Tab.Navigator
       initialRouteName="Camera"
       screenOptions={{
-        headerStyle: { backgroundColor: colors.bg },
-        headerTintColor: colors.text,
-        headerTitleStyle: { color: colors.text },
-        headerShadowVisible: false,
+        headerShown: false,
         sceneStyle: { backgroundColor: colors.bg },
-        tabBarStyle: { backgroundColor: colors.bg, borderTopColor: colors.border },
-        tabBarActiveTintColor: colors.text,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+        tabBarStyle: { backgroundColor: colors.tabBar, borderTopWidth: 1, borderTopColor: 'rgba(242,244,246,0.07)', paddingTop: 6 },
+        tabBarActiveTintColor: colors.accentBright,
+        tabBarInactiveTintColor: colors.textFaint,
+        tabBarLabelStyle: { fontFamily: fonts.sans, fontSize: 10.5, marginTop: 2 },
         lazy: true,
       }}
     >
-      <Tab.Screen name="Camera" component={CameraScreen} options={{ title: 'Камера', headerShown: false, tabBarIcon: icon('📷') }} />
-      <Tab.Screen name="Collection" component={CollectionScreen} options={{ title: 'Коллекция', tabBarIcon: icon('🗂️') }} />
-      <Tab.Screen name="Map" component={MapScreen} options={{ title: 'Карта', tabBarIcon: icon('🗺️') }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Профиль', tabBarIcon: icon('👤') }} />
+      <Tab.Screen name="Camera" component={CameraScreen} options={{ title: 'Камера', tabBarIcon: icon('Camera') }} />
+      <Tab.Screen name="Collection" component={CollectionScreen} options={{ title: 'Коллекция', tabBarIcon: icon('Collection') }} />
+      <Tab.Screen name="Map" component={MapScreen} options={{ title: 'Карта', tabBarIcon: icon('Map') }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Профиль', tabBarIcon: icon('Profile') }} />
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  icon: { fontSize: 20 },
-  iconOff: { opacity: 0.55 },
-});
