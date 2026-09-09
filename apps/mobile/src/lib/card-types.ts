@@ -50,6 +50,9 @@ export interface CardRow {
   cell_id: string | null;
   lat: number | null;
   lng: number | null;
+  /** Витрина = публикация (T6.1, миграция 0007): видна другим пользователям, в т.ч. на карте. */
+  published: boolean;
+  published_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -203,6 +206,8 @@ export function parseCardRow(raw: unknown): CardRow | null {
     cell_id: str(raw.cell_id),
     lat: num(raw.lat),
     lng: num(raw.lng),
+    published: bool(raw.published),
+    published_at: str(raw.published_at),
     created_at: str(raw.created_at) ?? '',
     updated_at: str(raw.updated_at) ?? '',
   };
