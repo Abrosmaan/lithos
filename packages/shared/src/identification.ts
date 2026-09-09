@@ -76,12 +76,29 @@ export function identificationCandidates(result: ScanResult): Identification {
     reason: c.reason,
   }));
   const kept = candidates.filter((c) => c.is_primary || c.percent >= IDENTIFICATION_MIN_PERCENT);
-  const sum = kept.reduce((s, c) => s + c.percent, 0);
+  const primaryRow = kept[0]!;
+  // Инварианты показа: primary ≥ любого другого кандидата (иначе заголовок «скорее всего X» спорит со
+  // списком) и primary ≥ одного шага (0 % у главного кандидата — бессмыслица). Излишек/недостаток
+  // балансируется через «другое», а если его нет — через самого крупного из остальных.
+  const maxOther = kept.slice(1).reduce((m, c) => Math.max(m, c.percent), 0);
+  if (primaryRow.percent < maxOther) primaryRow.percent = maxOther;
+  if (primaryRow.percent < IDENTIFICATION_PERCENT_STEP) primaryRow.percent = IDENTIFICATION_PERCENT_STEP;
+  let sum = kept.reduce((s, c) => s + c.percent, 0);
   if (sum < 100) {
     kept.push({ rock_class: 'other', name_ru: 'другое', percent: 100 - sum, is_primary: false, reason: null });
-  } else if (sum > 100) {
-    // Округление увело сумму вверх — снимаем с primary (он всегда крупнейший).
-    kept[0]!.percent -= sum - 100;
+  } else {
+    // Сумма > 100 — снимаем с остальных по убыванию, не опуская их ниже нуля и не трогая primary.
+    let excess = sum - 100;
+    for (const c of kept.slice(1).sort((a, b) => b.percent - a.percent)) {
+      if (excess <= 0) break;
+      const take = Math.min(excess, c.percent);
+      c.percent -= take;
+      excess -= take;
+    }
+    // Кандидаты, обнулившиеся при балансировке, из списка убираем.
+    for (let i = kept.length - 1; i > 0; i--) if (kept[i]!.percent <= 0) kept.splice(i, 1);
+    sum = kept.reduce((s, c) => s + c.percent, 0);
+    if (sum > 100) primaryRow.percent -= sum - 100; // теоретический хвост: только если остальных не было
   }
   candidates = kept;
   return { band: identificationBand(result.rock_class.confidence), primary, candidates };

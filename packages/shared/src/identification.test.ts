@@ -50,6 +50,18 @@ describe('identificationCandidates', () => {
     expect(id.candidates.filter((c) => c.rock_class === 'basalt')).toHaveLength(1);
     expect(id.candidates.filter((c) => c.rock_class !== 'other').length).toBeLessThanOrEqual(5);
   });
+  it('primary всегда ≥ любого другого кандидата после округления', () => {
+    const id = identificationCandidates(res('basalt', 0.34, [{ name: 'andesite', confidence: 0.33, reason: null }, { name: 'gabbro', confidence: 0.33, reason: null }]));
+    const [p, ...rest] = id.candidates;
+    expect(p!.rock_class).toBe('basalt');
+    for (const c of rest) expect(p!.percent).toBeGreaterThanOrEqual(c.percent);
+    expect(id.candidates.reduce((s, c) => s + c.percent, 0)).toBe(100);
+  });
+  it('primary не бывает 0 %', () => {
+    const id = identificationCandidates(res('basalt', 0.02, []));
+    expect(id.candidates[0]).toMatchObject({ rock_class: 'basalt', percent: 5 });
+    expect(id.candidates[1]).toMatchObject({ rock_class: 'other', percent: 95 });
+  });
   it('band по порогам', () => {
     expect(identificationBand(0.8)).toBe('sure');
     expect(identificationBand(0.79)).toBe('likely');
