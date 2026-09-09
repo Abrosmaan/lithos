@@ -1,13 +1,14 @@
-// Дневник локации (spec §8, T3.1): ожидаемые породы ячейки geohash-6 (lithos.diary.expected, а до первого скана —
-// geo_cache.expected_rocks) и найденные (diary.found ∪ карточки в ячейке). Прогресс N из M, значок при 100 %.
+// Дневник локации (spec §8, T3.1; DESIGN_SYSTEM.md экран 11): ожидаемые породы ячейки geohash-6
+// (lithos.diary.expected, а до первого скана — geo_cache.expected_rocks) и найденные (diary.found ∪ карточки
+// в ячейке). Прогресс N из M, значок при 100 %. Логика загрузки/резолва ячейки не менялась при рестайле.
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CardTile } from '../components/CardTile';
 import { BigButton } from '../components/BigButton';
-import { Line, Section } from '../components/Section';
-import { TierBadge } from '../components/TierBadge';
-import { displayName, formatDateRu, rockClassRu } from '../lib/card-facts';
+import { Note, SectionLabel } from '../components/ui';
+import { rockClassRu } from '../lib/card-facts';
 import type { CardRow } from '../lib/card-types';
 import { fetchDiaryCell, fetchExpectedRocks, listCardsInCell } from '../lib/cards';
 import { diaryProgress, type DiaryProgress } from '../lib/diary';
@@ -16,7 +17,7 @@ import { cellCenter, encodeGeohash } from '../lib/geohash';
 import { requestGeoFix } from '../lib/location';
 import { loadCards, readCachedCards } from '../lib/offline-cache';
 import type { RootScreenProps } from '../navigation/types';
-import { colors, radius, spacing, tierColors } from '../theme';
+import { colors, density, fonts, radius, tierColors } from '../theme';
 
 type Props = RootScreenProps<'Diary'>;
 
@@ -81,28 +82,29 @@ export function DiaryScreen({ navigation, route }: Props) {
   }, [load]));
 
   const toCamera = () => navigation.navigate('Tabs', { screen: 'Camera' }, { pop: true });
+  const pad = { paddingBottom: insets.bottom + 30 };
 
   if (noGeo) {
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, pad]}>
         <Text style={styles.h1}>Нет геопозиции</Text>
         <Text style={styles.muted}>Дневник ведётся по ячейке, где вы находитесь. Разрешите геопозицию в настройках или отсканируйте камень с гео — тогда появится дневник его места.</Text>
-        <BigButton label="Попробовать снова" onPress={() => { void load(); }} style={styles.stretch} />
-        <BigButton label="Сканировать" variant="secondary" onPress={toCamera} style={styles.stretch} />
+        <BigButton label="Попробовать снова" onPress={() => { void load(); }} />
+        <BigButton label="Сканировать" variant="secondary" onPress={toCamera} />
       </View>
     );
   }
   if (error && !data) {
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, pad]}>
         <Text style={styles.muted}>{error}</Text>
-        <BigButton label="Обновить" onPress={() => { void load(); }} style={styles.stretch} />
+        <BigButton label="Обновить" onPress={() => { void load(); }} />
       </View>
     );
   }
   if (!data) {
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, pad]}>
         <ActivityIndicator color={colors.accent} size="large" />
         <Text style={styles.muted}>Определяем место…</Text>
       </View>
@@ -115,19 +117,25 @@ export function DiaryScreen({ navigation, route }: Props) {
   const pct = progress.total > 0 ? progress.foundCount / progress.total : 0;
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing.xl }]}>
+    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, pad]}>
       {error && (
-        <Pressable onPress={() => { void load(); }} accessibilityRole="button" style={styles.errorBanner}>
-          <Text style={styles.errorText}>{error} Нажмите, чтобы обновить.</Text>
+        <Pressable onPress={() => { void load(); }} accessibilityRole="button">
+          <Note tone="danger">{error} Нажмите, чтобы обновить.</Note>
         </Pressable>
       )}
 
       <View style={[styles.hero, progress.complete && styles.heroComplete]}>
-        <Text style={styles.cell}>Ячейка {cellId}{center ? ` · ${center.latitude.toFixed(3)}, ${center.longitude.toFixed(3)}` : ''}</Text>
-        <Text style={styles.source}>{SOURCE_RU[source]}</Text>
+        <View style={styles.heroHead}>
+          <Text style={styles.cell}>Ячейка {cellId}</Text>
+          <Text style={styles.coords}>{center ? `${center.latitude.toFixed(3)}, ${center.longitude.toFixed(3)}` : SOURCE_RU[source]}</Text>
+        </View>
+        {center && <Text style={styles.source}>{SOURCE_RU[source]}</Text>}
         {progress.total > 0 ? (
           <>
-            <Text style={styles.progress}>{progress.foundCount} из {progress.total}</Text>
+            <View style={styles.progressRow}>
+              <Text style={styles.progressN}>{progress.foundCount}</Text>
+              <Text style={styles.progressOf}>из {progress.total} ожидаемых пород</Text>
+            </View>
             <View style={styles.bar}>
               <View style={[styles.barFill, { width: `${Math.round(pct * 100)}%` }, progress.complete && styles.barComplete]} />
             </View>
@@ -150,34 +158,46 @@ export function DiaryScreen({ navigation, route }: Props) {
       </View>
 
       {progress.items.length > 0 && (
-        <Section title="Ожидаются здесь">
+        <View style={styles.section}>
+          <SectionLabel>Ожидаемые породы</SectionLabel>
           {progress.items.map((i) => (
-            <View key={i.rock_class} style={styles.item}>
-              <Text style={[styles.check, i.found && styles.checkOn]}>{i.found ? '✓' : '○'}</Text>
-              <Text style={[styles.itemText, i.found && styles.itemFound]}>{rockClassRu(i.rock_class)}</Text>
+            <View key={i.rock_class} style={[styles.item, i.found ? styles.itemFound : styles.itemPending]}>
+              <View style={[styles.mark, i.found ? styles.markOn : styles.markOff]}>
+                {i.found && <View style={styles.markCheck} />}
+              </View>
+              <Text style={[styles.itemText, i.found && styles.itemTextFound]}>{rockClassRu(i.rock_class)}</Text>
+              <Text style={styles.itemNote}>{i.found ? 'найдено' : 'ожидается'}</Text>
             </View>
           ))}
-        </Section>
+        </View>
       )}
 
       {progress.extra.length > 0 && (
-        <Section title="Сверх списка">
-          {progress.extra.map((r) => <Line key={r}>{rockClassRu(r)} — не ожидался здесь (странник или редкость)</Line>)}
-        </Section>
+        <View style={styles.section}>
+          <SectionLabel>Сверх списка</SectionLabel>
+          {progress.extra.map((r) => (
+            <View key={r} style={styles.extra}>
+              <Text style={styles.extraName}>{rockClassRu(r)}</Text>
+              <Text style={styles.extraNote}>не ожидался здесь — странник или редкость</Text>
+            </View>
+          ))}
+        </View>
       )}
 
-      <Section title={`Находки в ячейке · ${shownCards.length}`}>
-        {shownCards.length === 0 && <Line muted>Ещё ничего не найдено.</Line>}
-        {shownCards.map((c) => (
-          <Pressable key={c.id} onPress={() => navigation.push('Card', { cardId: c.id })} accessibilityRole="button" style={({ pressed }) => [styles.cardRow, pressed && styles.pressed]}>
-            <View style={styles.cardBody}>
-              <Text style={styles.cardName} numberOfLines={1}>{displayName(c)}</Text>
-              <Text style={styles.cardSub} numberOfLines={1}>{rockClassRu(c.rock_class)}{formatDateRu(c.created_at) ? ` · ${formatDateRu(c.created_at)}` : ''}</Text>
-            </View>
-            <TierBadge tier={c.tier} verification={c.verification} />
-          </Pressable>
-        ))}
-      </Section>
+      <View style={styles.section}>
+        <SectionLabel>Находки в ячейке · {shownCards.length}</SectionLabel>
+        {shownCards.length === 0 ? (
+          <Text style={styles.muted}>Ещё ничего не найдено.</Text>
+        ) : (
+          <View style={styles.grid}>
+            {shownCards.map((c) => (
+              <View key={c.id} style={styles.gridItem}>
+                <CardTile card={c} size="sm" onPress={() => navigation.push('Card', { cardId: c.id })} />
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
 
       <BigButton label="Сканировать здесь" onPress={toCamera} />
     </ScrollView>
@@ -186,32 +206,39 @@ export function DiaryScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: spacing.md, gap: spacing.md },
-  center: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, gap: spacing.md },
-  stretch: { alignSelf: 'stretch' },
-  h1: { color: colors.text, fontSize: 22, fontWeight: '700', textAlign: 'center' },
-  muted: { color: colors.textMuted, fontSize: 14, lineHeight: 20, textAlign: 'center' },
-  errorBanner: { backgroundColor: colors.warning, borderRadius: radius.md, padding: spacing.md },
-  errorText: { color: '#fff', fontSize: 15 },
-  hero: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 2, borderColor: colors.border, padding: spacing.lg, gap: spacing.sm, alignItems: 'center' },
+  content: { padding: 16, gap: density.gap },
+  center: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 },
+  h1: { fontFamily: fonts.serif, fontSize: 22, lineHeight: 27, color: colors.text, textAlign: 'center' },
+  muted: { fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 20, color: colors.textMuted, textAlign: 'center' },
+  hero: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.divider, padding: 17, gap: 13 },
   heroComplete: { borderColor: tierColors.legendary },
-  cell: { color: colors.text, fontSize: 15, fontWeight: '600' },
-  source: { color: colors.textMuted, fontSize: 13 },
-  progress: { color: colors.text, fontSize: 40, fontWeight: '800', lineHeight: 46 },
-  bar: { alignSelf: 'stretch', height: 10, borderRadius: radius.full, backgroundColor: colors.surfaceActive, overflow: 'hidden' },
-  barFill: { height: '100%', backgroundColor: colors.accent, borderRadius: radius.full },
+  heroHead: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
+  cell: { fontFamily: fonts.serif, fontSize: 22, lineHeight: 27, color: colors.text, flex: 1 },
+  coords: { fontFamily: fonts.monoRegular, fontSize: 11, lineHeight: 14, color: colors.textDim },
+  source: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 17, color: colors.textMuted },
+  progressRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  progressN: { fontFamily: fonts.monoBold, fontSize: 26, lineHeight: 28, color: colors.text },
+  progressOf: { fontFamily: fonts.sans, fontSize: 14, lineHeight: 18, color: colors.textMuted },
+  bar: { height: 8, borderRadius: radius.full, backgroundColor: colors.track, overflow: 'hidden' },
+  barFill: { height: '100%', borderRadius: radius.full, backgroundColor: colors.accent },
   barComplete: { backgroundColor: tierColors.legendary },
-  badge: { backgroundColor: tierColors.legendary, paddingHorizontal: spacing.md, paddingVertical: spacing.xs + 2, borderRadius: radius.full },
-  badgeText: { color: '#1a1400', fontSize: 15, fontWeight: '800' },
-  link: { color: '#7cc4ff', fontSize: 15, paddingTop: spacing.xs },
-  item: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
-  check: { color: colors.textMuted, fontSize: 20, width: 26, textAlign: 'center' },
-  checkOn: { color: '#5ccb8a' },
-  itemText: { color: colors.textMuted, fontSize: 17 },
-  itemFound: { color: colors.text, fontWeight: '600' },
-  cardRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
-  pressed: { opacity: 0.8 },
-  cardBody: { flex: 1, gap: 2 },
-  cardName: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  cardSub: { color: colors.textMuted, fontSize: 13 },
+  badge: { alignSelf: 'flex-start', backgroundColor: tierColors.legendary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.full },
+  badgeText: { fontFamily: fonts.sansBold, fontSize: 13.5, color: '#1a1400' },
+  link: { fontFamily: fonts.sansSemi, fontSize: 13.5, lineHeight: 18, color: colors.accentBright },
+  section: { gap: 9 },
+  item: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, paddingHorizontal: 13, borderRadius: radius.md, borderWidth: 1 },
+  itemFound: { backgroundColor: colors.accentTint, borderColor: colors.accentBorder },
+  itemPending: { backgroundColor: colors.surface, borderColor: colors.divider },
+  mark: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  markOn: { borderColor: colors.accentBright, backgroundColor: colors.accent },
+  markOff: { borderColor: 'rgba(242,244,246,0.2)' },
+  markCheck: { width: 7, height: 4, borderLeftWidth: 1.5, borderBottomWidth: 1.5, borderColor: colors.accentText, transform: [{ rotate: '-45deg' }], marginTop: -2 },
+  itemText: { flex: 1, fontFamily: fonts.sans, fontSize: 14.5, lineHeight: 19, color: colors.textMuted },
+  itemTextFound: { color: colors.text },
+  itemNote: { fontFamily: fonts.sans, fontSize: 12, lineHeight: 16, color: colors.textDim },
+  extra: { padding: 14, borderRadius: radius.md, backgroundColor: colors.surface, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.accentBorder, gap: 4 },
+  extraName: { fontFamily: fonts.sans, fontSize: 14.5, lineHeight: 19, color: colors.text },
+  extraNote: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 17, color: colors.textMuted },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: density.grid },
+  gridItem: { width: '48%', flexGrow: 1 },
 });

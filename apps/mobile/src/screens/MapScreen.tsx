@@ -1,6 +1,6 @@
-// Карта (spec §8, T3.2): точки сканов цветом тира, тап → карточка, ячейки с закрытым дневником подсвечены.
-// react-native-maps: Apple Maps на iOS без ключа; Android требует Google Maps API key (см. docs/tasks/T3.2.md).
-// Офлайн — точки из кэша AsyncStorage (тайлы карты офлайн не гарантируются).
+// Карта (spec §8, T3.2; DESIGN_SYSTEM.md экран 12): точки сканов цветом тира, тап → карточка, ячейки с
+// закрытым дневником подсвечены. react-native-maps: Apple Maps на iOS без ключа; Android требует Google Maps
+// API key (см. docs/tasks/T3.2.md). Офлайн — точки из кэша AsyncStorage. Логика загрузки не менялась при рестайле.
 import { TIER_RU, TIERS } from '@lithos/shared';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -8,6 +8,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigButton } from '../components/BigButton';
+import { Note } from '../components/ui';
 import { displayName, tierLabel } from '../lib/card-facts';
 import type { CardRow } from '../lib/card-types';
 import { completedCells, type DiaryRow } from '../lib/diary';
@@ -17,7 +18,7 @@ import { cellPolygon } from '../lib/geohash';
 import { loadCards, loadDiary } from '../lib/offline-cache';
 import { pluralRu } from '../lib/text';
 import type { TabScreenProps } from '../navigation/types';
-import { colors, mapColors, radius, spacing, tierColor } from '../theme';
+import { colors, fonts, mapColors, placeholderStripes, radius, tierColor } from '../theme';
 
 type Props = TabScreenProps<'Map'>;
 
@@ -25,7 +26,7 @@ type Point = CardRow & { lat: number; lng: number };
 
 /** Стартовый регион без точек: Черноморское побережье (spec §16 — фокус прототипа). */
 const DEFAULT_REGION = { latitude: 44.6, longitude: 37.9, latitudeDelta: 6, longitudeDelta: 6 };
-const FIT_PADDING = { top: 80, right: 40, bottom: 140, left: 40 };
+const FIT_PADDING = { top: 80, right: 40, bottom: 160, left: 40 };
 
 const hasGeo = (c: CardRow): c is Point => !c.hidden && c.lat !== null && c.lng !== null;
 
@@ -87,7 +88,7 @@ export function MapScreen({ navigation }: Props) {
     return (
       <View style={styles.center}>
         <Text style={styles.muted}>{error}</Text>
-        <BigButton label="Обновить" onPress={() => { void load(); }} style={styles.stretch} />
+        <BigButton label="Обновить" onPress={() => { void load(); }} />
       </View>
     );
   }
@@ -118,31 +119,36 @@ export function MapScreen({ navigation }: Props) {
             tracksViewChanges={false}
             onPress={() => navigation.navigate('Card', { cardId: c.id })}
           >
-            <View style={[styles.dot, { backgroundColor: c.verification === 'pending_review' ? tierColor(null) : tierColor(c.tier) }]} />
+            <View style={styles.markerRing}>
+              <View style={[styles.dot, { backgroundColor: c.verification === 'pending_review' ? tierColor(null) : tierColor(c.tier) }]}>
+                {c.verification === 'pending_review' && <Text style={styles.dotMark}>?</Text>}
+              </View>
+            </View>
           </Marker>
         ))}
       </MapView>
 
       {(offline || (error && cards)) && (
-        <View style={[styles.banner, { top: spacing.sm }]}>
-          <Text style={styles.bannerText}>{offline ? 'Нет связи — показаны сохранённые точки.' : error}</Text>
+        <View style={[styles.banner, { top: insets.top + 10 }]}>
+          <Note tone="neutral">{offline ? 'Нет связи — показаны сохранённые точки.' : error}</Note>
         </View>
       )}
 
-      <View style={[styles.legend, { bottom: insets.bottom > 0 ? spacing.sm : spacing.md }]}>
+      <View style={[styles.legend, { bottom: insets.bottom > 0 ? 10 : 16 }]}>
         {cards === null ? (
           <ActivityIndicator color={colors.accent} />
         ) : points.length === 0 ? (
           <View style={styles.legendEmpty}>
+            <View style={styles.legendStone} />
             <Text style={styles.legendTitle}>Пока нет точек</Text>
             <Text style={styles.muted}>Отсканируйте камень с геопозицией — он появится на карте.</Text>
             <Pressable onPress={() => navigation.navigate('Tabs', { screen: 'Camera' }, { pop: true })} accessibilityRole="button">
-              <Text style={styles.link}>Сканировать →</Text>
+              <Text style={styles.link}>Сканировать</Text>
             </Pressable>
           </View>
         ) : (
           <>
-            <Text style={styles.legendTitle}>
+            <Text style={styles.legendCount}>
               {points.length} {pluralRu(points.length, 'точка', 'точки', 'точек')}
               {polygons.length > 0 ? ` · ${polygons.length} ${pluralRu(polygons.length, 'ячейка закрыта', 'ячейки закрыты', 'ячеек закрыто')}` : ''}
             </Text>
@@ -155,7 +161,7 @@ export function MapScreen({ navigation }: Props) {
               ))}
               {polygons.length > 0 && (
                 <View style={styles.legendItem}>
-                  <View style={[styles.legendSquare]} />
+                  <View style={styles.legendSquare} />
                   <Text style={styles.legendText}>дневник закрыт</Text>
                 </View>
               )}
@@ -169,19 +175,21 @@ export function MapScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  center: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, gap: spacing.md },
-  stretch: { alignSelf: 'stretch' },
-  muted: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
-  dot: { width: 18, height: 18, borderRadius: radius.full, borderWidth: 2.5, borderColor: '#fff' },
-  banner: { position: 'absolute', left: spacing.md, right: spacing.md, backgroundColor: 'rgba(138,109,31,0.95)', borderRadius: radius.md, padding: spacing.sm + 2 },
-  bannerText: { color: '#fff', fontSize: 14, textAlign: 'center' },
-  legend: { position: 'absolute', left: spacing.md, right: spacing.md, backgroundColor: 'rgba(22,28,36,0.94)', borderRadius: radius.md, padding: spacing.md, gap: spacing.sm, borderWidth: 1, borderColor: colors.border },
-  legendEmpty: { gap: spacing.xs },
-  legendTitle: { color: colors.text, fontSize: 15, fontWeight: '700' },
-  legendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm + 2 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  legendDot: { width: 10, height: 10, borderRadius: radius.full },
-  legendSquare: { width: 10, height: 10, backgroundColor: mapColors.cellFill, borderWidth: 1, borderColor: mapColors.cellStroke },
-  legendText: { color: colors.textMuted, fontSize: 12 },
-  link: { color: '#7cc4ff', fontSize: 15, fontWeight: '600' },
+  center: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 },
+  muted: { fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 19, color: colors.textMuted },
+  markerRing: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: colors.bg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  dot: { width: 14, height: 14, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
+  dotMark: { fontFamily: fonts.monoBold, fontSize: 9, lineHeight: 10, color: colors.bg },
+  banner: { position: 'absolute', left: 16, right: 16 },
+  legend: { position: 'absolute', left: 16, right: 16, backgroundColor: 'rgba(22,28,36,0.94)', borderRadius: radius.md, padding: 16, gap: 11, borderWidth: 1, borderColor: colors.divider },
+  legendEmpty: { gap: 8, alignItems: 'flex-start' },
+  legendStone: { width: 34, height: 34, borderRadius: 16, backgroundColor: placeholderStripes.a },
+  legendTitle: { fontFamily: fonts.serif, fontSize: 16, lineHeight: 20, color: colors.text },
+  legendCount: { fontFamily: fonts.mono, fontSize: 13, lineHeight: 16, color: colors.chipText },
+  legendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  legendDot: { width: 9, height: 9, borderRadius: 4.5 },
+  legendSquare: { width: 9, height: 9, backgroundColor: mapColors.cellFill, borderWidth: 1, borderColor: mapColors.cellStroke },
+  legendText: { fontFamily: fonts.sans, fontSize: 11.5, lineHeight: 14, color: colors.textMuted },
+  link: { fontFamily: fonts.sansSemi, fontSize: 14, lineHeight: 18, color: colors.accentBright },
 });

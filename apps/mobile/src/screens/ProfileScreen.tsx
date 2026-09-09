@@ -1,30 +1,36 @@
-// Профиль (spec §8, §12; T3.3): имя (lithos.users.display_name), статистика — сканов всего (scans),
-// распределение по тирам (cards), редчайшая карточка, самая далёкая находка; витрина до 12 карточек (локально).
+// Профиль (spec §8, §12; T3.3; DESIGN_SYSTEM.md экран 13): имя (lithos.users.display_name), статистика,
+// распределение по тирам, редчайшая/самая далёкая находка, витрина, блоки «Аккаунт» и «Настройки» (T5.3).
+import { Camera } from 'expo-camera';
+import Constants from 'expo-constants';
+import { getForegroundPermissionsAsync } from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { BigButton } from '../components/BigButton';
 import { CardTile } from '../components/CardTile';
-import { Section } from '../components/Section';
-import { formatDateRu } from '../lib/card-facts';
+import { Note, SectionLabel } from '../components/ui';
 import type { CardRow } from '../lib/card-types';
 import { logError, MSG, toUserMessage } from '../lib/errors';
 import { farthestFind, formatDistance } from '../lib/geo-math';
 import { loadCards } from '../lib/offline-cache';
 import { fetchPrimaryPhotoUrls } from '../lib/photo-urls';
-import { countScans, DISPLAY_NAME_MAX, fetchProfile, type Profile, updateDisplayName } from '../lib/profile';
+import { countScans, countScansToday, DISPLAY_NAME_MAX, fetchProfile, type Profile, updateDisplayName, wipeLocalData } from '../lib/profile';
 import { pruneShowcase, readShowcase, SHOWCASE_MAX } from '../lib/showcase';
+import { APPLE_SIGNIN_SOON, appVersionText, PRIVACY_TEXT, scanLimitForAccount, type SettingKey, settingsRows, toPermissionState, WIPE_DIALOG } from '../lib/settings';
 import { rarestCard, tierDistribution } from '../lib/stats';
 import type { TabScreenProps } from '../navigation/types';
-import { colors, radius, spacing, tierColor } from '../theme';
+import { colors, fonts, radius, tierColor } from '../theme';
 
 type Props = TabScreenProps<'Profile'>;
 
 export const DEFAULT_NAME = 'Собиратель камней';
 
+const APP_VERSION = appVersionText(Constants.expoConfig?.version, Constants.expoConfig?.ios?.buildNumber ?? String(Constants.expoConfig?.android?.versionCode ?? ''));
+
 export function ProfileScreen({ navigation }: Props) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [scans, setScans] = useState<number | null>(null);
+  const [scansToday, setScansToday] = useState<number | null>(null);
   const [cards, setCards] = useState<CardRow[] | null>(null);
   const [showcaseIds, setShowcaseIds] = useState<string[]>([]);
   const [urls, setUrls] = useState<Map<string, string>>(new Map());
@@ -34,6 +40,10 @@ export function ProfileScreen({ navigation }: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+  const [camPerm, setCamPerm] = useState<string>('unknown');
+  const [locPerm, setLocPerm] = useState<string>('unknown');
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const seq = useRef(0);
 
   const load = useCallback(async (isFocused: () => boolean = () => true) => {
@@ -49,14 +59,20 @@ export function ProfileScreen({ navigation }: Props) {
       setShowcaseIds(ids);
       setOffline(c.offline);
       setError(null);
-      // Имя и счётчик — только из сети; офлайн остаются прошлые значения / «—».
-      const [p, n] = await Promise.all([
+      // Имя, счётчики, разрешения — только из сети/системы; офлайн остаются прошлые значения / «—».
+      const [p, n, today, cam, loc] = await Promise.all([
         fetchProfile().catch((e) => { logError('profile.user', e); return null; }),
         countScans().catch((e) => { logError('profile.scans', e); return null; }),
+        countScansToday().catch((e) => { logError('profile.scansToday', e); return null; }),
+        Camera.getCameraPermissionsAsync().catch(() => null),
+        getForegroundPermissionsAsync().catch(() => null),
       ]);
       if (!isAlive()) return;
       if (p) setProfile(p);
       if (n !== null) setScans(n);
+      if (today !== null) setScansToday(today);
+      if (cam) setCamPerm(cam.status);
+      if (loc) setLocPerm(loc.status);
       // Фото — только для плиток на экране: витрина, редчайшая, самая далёкая.
       const shown = c.data.filter((x) => !x.hidden);
       const wanted = new Set<string>([...ids, rarestCard(shown)?.id ?? '', farthestFind(shown)?.card.id ?? '']);
@@ -100,13 +116,46 @@ export function ProfileScreen({ navigation }: Props) {
   const maxCount = Math.max(1, ...buckets.map((b) => b.count));
   const openCard = (cardId: string) => navigation.navigate('Card', { cardId });
 
+  const scanLimit = scanLimitForAccount(profile?.createdAt ?? null);
+  const settings = useMemo(
+    () => settingsRows({ scansToday, scanLimit, camera: toPermissionState(camPerm), location: toPermissionState(locPerm), version: APP_VERSION }),
+    [scansToday, scanLimit, camPerm, locPerm],
+  );
+
+  const onSettingPress = (key: SettingKey) => {
+    if (key === 'camera' || key === 'location') { void Linking.openSettings(); return; }
+    if (key === 'privacy') { setShowPrivacy((v) => !v); return; }
+    if (key === 'about') { Alert.alert('Lithos', `${APP_VERSION}\n\nМобильная игра-коллекционирование камней.`); return; }
+    if (key === 'wipe') {
+      Alert.alert(WIPE_DIALOG.title, WIPE_DIALOG.body, [
+        { text: WIPE_DIALOG.cancel, style: 'cancel' },
+        { text: WIPE_DIALOG.confirm, style: 'destructive', onPress: () => { void doWipe(); } },
+      ]);
+      return;
+    }
+    Alert.alert('Скоро', 'Эта настройка появится в следующей версии.');
+  };
+
+  const doWipe = async () => {
+    try {
+      await wipeLocalData();
+      // Сброс до корня стека (не просто .navigate('Welcome')): после очистки AsyncStorage возврат
+      // аппаратной кнопкой «назад» не должен приводить на Profile с уже стёртыми локальными данными.
+      // getParent() из вкладки — навигация корневого Stack.Navigator, где и объявлен экран Welcome.
+      navigation.getParent()?.reset({ index: 0, routes: [{ name: 'Welcome' }] });
+    } catch (e) {
+      logError('profile.wipe', e);
+      Alert.alert('Не получилось', toUserMessage(e, MSG.saveFailed));
+    }
+  };
+
   if (cards === null) {
     return (
       <View style={styles.center}>
         {error ? (
           <>
             <Text style={styles.muted}>{error}</Text>
-            <BigButton label="Обновить" onPress={() => { void load(); }} style={styles.stretch} />
+            <BigButton label="Обновить" onPress={() => { void load(); }} />
           </>
         ) : (
           <ActivityIndicator color={colors.accent} size="large" />
@@ -121,8 +170,8 @@ export function ProfileScreen({ navigation }: Props) {
       contentContainerStyle={styles.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(); }} tintColor={colors.text} />}
     >
-      {offline && <Text style={styles.note}>Нет связи — показаны сохранённые данные.</Text>}
-      {error && !offline && <Text style={styles.note}>{error}</Text>}
+      {offline && <Note tone="neutral">Нет связи — показаны сохранённые данные.</Note>}
+      {error && !offline && <Note tone="danger">{error}</Note>}
 
       <View style={styles.hero}>
         {editing ? (
@@ -131,7 +180,7 @@ export function ProfileScreen({ navigation }: Props) {
               value={draft}
               onChangeText={setDraft}
               placeholder={DEFAULT_NAME}
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={colors.textDim}
               style={styles.input}
               maxLength={DISPLAY_NAME_MAX}
               autoFocus
@@ -146,10 +195,9 @@ export function ProfileScreen({ navigation }: Props) {
         ) : (
           <Pressable onPress={() => { setDraft(profile?.displayName ?? ''); setEditing(true); }} accessibilityRole="button" accessibilityLabel="Изменить имя">
             <Text style={styles.name}>{profile?.displayName ?? DEFAULT_NAME}</Text>
-            <Text style={styles.rename}>{profile ? 'нажмите, чтобы изменить имя' : 'имя загрузится при появлении сети'}</Text>
+            <Text style={styles.rename}>{profile ? 'тап, чтобы изменить · до 40 символов' : 'имя загрузится при появлении сети'}</Text>
           </Pressable>
         )}
-        {profile?.createdAt && formatDateRu(profile.createdAt) && <Text style={styles.since}>в Lithos с {formatDateRu(profile.createdAt)}</Text>}
       </View>
 
       <View style={styles.statsRow}>
@@ -158,10 +206,11 @@ export function ProfileScreen({ navigation }: Props) {
         <Stat label="Ячеек" value={String(new Set(visible.map((c) => c.cell_id).filter(Boolean)).size)} />
       </View>
 
-      <Section title="По тирам">
+      <View style={styles.block}>
+        <SectionLabel>Распределение по тирам</SectionLabel>
         {buckets.map((b) => (
           <View key={String(b.tier)} style={styles.barRow}>
-            <Text style={styles.barLabel}>{b.label}</Text>
+            <Text style={styles.barLabel} numberOfLines={1}>{b.label}</Text>
             <View style={styles.barTrack}>
               <View style={[styles.barFill, { width: `${Math.max(b.count > 0 ? 4 : 0, Math.round((b.count / maxCount) * 100))}%`, backgroundColor: tierColor(b.tier) }]} />
             </View>
@@ -169,38 +218,74 @@ export function ProfileScreen({ navigation }: Props) {
           </View>
         ))}
         {visible.length === 0 && <Text style={styles.muted}>Пока нет карточек.</Text>}
-      </Section>
+      </View>
 
       {(rarest || farthest) && (
         <View style={styles.highlights}>
-          {rarest && (
-            <View style={styles.highlight}>
-              <Text style={styles.highlightTitle}>Редчайшая</Text>
-              <CardTile card={rarest} photoUrl={urls.get(rarest.scan_id)} caption={`${rarest.score ?? '—'} очков`} onPress={() => openCard(rarest.id)} />
-            </View>
-          )}
-          {farthest && (
-            <View style={styles.highlight}>
-              <Text style={styles.highlightTitle}>Самая далёкая</Text>
-              <CardTile card={farthest.card} photoUrl={urls.get(farthest.card.scan_id)} caption={`${formatDistance(farthest.km)} от первой находки`} onPress={() => openCard(farthest.card.id)} />
-            </View>
-          )}
+          {rarest && <CardTile card={rarest} photoUrl={urls.get(rarest.scan_id)} kind="Редчайшая" caption={`${rarest.score ?? '—'} очков`} onPress={() => openCard(rarest.id)} />}
+          {farthest && <CardTile card={farthest.card} photoUrl={urls.get(farthest.card.scan_id)} kind="Самая далёкая" caption={`${formatDistance(farthest.km)} от первой находки`} onPress={() => openCard(farthest.card.id)} />}
         </View>
       )}
 
-      <Section title={`Витрина · ${showcase.length} из ${SHOWCASE_MAX}`}>
+      <View style={styles.block}>
+        <View style={styles.showcaseHead}>
+          <SectionLabel>Витрина</SectionLabel>
+          <Text style={styles.showcaseCount}>{showcase.length} / {SHOWCASE_MAX}</Text>
+        </View>
         {showcase.length === 0 ? (
-          <Text style={styles.muted}>Добавьте лучшие карточки кнопкой «В витрину» на экране карточки.</Text>
+          <Text style={styles.muted}>Витрина собирается на экране карточки кнопкой «В витрину».</Text>
         ) : (
           <View style={styles.grid}>
             {showcase.map((c) => (
-              <View key={c.id} style={styles.gridItem}>
-                <CardTile card={c} photoUrl={urls.get(c.scan_id)} onPress={() => openCard(c.id)} />
+              <View key={c.id} style={styles.gridItemXs}>
+                <CardTile card={c} size="xs" photoUrl={urls.get(c.scan_id)} onPress={() => openCard(c.id)} />
               </View>
             ))}
           </View>
         )}
-      </Section>
+        <Text style={styles.footnote}>В прототипе она локальная — без шеринга.</Text>
+      </View>
+
+      <View style={styles.block}>
+        <SectionLabel>Аккаунт</SectionLabel>
+        <View style={styles.account}>
+          <View style={styles.accountRow}>
+            <View style={styles.accountAvatar}>
+              <View style={styles.accountDot} />
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={styles.accountTitle}>{signedIn ? 'Вход через Apple' : 'Анонимный профиль'}</Text>
+              <Text style={styles.accountNote}>{signedIn ? 'Коллекция синхронизируется' : 'Коллекция хранится только на этом телефоне'}</Text>
+            </View>
+          </View>
+          <BigButton
+            label={signedIn ? 'Выйти' : 'Сохранить коллекцию через Apple'}
+            variant="secondary"
+            onPress={() => { if (signedIn) setSignedIn(false); else Alert.alert('Скоро', APPLE_SIGNIN_SOON); }}
+          />
+          <Text style={styles.footnote}>Регистрация не нужна: приложение работает анонимно. Вход только для того, чтобы коллекция пережила смену телефона.</Text>
+        </View>
+      </View>
+
+      <View style={styles.block}>
+        <SectionLabel>Настройки</SectionLabel>
+        <View style={styles.settingsCard}>
+          {settings.map((row, i) => (
+            <Pressable
+              key={row.key}
+              onPress={() => onSettingPress(row.key)}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.settingRow, i > 0 && styles.settingDivider, pressed && styles.pressed]}
+            >
+              <Text style={[styles.settingLabel, row.danger && styles.settingDanger]}>{row.label}</Text>
+              {row.value ? <Text style={styles.settingValue} numberOfLines={1}>{row.value}</Text> : null}
+              <View style={styles.chevron} />
+            </Pressable>
+          ))}
+        </View>
+        {showPrivacy && <Text style={styles.privacyText}>{PRIVACY_TEXT}</Text>}
+        <Text style={styles.version}>{APP_VERSION}</Text>
+      </View>
     </ScrollView>
   );
 }
@@ -216,31 +301,46 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: spacing.md, gap: spacing.md },
-  center: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, gap: spacing.md },
-  stretch: { alignSelf: 'stretch' },
-  muted: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
-  note: { color: '#e0c36a', fontSize: 14, textAlign: 'center' },
-  hero: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, gap: spacing.xs },
-  name: { color: colors.text, fontSize: 26, fontWeight: '800' },
-  rename: { color: colors.textMuted, fontSize: 13 },
-  since: { color: colors.textMuted, fontSize: 13, marginTop: spacing.xs },
-  editRow: { gap: spacing.sm },
-  editButtons: { flexDirection: 'row', gap: spacing.sm },
-  editBtn: { flex: 1, minHeight: 48 },
-  input: { backgroundColor: colors.bg, color: colors.text, fontSize: 18, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, padding: spacing.sm + 4 },
-  statsRow: { flexDirection: 'row', gap: spacing.sm },
-  stat: { flex: 1, backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing.md, alignItems: 'center', gap: 2 },
-  statValue: { color: colors.text, fontSize: 26, fontWeight: '800' },
-  statLabel: { color: colors.textMuted, fontSize: 13 },
-  barRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: 3 },
-  barLabel: { color: colors.text, fontSize: 14, width: 104 },
-  barTrack: { flex: 1, height: 12, borderRadius: radius.full, backgroundColor: colors.surfaceActive, overflow: 'hidden' },
+  content: { padding: 16, gap: 19 },
+  center: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 },
+  muted: { fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 19, color: colors.textMuted },
+  hero: { gap: 7 },
+  name: { fontFamily: fonts.serif, fontSize: 27, lineHeight: 30, color: colors.text },
+  rename: { fontFamily: fonts.sans, fontSize: 13, lineHeight: 17, color: colors.textDim, marginTop: 2 },
+  editRow: { gap: 8 },
+  editButtons: { flexDirection: 'row', gap: 9 },
+  editBtn: { flex: 1 },
+  input: { backgroundColor: colors.surface, color: colors.text, fontFamily: fonts.sans, fontSize: 15, borderRadius: radius.sm, borderWidth: 1, borderColor: 'rgba(63,191,163,0.4)', padding: 12 },
+  statsRow: { flexDirection: 'row', gap: 9 },
+  stat: { flex: 1, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.divider, padding: 15, paddingHorizontal: 13, alignItems: 'flex-start', gap: 5 },
+  statValue: { fontFamily: fonts.monoBold, fontSize: 24, lineHeight: 26, color: colors.text },
+  statLabel: { fontFamily: fonts.sans, fontSize: 12, lineHeight: 15, color: colors.textMuted },
+  block: { gap: 11, padding: 17, borderRadius: radius.lg, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider },
+  barRow: { flexDirection: 'row', alignItems: 'center', gap: 11 },
+  barLabel: { width: 92, flexShrink: 0, fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 16, color: colors.chipText },
+  barTrack: { flex: 1, height: 9, borderRadius: radius.full, backgroundColor: colors.track, overflow: 'hidden' },
   barFill: { height: '100%', borderRadius: radius.full },
-  barCount: { color: colors.text, fontSize: 14, fontWeight: '600', width: 28, textAlign: 'right' },
-  highlights: { flexDirection: 'row', gap: spacing.sm },
-  highlight: { flex: 1, gap: spacing.xs },
-  highlightTitle: { color: colors.textMuted, fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  gridItem: { width: '48%', flexGrow: 1 },
+  barCount: { width: 22, textAlign: 'right', fontFamily: fonts.mono, fontSize: 12, color: colors.textMuted },
+  highlights: { flexDirection: 'row', gap: 9 },
+  showcaseHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  showcaseCount: { fontFamily: fonts.mono, fontSize: 11, lineHeight: 14, color: colors.textDim },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  gridItemXs: { width: '31%' },
+  footnote: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 18, color: colors.textDim },
+  account: { gap: 13 },
+  accountRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  accountAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' },
+  accountDot: { width: 12, height: 12, borderRadius: 6, borderWidth: 1.5, borderColor: colors.textDim },
+  accountTitle: { fontFamily: fonts.sansSemi, fontSize: 14.5, lineHeight: 19, color: colors.text },
+  accountNote: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 17, color: colors.textMuted },
+  settingsCard: { borderRadius: radius.lg, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.divider },
+  settingRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15 },
+  settingDivider: { borderTopWidth: 1, borderTopColor: colors.divider },
+  pressed: { opacity: 0.85 },
+  settingLabel: { flex: 1, fontFamily: fonts.sans, fontSize: 14.5, lineHeight: 19, color: colors.text },
+  settingDanger: { color: colors.dangerAccent },
+  settingValue: { fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 18, color: colors.textDim, maxWidth: 140 },
+  chevron: { width: 8, height: 8, borderRightWidth: 1.6, borderTopWidth: 1.6, borderColor: '#4d5764', transform: [{ rotate: '45deg' }] },
+  privacyText: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 19, color: colors.textMuted },
+  version: { fontFamily: fonts.monoRegular, fontSize: 12, letterSpacing: 0.5, color: colors.textFaint, textAlign: 'center' },
 });
