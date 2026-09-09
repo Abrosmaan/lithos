@@ -127,7 +127,7 @@ describe('callModel', () => {
     expect(out.attempts).toBe(4);
     expect(out.provider).toBe('anthropic');
     expect(out.model).toBe('claude-sonnet-5');
-    expect(out.promptVersion).toBe('main-v1');
+    expect(out.promptVersion).toBe('main-v2.1');
     expect(out.result).toMatchObject({ rock_class: { primary: 'amygdaloidal_basalt' } });
     expect(anthropic.doGenerateCalls).toHaveLength(4);
     expect(google.doGenerateCalls).toHaveLength(0);
@@ -277,7 +277,7 @@ describe('callModel', () => {
         stage: 'main',
         provider: 'anthropic',
         model: 'claude-sonnet-5',
-        prompt_version: 'main-v1',
+        prompt_version: 'main-v2.1',
         tokens_in: 1000,
         tokens_out: 50,
         cost_usd: 0.003285,
@@ -309,7 +309,7 @@ describe('callModel', () => {
     const out = await callModel({ ...mainInput, stage: 'escalation', images: [IMG, IMG, IMG, IMG], priorResult: VALID_SCAN, scanId: 'e1' }, deps);
 
     expect(out.model).toBe('claude-opus-5');
-    expect(out.promptVersion).toBe('escalation-v1');
+    expect(out.promptVersion).toBe('escalation-v2');
     expect((out.result as ScanResult).revision_note).toBe('confirmed');
     const call = anthropic.doGenerateCalls[0]!;
     const systems = call.prompt.filter((m) => m.role === 'system');

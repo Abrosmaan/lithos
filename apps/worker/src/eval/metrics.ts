@@ -83,6 +83,33 @@ export function isConfidentError(result: ScanResult, label: GoldenLabel): boolea
   return result.rock_class.confidence >= CONFIDENT_ERROR_THRESHOLD && !top1Correct(result, label);
 }
 
+/**
+ * Калибровка распределения (main-v2): сумма primary.confidence + Σ alternatives.confidence должна быть ≈ 1
+ * (остаток — «ни один из них»). Окно — допуск eval, не балансовое число: ниже 0.85 модель «недораздала» массу,
+ * выше 1.05 — дала нескольким кандидатам по 0.9.
+ */
+export const CALIBRATION_SUM_RANGE = { min: 0.85, max: 1.05 } as const;
+
+export function probabilitySum(result: ScanResult): number {
+  return result.rock_class.confidence + result.rock_class.alternatives.reduce((s, a) => s + a.confidence, 0);
+}
+
+export function isCalibrated(result: ScanResult): boolean {
+  const sum = probabilitySum(result);
+  return sum >= CALIBRATION_SUM_RANGE.min && sum <= CALIBRATION_SUM_RANGE.max;
+}
+
+/**
+ * Brier/NLL-lite: вероятность, которую модель отдала истинному классу — primary плюс альтернативы, совпадающие
+ * с rock_class / acceptable_alternatives разметки (с точностью до разновидности). Обрезается до 1 (если модель
+ * назвала истину дважды или сумма > 1). Ошибочный ответ без истины в списке — 0.
+ */
+export function truthProbability(result: ScanResult, label: Pick<GoldenLabel, 'rock_class' | 'acceptable_alternatives'>): number {
+  let p = isAcceptable(result.rock_class.primary, label) ? result.rock_class.confidence : 0;
+  for (const a of result.rock_class.alternatives) if (isAcceptable(a.name, label)) p += a.confidence;
+  return Math.min(1, p);
+}
+
 export interface InclusionCounts {
   /** Предсказанные включения с confidence ≥ порога. */
   predicted: number;
@@ -158,6 +185,13 @@ export interface ScanOutcome extends ItemOutcome {
   top1: boolean;
   top2: boolean;
   confidentError: boolean;
+  /** Сумма primary + alternatives (калибровка распределения). */
+  probSum: number;
+  calibrated: boolean;
+  /** Вероятность, отданная истинному классу (0 — истины нет в списке). */
+  truthProb: number;
+  /** Число альтернатив в ответе. */
+  alternatives: number;
   inclusions: InclusionCounts;
   percentages: boolean;
   trap: boolean | null;
@@ -203,6 +237,10 @@ export function scanOutcome(
     top1: top1Correct(result, label),
     top2: top2Correct(result, label),
     confidentError: isConfidentError(result, label),
+    probSum: probabilitySum(result),
+    calibrated: isCalibrated(result),
+    truthProb: truthProbability(result, label),
+    alternatives: result.rock_class.alternatives.length,
     inclusions: inclusionCounts(result, label),
     percentages: hasPercentages(result),
     trap: trapPassed(result, label),
@@ -233,6 +271,10 @@ export function failedOutcome(id: string, stage: Outcome['stage'], meta: Omit<It
     top1: false,
     top2: false,
     confidentError: false,
+    probSum: 0,
+    calibrated: false,
+    truthProb: 0,
+    alternatives: 0,
     inclusions: { predicted: 0, truePositive: 0, labeled: 0, found: 0 },
     percentages: false,
     trap: null,
@@ -271,6 +313,12 @@ export interface ScanSummary extends CommonSummary {
   top2: number | null;
   /** Доля уверенных ошибок среди успешных ответов. */
   confidentErrorRate: number | null;
+  /** Доля ответов с суммой вероятностей в CALIBRATION_SUM_RANGE. */
+  calibratedRate: number | null;
+  /** Средняя вероятность истинного класса (Brier/NLL-lite; 1 — идеал). */
+  truthProbMean: number | null;
+  /** Среднее число альтернатив — цена калибровки в токенах. */
+  alternativesMean: number | null;
   inclusionPrecision: number | null;
   inclusionRecall: number | null;
   /** Доля ответов с процентами состава. */
@@ -340,6 +388,9 @@ export function summarizeScan(outcomes: ScanOutcome[]): ScanSummary {
     top1: ratio(ok.filter((o) => o.top1).length, ok.length),
     top2: ratio(ok.filter((o) => o.top2).length, ok.length),
     confidentErrorRate: ratio(ok.filter((o) => o.confidentError).length, ok.length),
+    calibratedRate: ratio(ok.filter((o) => o.calibrated).length, ok.length),
+    truthProbMean: ratio(ok.reduce((s, o) => s + o.truthProb, 0), ok.length),
+    alternativesMean: ratio(ok.reduce((s, o) => s + o.alternatives, 0), ok.length),
     inclusionPrecision: ratio(inc.truePositive, inc.predicted),
     inclusionRecall: ratio(inc.found, inc.labeled),
     percentagesRate: ratio(okAll.filter((o) => o.percentages).length, okAll.length),

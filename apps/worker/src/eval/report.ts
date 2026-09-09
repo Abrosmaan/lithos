@@ -1,4 +1,5 @@
 // Markdown-отчёт eval: таблица по каждой модели каждой ступени (dev-plan T2.4), список уверенных ошибок для калибровки.
+// Колонки «Калибровка» (сумма вероятностей в окне) и «P(истина)» (средняя вероятность истинного класса) — T5.0.
 import { formatModelSpec, type LlmStage } from '../llm/config.js';
 import { summarizeGate, summarizeScan, type ScanOutcome } from './metrics.js';
 import { isGateOutcomes, isScanOutcomes, type ModelRun } from './run.js';
@@ -20,6 +21,10 @@ export function pct(v: number | null, digits = 1): string {
 
 export function usd(v: number): string {
   return `$${v.toFixed(4)}`;
+}
+
+function num(v: number | null, digits = 2): string {
+  return v === null ? '—' : v.toFixed(digits);
 }
 
 function ms(v: number): string {
@@ -55,19 +60,19 @@ function gateTable(runs: ModelRun[]): string[] {
 function scanTable(runs: ModelRun[], stage: LlmStage): string[] {
   const esc = stage === 'escalation';
   const lines = [
-    `| Модель | n | Ошибок вызова | Top-1 | Top-2 | Уверенные ошибки | Precision включений | Recall включений | Ловушки | С процентами | Стоимость/скан | p50 | p95 | Repair |${esc ? ' Изменил primary |' : ''}`,
-    `|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|${esc ? '---:|' : ''}`,
+    `| Модель | n | Ошибок вызова | Top-1 | Top-2 | Уверенные ошибки | Калибровка | P(истина) | Альтернатив | Precision включений | Recall включений | Ловушки | С процентами | Стоимость/скан | p50 | p95 | Repair |${esc ? ' Изменил primary |' : ''}`,
+    `|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|${esc ? '---:|' : ''}`,
   ];
   for (const r of runs) {
     const note = statusNote(r);
     if (note || !isScanOutcomes(r.outcomes)) {
-      lines.push(`| ${formatModelSpec(r.spec)} | — | — | ${note ?? '—'} | — | — | — | — | — | — | — | — | — | — |${esc ? ' — |' : ''}`);
+      lines.push(`| ${formatModelSpec(r.spec)} | — | — | ${note ?? '—'} | — | — | — | — | — | — | — | — | — | — | — | — | — |${esc ? ' — |' : ''}`);
       continue;
     }
     const s = summarizeScan(r.outcomes);
     const traps = s.trapN ? `${pct(s.trapAccuracy)} (${s.trapN})` : '—';
     lines.push(
-      `| ${formatModelSpec(r.spec)} | ${s.n} | ${s.failedCalls} | ${pct(s.top1)} | ${pct(s.top2)} | ${pct(s.confidentErrorRate)} | ${pct(s.inclusionPrecision)} | ${pct(s.inclusionRecall)} | ${traps} | ${pct(s.percentagesRate)} | ${usd(s.costMeanUsd)} | ${ms(s.latencyP50)} | ${ms(s.latencyP95)} | ${s.repaired} |${esc ? ` ${pct(s.changedPrimaryRate)} |` : ''}`,
+      `| ${formatModelSpec(r.spec)} | ${s.n} | ${s.failedCalls} | ${pct(s.top1)} | ${pct(s.top2)} | ${pct(s.confidentErrorRate)} | ${pct(s.calibratedRate)} | ${num(s.truthProbMean)} | ${num(s.alternativesMean)} | ${pct(s.inclusionPrecision)} | ${pct(s.inclusionRecall)} | ${traps} | ${pct(s.percentagesRate)} | ${usd(s.costMeanUsd)} | ${ms(s.latencyP50)} | ${ms(s.latencyP95)} | ${s.repaired} |${esc ? ` ${pct(s.changedPrimaryRate)} |` : ''}`,
     );
   }
   return lines;

@@ -1,15 +1,16 @@
-// S3 Escalation — тот же системный промпт Main + добавка из ai-pipeline §6.
+// S3 Escalation — тот же системный промпт Main + добавка из ai-pipeline §6 (escalation-v2: плюс ревью списка вероятностей, T5.0).
 // Добавка идёт вторым системным блоком: первый (Main) остаётся кэшируемым префиксом, вердикт S2 меняется на каждый скан.
 import type { ScanResult } from '@lithos/shared';
 import type { SystemModelMessage } from 'ai';
 import type { BuiltPrompt } from './gate.js';
 import { mainSystemMessage, mainUserMessage, type MainPromptArgs } from './main.js';
 
-export const PROMPT_VERSION = 'escalation-v1';
+export const PROMPT_VERSION = 'escalation-v2';
 
 export const ESCALATION_ADDENDUM_TEMPLATE = `A first-pass analysis is attached. Your job is review, not re-identification.
 - Confirm, correct, or reduce confidence on each field. Change a label only if the evidence clearly supports a different one.
 - Be especially skeptical of: fossils, agate, native metals, and any inclusion the first pass rated ≥ 0.8. These are the labels that, if wrong, damage user trust most.
+- Review the probability list too: re-rank primary and alternatives if the evidence supports it, keep probabilities calibrated and summing ≈ 1 (remainder = "none of these"), and keep or rewrite each alternative's reason so it names visible evidence.
 - Write revision_note: one sentence on what you changed and why, or "confirmed".
 
 First-pass result:

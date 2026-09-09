@@ -2,8 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { CONFIDENT_ERROR_THRESHOLD, INCLUSION_CONFIDENCE_THRESHOLD, type ScanResult } from '@lithos/shared';
 import type { GoldenLabel } from './labels.js';
 import {
+  CALIBRATION_SUM_RANGE,
   classMatches,
   gateOutcome,
+  isCalibrated,
+  probabilitySum,
+  truthProbability,
   hasPercentages,
   inclusionCounts,
   isConfidentError,
@@ -92,6 +96,48 @@ describe('confident errors', () => {
     expect(isConfidentError(result({ primary: 'granite', confidence: CONFIDENT_ERROR_THRESHOLD }), label())).toBe(true);
     expect(isConfidentError(result({ primary: 'granite', confidence: CONFIDENT_ERROR_THRESHOLD - 0.01 }), label())).toBe(false);
     expect(isConfidentError(result({ primary: 'basalt', confidence: 0.99 }), label())).toBe(false);
+  });
+});
+
+describe('calibration of the candidate list (main-v2)', () => {
+  const alts = (...a: [ScanResult['rock_class']['primary'], number][]) => a.map(([name, confidence]) => ({ name, confidence }));
+  it('sum of primary + alternatives must fall into CALIBRATION_SUM_RANGE; the window itself is the metric constant', () => {
+    expect(probabilitySum(result({ rock_class: { primary: 'basalt', confidence: 0.6, alternatives: alts(['andesite', 0.25], ['gabbro', 0.1]) } }))).toBeCloseTo(0.95);
+    expect(isCalibrated(result({ rock_class: { primary: 'basalt', confidence: 0.6, alternatives: alts(['andesite', 0.25], ['gabbro', 0.1]) } }))).toBe(true);
+    // «всем по 0.9» — не калибровка
+    expect(isCalibrated(result({ rock_class: { primary: 'basalt', confidence: 0.9, alternatives: alts(['andesite', 0.9]) } }))).toBe(false);
+    // недораздал массу
+    expect(isCalibrated(result({ rock_class: { primary: 'basalt', confidence: 0.5, alternatives: [] } }))).toBe(false);
+    expect(isCalibrated(result({ rock_class: { primary: 'basalt', confidence: CALIBRATION_SUM_RANGE.min, alternatives: [] } }))).toBe(true);
+    expect(isCalibrated(result({ rock_class: { primary: 'basalt', confidence: CALIBRATION_SUM_RANGE.max, alternatives: [] } }))).toBe(true);
+  });
+  it('truth probability sums the mass on acceptable classes (varieties and acceptable_alternatives), capped at 1', () => {
+    const l = label({ rock_class: 'basalt', acceptable_alternatives: ['andesite'] });
+    // primary верен → его confidence
+    expect(truthProbability(result({ rock_class: { primary: 'basalt', confidence: 0.7, alternatives: alts(['gabbro', 0.2]) } }), l)).toBeCloseTo(0.7);
+    // primary неверен, истина второй → её confidence
+    expect(truthProbability(result({ rock_class: { primary: 'gabbro', confidence: 0.5, alternatives: alts(['vesicular_basalt', 0.3], ['diorite', 0.1]) } }), l)).toBeCloseTo(0.3);
+    // истина и допустимая альтернатива обе в списке — складываются
+    expect(truthProbability(result({ rock_class: { primary: 'basalt', confidence: 0.5, alternatives: alts(['andesite', 0.3]) } }), l)).toBeCloseTo(0.8);
+    // истины нет — 0
+    expect(truthProbability(result({ rock_class: { primary: 'gabbro', confidence: 0.9, alternatives: alts(['diorite', 0.1]) } }), l)).toBe(0);
+    // обрезка до 1
+    expect(truthProbability(result({ rock_class: { primary: 'basalt', confidence: 0.9, alternatives: alts(['andesite', 0.9]) } }), l)).toBe(1);
+  });
+  it('summary: calibrated rate, mean truth probability and mean alternatives over rocks only; failed calls excluded', () => {
+    const glass = label({ id: 'tr-10', is_rock: false, rock_class: 'unknown', trap: 'glass_vs_quartz', decoy: { rock_class: 'quartz_vein' } });
+    const outcomes = [
+      scanOutcome(result({ rock_class: { primary: 'basalt', confidence: 0.6, alternatives: alts(['andesite', 0.3]) } }), label(), meta, 'main'),
+      scanOutcome(result({ rock_class: { primary: 'granite', confidence: 0.9, alternatives: alts(['basalt', 0.9], ['gabbro', 0.9], ['diorite', 0.9]) } }), label({ id: 'vc-02' }), meta, 'main'),
+      scanOutcome(result({ rock_class: { primary: 'quartz_vein', confidence: 0.3, alternatives: [] } }), glass, meta, 'main'),
+      failedOutcome('vc-03', 'main', { ...meta, costUsd: 0 }, label({ id: 'vc-03' })),
+    ];
+    const s = summarizeScan(outcomes.filter((o): o is Extract<typeof o, { stage: 'main' }> => o.stage === 'main'));
+    expect(s.calibratedRate).toBe(0.5);
+    expect(s.truthProbMean).toBeCloseTo((0.6 + 0.9) / 2); // vc-02: истина в альтернативах с 0.9, обрезка до 1 не нужна
+    expect(s.alternativesMean).toBe(2);
+    const onlyFailed = [failedOutcome('vc-03', 'main', { ...meta, costUsd: 0 }, label({ id: 'vc-03' }))].filter((o): o is Extract<typeof o, { stage: 'main' }> => o.stage === 'main');
+    expect(summarizeScan(onlyFailed).calibratedRate).toBeNull();
   });
 });
 
