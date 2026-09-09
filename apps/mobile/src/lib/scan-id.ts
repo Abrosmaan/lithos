@@ -3,8 +3,10 @@ import * as Crypto from 'expo-crypto';
 import { LITHOS_SCAN_NAMESPACE, type Sha1, uuidV5 } from './uuid-v5';
 
 export const sha1: Sha1 = async (bytes) => {
-  const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
-  return new Uint8Array(await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA1, buf));
+  // expo-crypto на iOS принимает только TypedArray (ArrayBuffer → ArgumentCastException).
+  // Копия в новый Uint8Array убирает и смещение byteOffset у subarray-вью.
+  const view = new Uint8Array(bytes);
+  return new Uint8Array(await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA1, view));
 };
 
 export function scanIdName(deviceId: string, at: Date): string {
