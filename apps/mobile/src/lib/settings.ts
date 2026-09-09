@@ -1,7 +1,7 @@
 // Настройки профиля (экран 13 прототипа): строки списка, окно счётчика сканов, статусы разрешений, версия,
 // текст о данных. Чистый модуль — без Supabase и нативных вызовов (тестируется в vitest).
 // Лимит сканов — только из @lithos/shared (scanLimitFor / MAX_SCANS_PER_DAY), чисел здесь нет.
-import { MAX_SCANS_PER_DAY, scanLimitFor } from '@lithos/shared';
+import { MAX_SCANS_PER_DAY, scanLimitFor, SHOWCASE_MAX } from '@lithos/shared';
 
 /** Статус разрешения в терминах expo-modules-core PermissionStatus + «ещё не читали». */
 export type PermissionState = 'granted' | 'denied' | 'undetermined' | 'unknown';
@@ -53,7 +53,20 @@ export function appVersionText(version: string | null | undefined, build: string
   return build && build.length > 0 ? `Lithos ${v} · сборка ${build}` : `Lithos ${v}`;
 }
 
-export type SettingKey = 'scans' | 'language' | 'notifications' | 'camera' | 'location' | 'about' | 'privacy' | 'wipe';
+export type SettingKey =
+  | 'scans'
+  | 'language'
+  | 'notifications'
+  | 'camera'
+  | 'location'
+  | 'about'
+  | 'privacy'
+  | 'publications'
+  | 'training'
+  | 'privacyPolicy'
+  | 'termsOfUse'
+  | 'serverWipe'
+  | 'wipe';
 
 export interface SettingsRow {
   key: SettingKey;
@@ -68,9 +81,29 @@ export interface SettingsInput {
   camera: PermissionState;
   location: PermissionState;
   version: string;
+  /** Сколько карточек сейчас в витрине (published=true на сервере); undefined/null — поток E ещё не подключил чтение. */
+  publishedCount?: number | null;
+  /** lithos.users.training_opt_in; null/undefined — ещё не загружено. */
+  trainingOptIn?: boolean | null;
 }
 
-/** Список настроек в порядке прототипа (строки 1469–1477). Языка и уведомлений в прототипе нет — честные значения. */
+/** «3 из 12»; ничего не опубликовано — «Нет»; ещё не загружено — «—» (consent-copy.md §6a). */
+export function publicationsValueText(publishedCount: number | null | undefined, max: number = SHOWCASE_MAX): string {
+  if (publishedCount == null) return '—';
+  return publishedCount === 0 ? 'Нет' : `${publishedCount} из ${max}`;
+}
+
+/** «Разрешено» / «Отключено»; ещё не загружено — «—» (consent-copy.md §6b). */
+export function trainingValueText(trainingOptIn: boolean | null | undefined): string {
+  if (trainingOptIn == null) return '—';
+  return trainingOptIn ? 'Разрешено' : 'Отключено';
+}
+
+/**
+ * Список настроек в порядке прототипа (строки 1469–1477) + новые пункты compliance (T6.0 часть 3, consent-copy.md
+ * §6), вставленные после «Приватность и данные» и перед «Удалить все данные». Языка и уведомлений в прототипе
+ * нет — честные значения. Обработку press (кроме camera/location/privacy/about/wipe) подключает поток E.
+ */
 export function settingsRows(input: SettingsInput): SettingsRow[] {
   return [
     { key: 'scans', label: 'Сканов сегодня', value: scansTodayText(input.scansToday, input.scanLimit) },
@@ -80,15 +113,45 @@ export function settingsRows(input: SettingsInput): SettingsRow[] {
     { key: 'location', label: 'Геопозиция', value: GEO_PERMISSION_RU[input.location] },
     { key: 'about', label: 'О приложении', value: input.version },
     { key: 'privacy', label: 'Приватность и данные', value: '' },
+    { key: 'publications', label: 'Мои публикации', value: publicationsValueText(input.publishedCount) },
+    { key: 'training', label: 'Обучение модели', value: trainingValueText(input.trainingOptIn) },
+    { key: 'privacyPolicy', label: 'Политика конфиденциальности', value: '' },
+    { key: 'termsOfUse', label: 'Пользовательское соглашение', value: '' },
+    { key: 'serverWipe', label: 'Удалить данные на сервере', value: '', danger: true },
     { key: 'wipe', label: 'Удалить все данные', value: '', danger: true },
   ];
 }
 
-/** Текст о данных — тот же, что в карточке «Что мы делаем с фото» на приветствии (прототип, строка 92). */
+/** Текст о данных (consent-copy.md §5) — «Приватность и данные» в профиле. Витрина = публикация, не молчание. */
 export const PRIVACY_TEXT =
-  'Мы храним все снимки камней и учим на них модель определять породы точнее — без этого вердикт остаётся приблизительным. ' +
-  'Снимки не привязаны к имени, не публикуются и не показываются другим пользователям. ' +
-  'Регистрация не нужна: приложение работает анонимно, коллекция привязана к этому телефону.';
+  'Снимки камней хранятся у нас: по ним модель определяет породу, и на них же мы учим её работать точнее. ' +
+  'Фото уходит к моделям Anthropic и Google для определения — на своих моделях они его не учат.\n\n' +
+  'Ваши находки по умолчанию видны только вам. Опубликованными становятся те, что вы добавили в витрину: у них ' +
+  'другие видят фото, породу, тир, ваше имя и место с точностью около километра — точных координат не видит ' +
+  'никто. Убрать из витрины можно в любой момент.\n\n' +
+  'Регистрация не нужна: приложение работает анонимно, аккаунт не привязан к почте, телефону или соцсетям. ' +
+  'Сырые ответы моделей храним 90 дней. Удалить данные — кнопками ниже.';
+
+/** Пояснение под списком «Мои публикации», когда есть хотя бы одна публикация (consent-copy.md §6a). */
+export const PUBLICATIONS_TEXT =
+  'Опубликованные находки видны другим в витрине и на карте. Чтобы убрать любую, откройте её карточку и нажмите «Убрать из витрины».';
+
+/** То же место, если публикаций нет (consent-copy.md §6a). */
+export const PUBLICATIONS_EMPTY_TEXT = 'Вы пока ничего не опубликовали. Все находки видны только вам.';
+
+/** Пояснение под переключателем «Обучение модели» (consent-copy.md §6b). */
+export const TRAINING_TEXT =
+  'Мы учим свою модель определять породы на снимках пользователей. Можно отключить — тогда ваши новые и ' +
+  'сохранённые снимки не попадут в будущие обучающие выборки. То, чему модель уже научилась, отменить нельзя: ' +
+  '«разучиться» она не может.';
+
+/** Подтверждение при выключении переключателя «Обучение модели» (consent-copy.md §6b). */
+export const TRAINING_OPT_OUT_DIALOG = {
+  title: 'Отключить обучение?',
+  body: 'Ваши снимки перестанут попадать в обучающие выборки. Определение породы продолжит работать как раньше.',
+  confirm: 'Отключить',
+  cancel: 'Отмена',
+} as const;
 
 /** Тексты диалога «Удалить все данные»: стираем только телефон, записи в базе остаются. */
 export const WIPE_DIALOG = {
@@ -97,6 +160,23 @@ export const WIPE_DIALOG = {
   confirm: 'Удалить',
   cancel: 'Отмена',
 } as const;
+
+/**
+ * Тексты диалога «Удалить данные на сервере» (consent-copy.md §6c) — отдельно от WIPE_DIALOG (тот стирает
+ * только телефон). До появления lib/profile.ts#deleteServerData этот пункт в UI показывать нельзя.
+ */
+export const SERVER_WIPE_DIALOG = {
+  title: 'Удалить всё с сервера?',
+  body:
+    'Навсегда исчезнут: все карточки, все снимки, сканы, дневник мест и публикации. Опубликованные находки ' +
+    'пропадут с чужих карт. Восстановить не получится — резервной копии для вас у нас нет.\n\n' +
+    'Приложение останется установленным и откроется как в первый раз.',
+  confirm: 'Удалить навсегда',
+  cancel: 'Отмена',
+} as const;
+
+export const SERVER_WIPE_DONE = 'Данные удалены. Приложение открыто заново.';
+export const SERVER_WIPE_FAILED = 'Не получилось удалить данные. Проверьте связь и попробуйте ещё раз.';
 
 /** Вход через Apple: бэкенда нет — одна честная фраза, ничего сверх. */
 export const APPLE_SIGNIN_SOON = 'Скоро: вход через Apple, чтобы коллекция пережила смену телефона';

@@ -1,5 +1,6 @@
 // Профиль (spec §8, §12; T3.3; DESIGN_SYSTEM.md экран 13): имя (lithos.users.display_name), статистика,
-// распределение по тирам, редчайшая/самая далёкая находка, витрина, блоки «Аккаунт» и «Настройки» (T5.3).
+// распределение по тирам, редчайшая/самая далёкая находка, мои публикации (T6.1, витрина = публикация,
+// cards.published — не локальный AsyncStorage), блоки «Аккаунт» и «Настройки» (T5.3, T6.1 поток F/E3).
 import { Camera } from 'expo-camera';
 import Constants from 'expo-constants';
 import { getForegroundPermissionsAsync } from 'expo-location';
@@ -12,13 +13,31 @@ import { CardTile } from '../components/CardTile';
 import { SettingsList } from '../components/SettingsList';
 import { Note, SectionLabel } from '../components/ui';
 import type { CardRow } from '../lib/card-types';
+import { SHOWCASE_PROFILE_FOOTNOTE } from '../lib/consent';
 import { logError, MSG, toUserMessage } from '../lib/errors';
 import { farthestFind, formatDistance } from '../lib/geo-math';
 import { loadCards } from '../lib/offline-cache';
 import { fetchPrimaryPhotoUrls } from '../lib/photo-urls';
-import { countScans, countScansToday, DISPLAY_NAME_MAX, fetchProfile, type Profile, updateDisplayName, wipeLocalData } from '../lib/profile';
-import { pruneShowcase, readShowcase, SHOWCASE_MAX } from '../lib/showcase';
-import { APPLE_SIGNIN_SOON, appVersionText, PRIVACY_TEXT, scanLimitForAccount, type SettingKey, settingsRows, toPermissionState, WIPE_DIALOG } from '../lib/settings';
+import { countScans, countScansToday, deleteServerData, DISPLAY_NAME_MAX, fetchProfile, type Profile, setTrainingOptIn, updateDisplayName, wipeLocalData } from '../lib/profile';
+import { summarizeBulkUnpublish, UNPUBLISH_ALL_DIALOG } from '../lib/publications';
+import { setPublished } from '../lib/publish';
+import {
+  APPLE_SIGNIN_SOON,
+  appVersionText,
+  PRIVACY_TEXT,
+  PUBLICATIONS_EMPTY_TEXT,
+  PUBLICATIONS_TEXT,
+  publicationsValueText,
+  scanLimitForAccount,
+  SERVER_WIPE_DIALOG,
+  SERVER_WIPE_DONE,
+  SERVER_WIPE_FAILED,
+  type SettingKey,
+  settingsRows,
+  toPermissionState,
+  TRAINING_OPT_OUT_DIALOG,
+  WIPE_DIALOG,
+} from '../lib/settings';
 import { rarestCard, tierDistribution } from '../lib/stats';
 import type { TabScreenProps } from '../navigation/types';
 import { colors, fonts, radius, tierColor } from '../theme';
@@ -34,7 +53,6 @@ export function ProfileScreen({ navigation }: Props) {
   const [scans, setScans] = useState<number | null>(null);
   const [scansToday, setScansToday] = useState<number | null>(null);
   const [cards, setCards] = useState<CardRow[] | null>(null);
-  const [showcaseIds, setShowcaseIds] = useState<string[]>([]);
   const [urls, setUrls] = useState<Map<string, string>>(new Map());
   const [offline, setOffline] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +64,10 @@ export function ProfileScreen({ navigation }: Props) {
   const [camPerm, setCamPerm] = useState<string>('unknown');
   const [locPerm, setLocPerm] = useState<string>('unknown');
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showPublicationsInfo, setShowPublicationsInfo] = useState(false);
+  const [trainingBusy, setTrainingBusy] = useState(false);
+  const [unpublishing, setUnpublishing] = useState(false);
+  const [serverWiping, setServerWiping] = useState(false);
   const seq = useRef(0);
   const insets = useSafeAreaInsets(); // вкладка без хедера: верх контента ушёл бы под Dynamic Island
 
@@ -53,13 +75,9 @@ export function ProfileScreen({ navigation }: Props) {
     const my = ++seq.current;
     const isAlive = () => isFocused() && my === seq.current;
     try {
-      const [c, stored] = await Promise.all([loadCards(), readShowcase()]);
-      if (!isAlive()) return;
-      // Витрина: id карточек, которых больше нет среди видимых, вычищаются (только не офлайн — кэш может быть неполным).
-      const ids = c.offline ? stored : await pruneShowcase(stored, new Set(c.data.filter((x) => !x.hidden).map((x) => x.id)));
+      const c = await loadCards();
       if (!isAlive()) return;
       setCards(c.data);
-      setShowcaseIds(ids);
       setOffline(c.offline);
       setError(null);
       // Имя, счётчики, разрешения — только из сети/системы; офлайн остаются прошлые значения / «—».
@@ -76,9 +94,9 @@ export function ProfileScreen({ navigation }: Props) {
       if (today !== null) setScansToday(today);
       if (cam) setCamPerm(cam.status);
       if (loc) setLocPerm(loc.status);
-      // Фото — только для плиток на экране: витрина, редчайшая, самая далёкая.
+      // Фото — только для плиток на экране: мои публикации, редчайшая, самая далёкая.
       const shown = c.data.filter((x) => !x.hidden);
-      const wanted = new Set<string>([...ids, rarestCard(shown)?.id ?? '', farthestFind(shown)?.card.id ?? '']);
+      const wanted = new Set<string>([...shown.filter((x) => x.published).map((x) => x.id), rarestCard(shown)?.id ?? '', farthestFind(shown)?.card.id ?? '']);
       const photos = await fetchPrimaryPhotoUrls(shown.filter((x) => wanted.has(x.id)).map((x) => x.scan_id));
       if (isAlive()) setUrls(photos);
     } catch (e) {
@@ -115,20 +133,42 @@ export function ProfileScreen({ navigation }: Props) {
   const buckets = useMemo(() => tierDistribution(visible), [visible]);
   const rarest = useMemo(() => rarestCard(visible), [visible]);
   const farthest = useMemo(() => farthestFind(visible), [visible]);
-  const showcase = useMemo(() => showcaseIds.map((id) => visible.find((c) => c.id === id)).filter((c): c is CardRow => !!c), [showcaseIds, visible]);
+  // Мои публикации: витрина стала серверной (T6.1 §2.2) — источник правды это cards.published, а не
+  // локальный AsyncStorage-список (lib/showcase.ts), который CardScreen больше не пополняет.
+  const publications = useMemo(() => visible.filter((c) => c.published), [visible]);
   const maxCount = Math.max(1, ...buckets.map((b) => b.count));
   const openCard = (cardId: string) => navigation.navigate('Card', { cardId });
 
   const scanLimit = scanLimitForAccount(profile?.createdAt ?? null);
   const settings = useMemo(
-    () => settingsRows({ scansToday, scanLimit, camera: toPermissionState(camPerm), location: toPermissionState(locPerm), version: APP_VERSION }),
-    [scansToday, scanLimit, camPerm, locPerm],
+    () => settingsRows({
+      scansToday,
+      scanLimit,
+      camera: toPermissionState(camPerm),
+      location: toPermissionState(locPerm),
+      version: APP_VERSION,
+      publishedCount: cards ? publications.length : null,
+      trainingOptIn: profile?.trainingOptIn ?? null,
+    }),
+    [scansToday, scanLimit, camPerm, locPerm, cards, publications.length, profile?.trainingOptIn],
   );
 
   const onSettingPress = (key: SettingKey) => {
+    if (serverWiping) return;
     if (key === 'camera' || key === 'location') { void Linking.openSettings(); return; }
     if (key === 'privacy') { setShowPrivacy((v) => !v); return; }
+    if (key === 'publications') { setShowPublicationsInfo((v) => !v); return; }
     if (key === 'about') { Alert.alert('Lithos', `${APP_VERSION}\n\nМобильная игра-коллекционирование камней.`); return; }
+    if (key === 'training') { onTrainingPress(); return; }
+    if (key === 'privacyPolicy') { navigation.navigate('Policy', { doc: 'privacy' }); return; }
+    if (key === 'termsOfUse') { navigation.navigate('Policy', { doc: 'terms' }); return; }
+    if (key === 'serverWipe') {
+      Alert.alert(SERVER_WIPE_DIALOG.title, SERVER_WIPE_DIALOG.body, [
+        { text: SERVER_WIPE_DIALOG.cancel, style: 'cancel' },
+        { text: SERVER_WIPE_DIALOG.confirm, style: 'destructive', onPress: () => { void doServerWipe(); } },
+      ]);
+      return;
+    }
     if (key === 'wipe') {
       Alert.alert(WIPE_DIALOG.title, WIPE_DIALOG.body, [
         { text: WIPE_DIALOG.cancel, style: 'cancel' },
@@ -150,6 +190,81 @@ export function ProfileScreen({ navigation }: Props) {
       logError('profile.wipe', e);
       Alert.alert('Не получилось', toUserMessage(e, MSG.saveFailed));
     }
+  };
+
+  // Удаление данных на сервере (consent-copy.md §6c) — необратимо, поэтому после успеха экран не должен
+  // делать вид, что коллекция на месте: сбрасываем стек на Welcome, как doWipe() выше. serverWiping блокирует
+  // повторные нажатия по настройкам, пока запрос летит (RPC + удаление файлов в Storage — не мгновенно).
+  const doServerWipe = async () => {
+    setServerWiping(true);
+    try {
+      await deleteServerData();
+      Alert.alert('Готово', SERVER_WIPE_DONE, [
+        { text: 'ОК', onPress: () => navigation.getParent()?.reset({ index: 0, routes: [{ name: 'Welcome' }] }) },
+      ]);
+    } catch (e) {
+      logError('profile.serverWipe', e);
+      Alert.alert('Не получилось', SERVER_WIPE_FAILED);
+      setServerWiping(false);
+    }
+  };
+
+  // Обучение модели (consent-copy.md §6b): включение — сразу, отключение — только после подтверждения
+  // (TRAINING_OPT_OUT_DIALOG). Оптимистичное переключение с откатом при ошибке сервера, как doPublish в CardScreen.
+  const setTraining = async (value: boolean) => {
+    if (!profile || trainingBusy) return;
+    const prev = profile;
+    setTrainingBusy(true);
+    setProfile({ ...profile, trainingOptIn: value });
+    try {
+      await setTrainingOptIn(value);
+    } catch (e) {
+      logError('profile.trainingOptIn', e);
+      setProfile(prev);
+      Alert.alert('Не получилось', toUserMessage(e, MSG.saveFailed));
+    } finally {
+      setTrainingBusy(false);
+    }
+  };
+
+  const onTrainingPress = () => {
+    if (!profile || trainingBusy) return;
+    if (profile.trainingOptIn) {
+      Alert.alert(TRAINING_OPT_OUT_DIALOG.title, TRAINING_OPT_OUT_DIALOG.body, [
+        { text: TRAINING_OPT_OUT_DIALOG.cancel, style: 'cancel' },
+        { text: TRAINING_OPT_OUT_DIALOG.confirm, style: 'destructive', onPress: () => { void setTraining(false); } },
+      ]);
+    } else {
+      void setTraining(true);
+    }
+  };
+
+  // «Убрать все публикации» одним действием (T6.0 §2.3): Promise.allSettled — частичный сетевой отказ на
+  // одной находке не должен молчать об остальных. summarizeBulkUnpublish формирует честный текст в обоих
+  // случаях (см. lib/publications.ts).
+  const unpublishAll = async () => {
+    const targets = publications;
+    if (targets.length === 0 || unpublishing) return;
+    setUnpublishing(true);
+    try {
+      const results = await Promise.allSettled(targets.map((c) => setPublished(c.id, false)));
+      const okIds = new Set(targets.filter((_, i) => results[i]?.status === 'fulfilled').map((c) => c.id));
+      if (okIds.size > 0) {
+        setCards((prev) => (prev ? prev.map((c) => (okIds.has(c.id) ? { ...c, published: false, published_at: null } : c)) : prev));
+      }
+      const { title, message } = summarizeBulkUnpublish(targets.length, okIds.size);
+      Alert.alert(title, message);
+    } finally {
+      setUnpublishing(false);
+    }
+  };
+
+  const onUnpublishAllPress = () => {
+    if (publications.length === 0 || unpublishing) return;
+    Alert.alert(UNPUBLISH_ALL_DIALOG.title, UNPUBLISH_ALL_DIALOG.body, [
+      { text: UNPUBLISH_ALL_DIALOG.cancel, style: 'cancel' },
+      { text: UNPUBLISH_ALL_DIALOG.confirm, style: 'destructive', onPress: () => { void unpublishAll(); } },
+    ]);
   };
 
   if (cards === null) {
@@ -232,21 +347,24 @@ export function ProfileScreen({ navigation }: Props) {
 
       <View style={styles.block}>
         <View style={styles.showcaseHead}>
-          <SectionLabel>Витрина</SectionLabel>
-          <Text style={styles.showcaseCount}>{showcase.length} / {SHOWCASE_MAX}</Text>
+          <SectionLabel>Мои публикации</SectionLabel>
+          <Text style={styles.showcaseCount}>{publicationsValueText(cards ? publications.length : null)}</Text>
         </View>
-        {showcase.length === 0 ? (
-          <Text style={styles.muted}>Витрина собирается на экране карточки кнопкой «В витрину».</Text>
+        {publications.length === 0 ? (
+          <Text style={styles.muted}>{PUBLICATIONS_EMPTY_TEXT}</Text>
         ) : (
-          <View style={styles.grid}>
-            {showcase.map((c) => (
-              <View key={c.id} style={styles.gridItemXs}>
-                <CardTile card={c} size="xs" photoUrl={urls.get(c.scan_id)} onPress={() => openCard(c.id)} />
-              </View>
-            ))}
-          </View>
+          <>
+            <View style={styles.grid}>
+              {publications.map((c) => (
+                <View key={c.id} style={styles.gridItemXs}>
+                  <CardTile card={c} size="xs" photoUrl={urls.get(c.scan_id)} onPress={() => openCard(c.id)} />
+                </View>
+              ))}
+            </View>
+            <Text style={styles.footnote}>{SHOWCASE_PROFILE_FOOTNOTE}</Text>
+            <BigButton label="Убрать все публикации" variant="secondary" onPress={onUnpublishAllPress} loading={unpublishing} disabled={unpublishing} />
+          </>
         )}
-        <Text style={styles.footnote}>В прототипе она локальная — без шеринга.</Text>
       </View>
 
       <View style={styles.block}>
@@ -272,8 +390,10 @@ export function ProfileScreen({ navigation }: Props) {
 
       <View style={styles.block}>
         <SectionLabel>Настройки</SectionLabel>
+        {serverWiping && <Note tone="neutral">Удаляем данные на сервере…</Note>}
         <SettingsList rows={settings} onPress={onSettingPress} />
         {showPrivacy && <Text style={styles.privacyText}>{PRIVACY_TEXT}</Text>}
+        {showPublicationsInfo && <Text style={styles.privacyText}>{publications.length === 0 ? PUBLICATIONS_EMPTY_TEXT : PUBLICATIONS_TEXT}</Text>}
         <Text style={styles.version}>{APP_VERSION}</Text>
       </View>
     </ScrollView>

@@ -7,6 +7,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CardTile } from '../components/CardTile';
 import { BigButton } from '../components/BigButton';
+import { PublicFindTile } from '../components/PublicFindTile';
 import { Note, SectionLabel } from '../components/ui';
 import { rockClassRu } from '../lib/card-facts';
 import type { CardRow } from '../lib/card-types';
@@ -18,6 +19,7 @@ import { requestGeoFix } from '../lib/location';
 import { loadCards, readCachedCards } from '../lib/offline-cache';
 import { fetchPrimaryPhotoUrls } from '../lib/photo-urls';
 import { fallbackPlaceName, placeNameForCell } from '../lib/place-name';
+import { fetchPublicPhotoUrl, listPublicFinds, type PublicFindRow } from '../lib/publish';
 import type { RootScreenProps } from '../navigation/types';
 import { colors, density, fonts, radius, tierColors } from '../theme';
 
@@ -46,8 +48,20 @@ export function DiaryScreen({ navigation, route }: Props) {
   const [useGeo, setUseGeo] = useState(!paramCell);
   const [placeName, setPlaceName] = useState<string | null>(null);
   const [urls, setUrls] = useState<Map<string, string>>(new Map());
+  // «Здесь находили другие» (T6.1-E2): отдельное состояние и отдельная загрузка от своих карточек выше —
+  // ошибка сети здесь не должна портить остальной экран (T6.0-fixes-and-social.md §2.2, п.6). null — ещё
+  // не загружено (спиннер), [] после загрузки — «никто не публиковал» либо ошибка (othersError не null).
+  const [others, setOthers] = useState<PublicFindRow[] | null>(null);
+  const [othersCursor, setOthersCursor] = useState<string | null>(null);
+  const [othersMore, setOthersMore] = useState(false);
+  const [othersError, setOthersError] = useState<string | null>(null);
+  const [otherUrls, setOtherUrls] = useState<Map<string, string>>(new Map());
   const insets = useSafeAreaInsets();
   const seq = useRef(0);
+  // Для догрузки страниц: актуальная ячейка и признак живого экрана — сравниваются после await.
+  const cellIdRef = useRef<string | null>(null);
+  const othersAlive = useRef(true);
+  useEffect(() => () => { othersAlive.current = false; }, []);
 
   const resolveCell = useCallback(async (): Promise<{ cellId: string; source: CellSource } | null> => {
     if (paramCell && !useGeo) return { cellId: paramCell, source: 'card' };
@@ -101,6 +115,61 @@ export function DiaryScreen({ navigation, route }: Props) {
     return () => { alive = false; };
   }, [currentCellId]);
 
+  // «Здесь находили другие» (T6.0-fixes-and-social.md §2.3): агрегат по ячейке, отдельный запрос от
+  // fetchDiaryCell/listCardsInCell выше — падает тихо, дневник остаётся рабочим и без чужого раздела.
+  useEffect(() => {
+    if (!currentCellId) return;
+    let alive = true;
+    cellIdRef.current = currentCellId;
+    setOthers(null);
+    setOthersCursor(null);
+    setOthersError(null);
+    setOtherUrls(new Map());
+    void listPublicFinds({ cellId: currentCellId })
+      .then((page) => { if (!alive) return; setOthers(page.items); setOthersCursor(page.nextCursor); })
+      .catch((e) => {
+        if (!alive) return;
+        logError('diary.others', e);
+        setOthers([]);
+        setOthersError(toUserMessage(e, MSG.loadFailed));
+      });
+    return () => { alive = false; };
+  }, [currentCellId]);
+
+  // Фото чужих находок — по одному (fetchPublicPhotoUrl не бросает, сам возвращает null при отказе).
+  useEffect(() => {
+    if (!others || others.length === 0) return;
+    let alive = true;
+    void Promise.all(others.map(async (f) => [f.id, await fetchPublicPhotoUrl(f.id)] as const)).then((pairs) => {
+      if (!alive) return;
+      setOtherUrls((prev) => {
+        const next = new Map(prev);
+        for (const [id, url] of pairs) if (url) next.set(id, url);
+        return next;
+      });
+    });
+    return () => { alive = false; };
+  }, [others]);
+
+  const loadMoreOthers = async () => {
+    if (!currentCellId || !othersCursor || othersMore) return;
+    // Ячейка может смениться, пока летит запрос (экран пересчитывает её на каждом фокусе), а экран —
+    // размонтироваться. Дописывать страницу старой ячейки в список новой нельзя, поэтому ячейка
+    // запоминается до запроса и сверяется после.
+    const cellId = currentCellId;
+    setOthersMore(true);
+    try {
+      const page = await listPublicFinds({ cellId, cursor: othersCursor });
+      if (!othersAlive.current || cellIdRef.current !== cellId) return;
+      setOthers((prev) => [...(prev ?? []), ...page.items]);
+      setOthersCursor(page.nextCursor);
+    } catch (e) {
+      logError('diary.others.more', e); // первая страница уже показана — тихо не добавляем следующую
+    } finally {
+      if (othersAlive.current) setOthersMore(false);
+    }
+  };
+
   const toCamera = () => navigation.navigate('Tabs', { screen: 'Camera' }, { pop: true });
   const pad = { paddingBottom: insets.bottom + 30 };
 
@@ -135,6 +204,9 @@ export function DiaryScreen({ navigation, route }: Props) {
   const center = cellCenter(cellId);
   const shownCards = cards.filter((c) => !c.hidden); // found считается с родителями после раскола, список — без них
   const pct = progress.total > 0 ? progress.foundCount / progress.total : 0;
+  // Свои же публикации не должны показываться в «Здесь находили другие» — это чужой раздел; свои находки
+  // этой ячейки уже видны выше, в «Находки в ячейке» (T6.0-fixes-and-social.md §2.2, п.4, применено и здесь).
+  const otherItems = others ? others.filter((f) => !cards.some((c) => c.id === f.id)) : null;
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, pad]}>
@@ -216,6 +288,32 @@ export function DiaryScreen({ navigation, route }: Props) {
               </View>
             ))}
           </View>
+        )}
+      </View>
+
+      <View style={styles.section}>
+        <SectionLabel>Здесь находили другие</SectionLabel>
+        {otherItems === null ? (
+          <ActivityIndicator color={colors.accent} />
+        ) : othersError && otherItems.length === 0 ? (
+          <Text style={styles.muted}>{othersError}</Text>
+        ) : otherItems.length === 0 ? (
+          <Text style={styles.muted}>Здесь пока никто ничего не публиковал.</Text>
+        ) : (
+          <>
+            <View style={styles.grid}>
+              {otherItems.map((f) => (
+                <View key={f.id} style={styles.gridItem}>
+                  <PublicFindTile find={f} photoUrl={otherUrls.get(f.id)} onPress={() => navigation.navigate('PublicFind', { find: f })} />
+                </View>
+              ))}
+            </View>
+            {othersCursor && (
+              <Pressable onPress={() => { void loadMoreOthers(); }} disabled={othersMore} accessibilityRole="button">
+                <Text style={styles.link}>{othersMore ? 'Загрузка…' : 'Показать ещё'}</Text>
+              </Pressable>
+            )}
+          </>
         )}
       </View>
 

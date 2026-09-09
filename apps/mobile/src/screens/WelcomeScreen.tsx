@@ -6,7 +6,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigButton } from '../components/BigButton';
 import { StepRow } from '../components/ui';
-import { markWelcomeSeen } from '../lib/prefs';
+import { ONBOARDING_CONSENT, ONBOARDING_PHOTO, TRAINING_CONSENT_CHECKBOX } from '../lib/consent';
+import { markConsentVersion, markWelcomeSeen } from '../lib/prefs';
+import { commitTrainingChoice } from '../lib/profile';
 import type { RootStackParamList } from '../navigation/types';
 import { colors, fonts, placeholderStripes, type } from '../theme';
 
@@ -18,18 +20,25 @@ const STEPS = [
   { title: 'Соберите место', body: 'Дневник показывает, какие породы здесь ожидаемы и что уже найдено.' },
 ] as const;
 
-const PRIVACY_MORE =
-  'Снимки лежат в закрытом хранилище проекта и доступны только вам и модели. Имя, координаты и снимки не публикуются ' +
-  'и другим пользователям не показываются. Удалить все данные можно в профиле.';
-
 export function WelcomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const [more, setMore] = useState(false);
+  // Согласие на обучение — отдельная галочка, отдельная от принятия соглашения/политики (T6.1-F, замечание 1).
+  // По умолчанию не отмечена: отказ не блокирует онбординг, это единственный необязательный пункт на экране.
+  const [trainingConsent, setTrainingConsent] = useState(false);
 
   const start = () => {
     void markWelcomeSeen();
+    // Онбординг уже показал актуальную формулировку (ONBOARDING_PHOTO/ONBOARDING_CONSENT) — новый пользователь
+    // не должен сразу же увидеть ConsentScreen с «мы меняем правила» после того, как только что их принял.
+    void markConsentVersion();
+    // Сессия на этот момент может быть ещё не создана — commitTrainingChoice сохраняет выбор локально сразу
+    // и пробует отправить на сервер; при неудаче досылает его при первой возможности (lib/profile.ts).
+    void commitTrainingChoice(trainingConsent);
     navigation.replace('Tabs', { screen: 'Camera' });
   };
+
+  const openPolicy = (doc: 'privacy' | 'terms') => navigation.navigate('Policy', { doc });
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 26 }]}>
@@ -50,16 +59,28 @@ export function WelcomeScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.dataCard}>
-        <View style={styles.dataHead}>
-          <View style={styles.checkbox} />
-          <Text style={type.bodyStrong}>Что мы делаем с фото</Text>
-        </View>
-        <Text style={styles.dataText}>
-          Мы храним все снимки камней и учим на них модель определять породы точнее — без этого вердикт остаётся приблизительным. Снимки не привязаны к имени, не публикуются и не показываются другим пользователям.
-        </Text>
-        {more ? <Text style={styles.dataText}>{PRIVACY_MORE}</Text> : null}
+        <Text style={type.bodyStrong}>{ONBOARDING_PHOTO.title}</Text>
+        <Text style={styles.dataText}>{ONBOARDING_PHOTO.body}</Text>
+        {more ? <Text style={styles.dataText}>{ONBOARDING_PHOTO.more}</Text> : null}
         <Pressable onPress={() => setMore((v) => !v)} accessibilityRole="button" hitSlop={6}>
-          <Text style={styles.link}>{more ? 'Свернуть' : 'Подробнее о данных'}</Text>
+          <Text style={styles.link}>{more ? ONBOARDING_PHOTO.lessLabel : ONBOARDING_PHOTO.moreLabel}</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.trainingRow}
+          onPress={() => setTrainingConsent((v) => !v)}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: trainingConsent }}
+          accessibilityLabel={TRAINING_CONSENT_CHECKBOX.label}
+          hitSlop={4}
+        >
+          <View style={[styles.checkbox, trainingConsent && styles.checkboxChecked]}>
+            {trainingConsent ? <Text style={styles.checkboxMark}>✓</Text> : null}
+          </View>
+          <View style={styles.trainingTextWrap}>
+            <Text style={styles.dataText}>{TRAINING_CONSENT_CHECKBOX.label}</Text>
+            <Text style={styles.trainingNote}>{TRAINING_CONSENT_CHECKBOX.note}</Text>
+          </View>
         </Pressable>
       </View>
 
@@ -67,7 +88,17 @@ export function WelcomeScreen({ navigation }: Props) {
 
       <View style={styles.footer}>
         <BigButton label="Найти первый камень" onPress={start} />
-        <Text style={styles.consent}>Регистрация не нужна. Продолжая, вы соглашаетесь на хранение снимков для обучения модели.</Text>
+        <Text style={styles.consent}>
+          {ONBOARDING_CONSENT.before}
+          <Text style={styles.consentLink} onPress={() => openPolicy('terms')} accessibilityRole="link">
+            {ONBOARDING_CONSENT.termsLabel}
+          </Text>
+          {ONBOARDING_CONSENT.between}
+          <Text style={styles.consentLink} onPress={() => openPolicy('privacy')} accessibilityRole="link">
+            {ONBOARDING_CONSENT.privacyLabel}
+          </Text>
+          {ONBOARDING_CONSENT.after}
+        </Text>
       </View>
     </ScrollView>
   );
@@ -87,11 +118,16 @@ const styles = StyleSheet.create({
   lead: { fontFamily: fonts.sans, fontSize: 14.5, lineHeight: 22, color: colors.textMuted },
   steps: { gap: 11 },
   dataCard: { padding: 16, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, gap: 9 },
-  dataHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  checkbox: { width: 15, height: 15, borderRadius: 3, borderWidth: 1.5, borderColor: colors.accentBright },
   dataText: { fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 20, color: colors.textMuted },
   link: { fontFamily: fonts.sansSemi, fontSize: 13.5, lineHeight: 18, color: colors.accentBright },
+  trainingRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 4 },
+  checkbox: { width: 18, height: 18, borderRadius: 4, borderWidth: 1.5, borderColor: colors.accentBright, alignItems: 'center', justifyContent: 'center' },
+  checkboxChecked: { backgroundColor: colors.accentBright },
+  checkboxMark: { fontSize: 12, lineHeight: 13, color: colors.bg, fontFamily: fonts.sansSemi },
+  trainingTextWrap: { flex: 1, gap: 3 },
+  trainingNote: { fontFamily: fonts.sans, fontSize: 12, lineHeight: 16, color: colors.textDim },
   spacer: { flex: 1 },
   footer: { gap: 10 },
   consent: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 18, color: colors.textDim, textAlign: 'center' },
+  consentLink: { fontFamily: fonts.sansSemi, color: colors.accentBright },
 });

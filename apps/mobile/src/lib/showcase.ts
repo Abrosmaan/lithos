@@ -1,7 +1,10 @@
-// Витрина (spec §8): до 12 карточек, выбор локальный (AsyncStorage).
-// T6.1 поток E: витрина стала публикацией (lib/publish.ts, setPublished) — toggleShowcase/readShowcase/
-// writeShowcase/pruneShowcase остаются как есть для ProfileScreen (локальный список «что было в витрине» —
-// он же вход для разового переноса ниже); CardScreen больше не пишет в этот список при публикации.
+// Витрина (spec §8, историческая): раньше — до 12 карточек локально в AsyncStorage. T6.1 поток E: витрина
+// стала публикацией (lib/publish.ts, setPublished, cards.published) — CardScreen больше не пишет в этот
+// локальный список. Он остаётся только на чтение (readShowcase) — как источник для разового переноса ниже
+// (planShowcaseMigration) и как чистая функция toggleShowcase, которую использует lib/stats.test.ts (вне
+// границ этой задачи — не трогать). writeShowcase/pruneShowcase/toggleShowcaseCard удалены в T6.1-E3: экраны
+// на них больше не ссылались (ProfileScreen читал их только для витрины, которая стала «Мои публикации» —
+// docs/tasks/T6.1-E3-profile.md), а запись в локальный список никому больше не нужна.
 import { SHOWCASE_MAX } from '@lithos/shared';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -23,23 +26,6 @@ export async function readShowcase(): Promise<string[]> {
     const parsed: unknown = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string').slice(0, SHOWCASE_MAX) : [];
   } catch { return []; }
-}
-
-export async function writeShowcase(list: readonly string[]): Promise<void> {
-  try { await AsyncStorage.setItem(SHOWCASE_KEY, JSON.stringify(list.slice(0, SHOWCASE_MAX))); } catch { /* локальная витрина, не критично */ }
-}
-
-/** Убирает id карточек, которых больше нет среди видимых (удалены/скрыты); при изменении — перезаписывает. */
-export async function pruneShowcase(list: readonly string[], visibleIds: ReadonlySet<string>): Promise<string[]> {
-  const kept = list.filter((id) => visibleIds.has(id));
-  if (kept.length !== list.length) await writeShowcase(kept);
-  return kept;
-}
-
-export async function toggleShowcaseCard(cardId: string): Promise<ToggleResult> {
-  const res = toggleShowcase(await readShowcase(), cardId);
-  if (res.status !== 'full') await writeShowcase(res.list);
-  return res;
 }
 
 // ---------------------------------------------------------------------------
