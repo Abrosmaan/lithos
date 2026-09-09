@@ -1,32 +1,43 @@
 import { Pressable, StyleSheet, Text, type ViewStyle } from 'react-native';
-import { colors, radius, spacing } from '../theme';
+import { colors, fonts, radius } from '../theme';
 
 interface Props {
   label: string;
   selected: boolean;
   onPress: () => void;
-  /** Цвет выбранного чипа (например, цвет тира); по умолчанию — акцент. */
+  /** Цвет выбранного чипа (например, цвет тира); по умолчанию — accentBright. */
   color?: string;
+  /** Mono-счётчик справа от подписи (фильтры тира). */
+  count?: number | string;
+  /** sort — компактный чип сортировки: выбранный surface2, невыбранный прозрачный. */
+  variant?: 'filter' | 'sort';
   style?: ViewStyle;
 }
 
-/** Чип фильтра/сортировки: крупный, чтобы попадать пальцем на улице. */
-export function Chip({ label, selected, onPress, color = colors.accent, style }: Props) {
+/** Чипы фильтра/сортировки (DESIGN_SYSTEM.md): выбранный фильтр заливается цветом тира, текст тёмный. */
+export function Chip({ label, selected, onPress, color = colors.accentBright, count, variant = 'filter', style }: Props) {
+  const sort = variant === 'sort';
+  const bg = sort ? (selected ? colors.surface2 : 'transparent') : selected ? color : colors.surface;
+  const border = sort ? (selected ? 'rgba(242,244,246,0.16)' : colors.divider) : selected ? color : colors.border;
+  const fg = sort ? (selected ? colors.text : colors.textMuted) : selected ? colors.bg : colors.chipText;
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      style={({ pressed }) => [styles.chip, selected && { backgroundColor: color, borderColor: color }, pressed && styles.pressed, style]}
+      style={({ pressed }) => [styles.chip, sort && styles.sort, { backgroundColor: bg, borderColor: border }, pressed && styles.pressed, style]}
     >
-      <Text style={[styles.text, selected && styles.textSelected]}>{label}</Text>
+      <Text style={[styles.text, sort && styles.sortText, { color: fg }]}>{label}</Text>
+      {count !== undefined ? <Text style={[styles.count, { color: fg }]}>{count}</Text> : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  chip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.full, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
-  pressed: { opacity: 0.8 },
-  text: { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
-  textSelected: { color: '#fff' },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingVertical: 9, paddingHorizontal: 13, borderRadius: radius.full, borderWidth: 1 },
+  sort: { paddingVertical: 8 },
+  pressed: { opacity: 0.85 },
+  text: { fontFamily: fonts.sansMedium, fontSize: 13 },
+  sortText: { fontSize: 12.5 },
+  count: { fontFamily: fonts.mono, fontSize: 11, opacity: 0.75 },
 });
