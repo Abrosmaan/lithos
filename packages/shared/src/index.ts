@@ -2,6 +2,7 @@
 export * from './enums.js';
 export * from './scan-result.js';
 export * from './geo.js';
+export * from './identification.js';
 export * from './score.js';
 export * from './limits.js';
 export * from './ui-constants.js';

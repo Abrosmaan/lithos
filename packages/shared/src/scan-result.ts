@@ -23,7 +23,12 @@ export const ScanResultSchema = z.object({
   rock_class: z.object({
     primary: z.enum(ROCK_CLASSES),
     confidence: z.number().min(0).max(1),
-    alternatives: z.array(z.object({ name: z.enum(ROCK_CLASSES), confidence: z.number().min(0).max(1) })).max(3).default([]),
+    // До 5 альтернатив с калиброванной вероятностью и коротким «почему похоже» (UX как в iNaturalist).
+    // Score от этих чисел НЕ зависит (spec §4.3): проценты только для показа, см. identification.ts.
+    alternatives: z
+      .array(z.object({ name: z.enum(ROCK_CLASSES), confidence: z.number().min(0).max(1), reason: z.string().max(80).nullish() }))
+      .max(5)
+      .default([]),
   }),
   inclusions: z.array(InclusionSchema).max(8).default([]),
   shape: z.object({
