@@ -76,7 +76,7 @@ export function identificationCandidates(result: ScanResult): Identification {
     reason: c.reason,
   }));
   const kept = candidates.filter((c) => c.is_primary || c.percent >= IDENTIFICATION_MIN_PERCENT);
-  let sum = kept.reduce((s, c) => s + c.percent, 0);
+  const sum = kept.reduce((s, c) => s + c.percent, 0);
   if (sum < 100) {
     kept.push({ rock_class: 'other', name_ru: 'другое', percent: 100 - sum, is_primary: false, reason: null });
   } else if (sum > 100) {
