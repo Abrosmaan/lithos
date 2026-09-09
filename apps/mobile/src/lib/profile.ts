@@ -1,7 +1,10 @@
-// Профиль (T3.3): имя в lithos.users.display_name (RLS users_self по auth.uid()), счётчик сканов.
-import { ensureUser } from './auth';
+// Профиль (T3.3): имя в lithos.users.display_name (RLS users_self по auth.uid()), счётчики сканов,
+// удаление локальных данных (T5.3).
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ensureUser, resetAuthCache } from './auth';
 import { MSG, UserError } from './errors';
 import { withRetry } from './retry';
+import { scanWindowStart } from './settings';
 import { supabase } from './supabase';
 
 export const DISPLAY_NAME_MAX = 40;
@@ -45,4 +48,25 @@ export async function countScans(): Promise<number> {
     if (r.error) throw new UserError(MSG.loadFailed, { cause: r.error });
     return r.count ?? 0;
   }, { label: 'scans.count' });
+}
+
+/** Сканов за скользящие сутки (окно лимита, spec §13) — count по lithos.scans пользователя. */
+export async function countScansToday(now: number = Date.now()): Promise<number> {
+  await ensureUser();
+  return withRetry(async (signal) => {
+    const r = await supabase.from('scans').select('id', { count: 'exact', head: true }).gte('created_at', scanWindowStart(now)).abortSignal(signal);
+    if (r.error) throw new UserError(MSG.loadFailed, { cause: r.error });
+    return r.count ?? 0;
+  }, { label: 'scans.countToday' });
+}
+
+/**
+ * «Удалить все данные»: только этот телефон — AsyncStorage (кэш, витрина, флаги, device_id), выход из
+ * анонимной сессии, сброс кэшей auth в памяти. Записи в базе не трогаем: следующий запуск создаст новый
+ * анонимный профиль с новым device_id.
+ */
+export async function wipeLocalData(): Promise<void> {
+  await AsyncStorage.clear();
+  await supabase.auth.signOut().catch(() => { /* сессии уже нет — не критично */ });
+  resetAuthCache();
 }

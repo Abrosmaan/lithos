@@ -14,6 +14,12 @@ let deviceIdInflight: Promise<string> | null = null;
 let userCache: { authUserId: string; userId: string } | null = null;
 let userInflight: Promise<LithosUser> | null = null;
 
+/** Сброс кэшей в памяти после «Удалить все данные» (T5.3): новый device_id и новая строка users при следующем ensureUser. */
+export function resetAuthCache(): void {
+  deviceIdCache = null;
+  userCache = null;
+}
+
 export async function getDeviceId(): Promise<string> {
   if (deviceIdCache) return deviceIdCache;
   if (deviceIdInflight) return deviceIdInflight;
