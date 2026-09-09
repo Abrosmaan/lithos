@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { boundingRegion, farthestFind, formatDistance, haversineKm, MAX_LAT_DELTA, MAX_LNG_DELTA } from './geo-math';
+import { boundingRegion, farthestFind, fitSpan, formatDistance, groupByLocation, haversineKm, MAX_LAT_DELTA, MAX_LNG_DELTA, MIN_FIT_SPAN } from './geo-math';
 
 const card = (id: string, lat: number | null, lng: number | null, day: number) => ({ id, lat, lng, created_at: `2026-09-${String(day).padStart(2, '0')}T10:00:00Z` });
 
@@ -60,5 +60,58 @@ describe('boundingRegion', () => {
     const r = boundingRegion([{ lat: -89, lng: -179 }, { lat: 89, lng: 0 }, { lat: 0, lng: 179 }])!;
     expect(r.latitudeDelta).toBe(MAX_LAT_DELTA);
     expect(r.longitudeDelta).toBeLessThanOrEqual(MAX_LNG_DELTA);
+  });
+});
+
+describe('fitSpan', () => {
+  it('одна точка или пусто — 0 (нечего подгонять, fitToCoordinates не звать)', () => {
+    expect(fitSpan([])).toBe(0);
+    expect(fitSpan([{ lat: 41.674, lng: 44.823 }])).toBe(0);
+  });
+
+  it('две совпадающие точки (дефект 3a — два скана в одном месте) — span ~0, меньше порога', () => {
+    const span = fitSpan([{ lat: 41.674, lng: 44.823 }, { lat: 41.674 + 3e-8, lng: 44.823 }]);
+    expect(span).toBeLessThan(MIN_FIT_SPAN);
+  });
+
+  it('две разнесённые точки — реальный разброс, больше порога', () => {
+    const span = fitSpan([{ lat: 41.674, lng: 44.823 }, { lat: 41.7, lng: 44.9 }]);
+    expect(span).toBeGreaterThan(MIN_FIT_SPAN);
+    expect(span).toBeCloseTo(0.077, 3);
+  });
+
+  it('антимеридиан: Чукотка и Аляска — узкий реальный разброс, а не ~343°', () => {
+    const span = fitSpan([{ lat: 64.7, lng: 177.5 }, { lat: 64.5, lng: -165.4 }]);
+    expect(span).toBeLessThan(20);
+  });
+});
+
+describe('groupByLocation', () => {
+  const at = (id: string, lat: number, lng: number) => ({ id, lat, lng });
+
+  it('разнесённые точки — каждая своя группа, порядок по первому вхождению', () => {
+    const groups = groupByLocation([at('a', 41.674, 44.823), at('b', 41.7, 44.9), at('c', 55.75, 37.61)]);
+    expect(groups.map((g) => g.map((p) => p.id))).toEqual([['a'], ['b'], ['c']]);
+  });
+
+  it('две точки в миллиметрах друг от друга (дефект 3c) — одна группа', () => {
+    const groups = groupByLocation([at('a', 41.674, 44.823), at('b', 41.674 + 3e-8, 44.823)]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]!.map((p) => p.id)).toEqual(['a', 'b']);
+  });
+
+  it('три и больше сканов в одном месте остаются одной группой целиком — ни один не теряется', () => {
+    const same = ['a', 'b', 'c', 'd', 'e'].map((id, i) => at(id, 41.674 + i * 1e-8, 44.823));
+    const groups = groupByLocation(same);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toHaveLength(5);
+  });
+
+  it('точки по разные стороны нулевого меридиана не расходятся из-за знака нуля', () => {
+    expect(groupByLocation([at('a', 51.4778, -1e-9), at('b', 51.4778, 1e-9)])).toHaveLength(1);
+  });
+
+  it('пусто — пусто', () => {
+    expect(groupByLocation([])).toEqual([]);
   });
 });

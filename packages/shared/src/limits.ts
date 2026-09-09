@@ -19,6 +19,14 @@ export const BUDGET_SOFT_RATIO = 0.8;
 /** Гео-аномалия (порода невозможна в точке, механизма нет) отправляется на ревью только от этого тира (spec §11). */
 export const ANOMALY_REVIEW_MIN_TIER: Tier = 'epic';
 
+/**
+ * Сколько разных пользователей должны пожаловаться, чтобы опубликованная находка автоматически ушла
+ * с витрины (T6.0 §2). Второе разрешённое дублирование в SQL: lithos.report_card не может импортировать
+ * TypeScript, поэтому держит то же число константой, а тест apps/mobile/src/lib/publish.test.ts читает
+ * миграцию 0007 и сверяет её с этим значением.
+ */
+export const REPORT_AUTOHIDE_THRESHOLD = 3;
+
 /** Ключи таблицы lithos.limits и их значения — источник для сида миграции. */
 export const SCAN_LIMIT_SEED = {
   max_scans_per_day: MAX_SCANS_PER_DAY,
