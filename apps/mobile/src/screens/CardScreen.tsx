@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigButton } from '../components/BigButton';
 import { IdentificationList, IdentificationNote } from '../components/IdentificationList';
 import { Section } from '../components/Section';
-import { Chevron, DeltaPill, KeyValue, LinkRow, Note, PhotoPlaceholder, SectionLabel, TierLine } from '../components/ui';
+import { Chevron, DeltaPill, KeyValue, LinkRow, Note, PhotoPlaceholder, TierLine } from '../components/ui';
 import { displayName, formatCoords, formatDateRu, inclusionLines, rockClassRu, rockGroupRu, shapeSummary, splitDelta, tierLabel, VERIFICATION_RU } from '../lib/card-facts';
 import type { CardRow } from '../lib/card-types';
 import { type CardPhoto, fetchAgeRange, fetchCard, fetchScanPhotos, fetchScanResults, updateCardUserName } from '../lib/cards';

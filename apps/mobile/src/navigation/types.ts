@@ -13,6 +13,8 @@ export type TabParamList = {
 };
 
 export type RootStackParamList = {
+  /** Приветствие (T5.2): один раз, до первого входа в табы (флаг prefs.isWelcomeSeen). */
+  Welcome: undefined;
   Tabs: NavigatorScreenParams<TabParamList> | undefined;
   Review: undefined;
   Result: { scanId: string };

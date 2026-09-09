@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   // Камера
   top: { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center', gap: 9, paddingHorizontal: 16 },
   bottomWrap: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 16, gap: 14 },
-  fade: { ...StyleSheet.absoluteFillObject, top: -40, flexDirection: 'column' },
+  fade: { ...StyleSheet.absoluteFill, top: -40, flexDirection: 'column' },
   fadeStep: { flex: 1 },
   toast: {
     flexDirection: 'row', gap: 11, alignItems: 'flex-start', padding: 13, paddingHorizontal: 15, borderRadius: radius.md,

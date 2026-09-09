@@ -127,7 +127,7 @@ export function breakdownRows(card: Pick<CardRow, 'score' | 'score_breakdown' | 
   if (!card.score_breakdown) {
     return [{ key: 'none', pts: '—', label: 'Редкость не считалась', why: 'нет геопозиции: слой «Место» и итоговый score недоступны' }];
   }
-  const rows = describeBreakdown(card.score_breakdown).map((l) => ({
+  const rows: BreakdownRow[] = describeBreakdown(card.score_breakdown).map((l) => ({
     key: l.key,
     pts: `+${l.points}`,
     label: `${l.title} ${l.points}`,

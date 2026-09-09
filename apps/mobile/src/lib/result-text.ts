@@ -145,6 +145,8 @@ export const RESULT_MSG = {
   provisional: 'Предварительно',
   saved: 'Карточка уже сохранена в коллекции',
   loadFailed: 'Не удалось загрузить результат. Проверьте интернет и попробуйте ещё раз.',
+  // Прототип (docs/design/Lithos App.dc.html, SPEC.slow): «Обрабатываем дольше обычного» + это тело.
+  slow: 'Карточка появится в коллекции, как только будет готова. Можно закрыть экран.',
 } as const;
 
 export type ResultPhase = 'loading' | 'determining' | 'refining' | 'done' | 'failed' | 'paused';
