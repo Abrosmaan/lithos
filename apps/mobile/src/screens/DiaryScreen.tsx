@@ -2,7 +2,7 @@
 // (lithos.diary.expected, а до первого скана — geo_cache.expected_rocks) и найденные (diary.found ∪ карточки
 // в ячейке). Прогресс N из M, значок при 100 %. Логика загрузки/резолва ячейки не менялась при рестайле.
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CardTile } from '../components/CardTile';
@@ -16,6 +16,8 @@ import { logError, MSG, toUserMessage } from '../lib/errors';
 import { cellCenter, encodeGeohash } from '../lib/geohash';
 import { requestGeoFix } from '../lib/location';
 import { loadCards, readCachedCards } from '../lib/offline-cache';
+import { fetchPrimaryPhotoUrls } from '../lib/photo-urls';
+import { fallbackPlaceName, placeNameForCell } from '../lib/place-name';
 import type { RootScreenProps } from '../navigation/types';
 import { colors, density, fonts, radius, tierColors } from '../theme';
 
@@ -42,6 +44,8 @@ export function DiaryScreen({ navigation, route }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [noGeo, setNoGeo] = useState(false);
   const [useGeo, setUseGeo] = useState(!paramCell);
+  const [placeName, setPlaceName] = useState<string | null>(null);
+  const [urls, setUrls] = useState<Map<string, string>>(new Map());
   const insets = useSafeAreaInsets();
   const seq = useRef(0);
 
@@ -68,6 +72,11 @@ export function DiaryScreen({ navigation, route }: Props) {
       if (!isAlive()) return;
       setData({ ...cell, cards, progress: diaryProgress({ expected, found: diary?.found ?? [], cards }) });
       setError(null);
+      const shown = cards.filter((c) => !c.hidden);
+      if (shown.length > 0) {
+        const photos = await fetchPrimaryPhotoUrls(shown.map((c) => c.scan_id));
+        if (isAlive()) setUrls(photos);
+      }
     } catch (e) {
       if (!isAlive()) return;
       logError('diary', e);
@@ -80,6 +89,17 @@ export function DiaryScreen({ navigation, route }: Props) {
     void load(() => alive);
     return () => { alive = false; };
   }, [load]));
+
+  // Топоним ячейки (T6.0 §4a): гонка на смену ячейки (гео ↔ карточка) гасится через alive-замыкание,
+  // сброс на fallback при смене cellId — чтобы не показать имя чужой ячейки, пока грузится новое.
+  const currentCellId = data?.cellId;
+  useEffect(() => {
+    if (!currentCellId) return;
+    let alive = true;
+    setPlaceName(null);
+    void placeNameForCell(currentCellId).then((name) => { if (alive) setPlaceName(name); });
+    return () => { alive = false; };
+  }, [currentCellId]);
 
   const toCamera = () => navigation.navigate('Tabs', { screen: 'Camera' }, { pop: true });
   const pad = { paddingBottom: insets.bottom + 30 };
@@ -126,10 +146,10 @@ export function DiaryScreen({ navigation, route }: Props) {
 
       <View style={[styles.hero, progress.complete && styles.heroComplete]}>
         <View style={styles.heroHead}>
-          <Text style={styles.cell}>Ячейка {cellId}</Text>
-          <Text style={styles.coords}>{center ? `${center.latitude.toFixed(3)}, ${center.longitude.toFixed(3)}` : SOURCE_RU[source]}</Text>
+          <Text style={styles.cell} numberOfLines={2}>{placeName ?? fallbackPlaceName(cellId)}</Text>
+          <Text style={styles.coords}>{center ? `${cellId} · ${center.latitude.toFixed(3)}, ${center.longitude.toFixed(3)}` : cellId}</Text>
         </View>
-        {center && <Text style={styles.source}>{SOURCE_RU[source]}</Text>}
+        <Text style={styles.source}>{SOURCE_RU[source]}</Text>
         {progress.total > 0 ? (
           <>
             <View style={styles.progressRow}>
@@ -192,7 +212,7 @@ export function DiaryScreen({ navigation, route }: Props) {
           <View style={styles.grid}>
             {shownCards.map((c) => (
               <View key={c.id} style={styles.gridItem}>
-                <CardTile card={c} size="sm" onPress={() => navigation.push('Card', { cardId: c.id })} />
+                <CardTile card={c} size="sm" photoUrl={urls.get(c.scan_id)} onPress={() => navigation.push('Card', { cardId: c.id })} />
               </View>
             ))}
           </View>
