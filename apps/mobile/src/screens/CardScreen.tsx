@@ -4,23 +4,25 @@
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigButton } from '../components/BigButton';
 import { IdentificationList, IdentificationNote } from '../components/IdentificationList';
 import { Section } from '../components/Section';
-import { Chevron, DeltaPill, KeyValue, LinkRow, Note, PhotoPlaceholder, TierLine } from '../components/ui';
-import { displayName, formatCoords, formatDateRu, inclusionLines, rockClassRu, rockGroupRu, shapeSummary, splitDelta, tierLabel, VERIFICATION_RU } from '../lib/card-facts';
+import { Chevron, DeltaPill, KeyValue, LinkRow, Note, PhotoPlaceholder, SectionLabel, TierLine } from '../components/ui';
+import { displayName, formatCoords, formatDateRu, inclusionLines, rockClassRu, rockGroupRu, shapeSummary, splitDelta, tierLabel, VERIFICATION_RU, type RockClass } from '../lib/card-facts';
 import type { CardRow } from '../lib/card-types';
 import { type CardPhoto, fetchAgeRange, fetchCard, fetchScanPhotos, fetchScanResults, listAllCards, updateCardUserName } from '../lib/cards';
-import { SHOWCASE_HINT, UNPUBLISH_DIALOG } from '../lib/consent';
+import { LABEL_ACTIONS, LABEL_FEEDBACK, LABEL_PICKER, LABEL_STATUS, SHOWCASE_HINT, UNPUBLISH_DIALOG } from '../lib/consent';
 import { publishDialogCopy } from '../lib/publish-copy';
 import { logError, MSG, toUserMessage } from '../lib/errors';
 import { splitRecommended, type VersionEntry, versionHistory } from '../lib/history';
 import { cardIdentification, identificationBefore, type IdentificationView } from '../lib/identification-view';
+import { fetchMyLabels, latestLabel, recordLabel, type MyLabelRow } from '../lib/labels';
 import { fetchProfile } from '../lib/profile';
 import { setPublished } from '../lib/publish';
+import { filterRockPickerGroups, rockPickerGroups } from '../lib/rock-picker';
 import { breakdownRows, cardShortId, cardsCountText, historyLines, scoreText, STATE_RU } from '../lib/screen-text';
 import { isPublishExplained, isShowcaseMigrationDone, markPublishExplained, markShowcaseMigrationDone, planShowcaseMigration, readShowcase } from '../lib/showcase';
 import type { RootStackParamList } from '../navigation/types';
@@ -40,6 +42,8 @@ interface Loaded {
   split: boolean;
   age: string | null;
   parent: CardRow | null;
+  /** Своя метка (T7.1, поток B): факт «вы подтвердили»/«вы указали другую породу», не card.verification. */
+  myLabel: MyLabelRow | null;
 }
 
 const PHOTO_W = 300;
@@ -55,6 +59,13 @@ export function CardScreen({ navigation, route }: Props) {
   const [draftName, setDraftName] = useState('');
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  // T7.1, поток B: подтверждение/исправление вердикта. labelAction — какая кнопка сейчас грузится (спиннер
+  // только на ней), pickerOpen/pickerQuery — шторка выбора породы для «Это другая порода».
+  const [labelAction, setLabelAction] = useState<'confirm' | 'correct' | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerQuery, setPickerQuery] = useState('');
+  const pickerGroups = useMemo(() => rockPickerGroups(), []);
+  const filteredPickerGroups = useMemo(() => filterRockPickerGroups(pickerGroups, pickerQuery), [pickerGroups, pickerQuery]);
   const insets = useSafeAreaInsets();
   const goSplit = useSplitFlow();
   const migrationChecked = useRef(false);
@@ -67,17 +78,20 @@ export function CardScreen({ navigation, route }: Props) {
       const card = await fetchCard(cardId);
       if (!isAlive()) return;
       if (!card) { setError('Карточка не найдена.'); return; }
-      const [photos, rows, age, parent] = await Promise.all([
+      const [photos, rows, age, parent, myLabels] = await Promise.all([
         fetchScanPhotos(card.scan_id).catch((e) => { logError('card.photos', e); return [] as CardPhoto[]; }),
         fetchScanResults(card.scan_id).catch((e) => { logError('card.results', e); return []; }),
         fetchAgeRange(card.cell_id),
         card.parent_card_id ? fetchCard(card.parent_card_id).catch(() => null) : Promise.resolve(null),
+        // Своя метка не критична для показа карточки — сетевой отказ не должен блокировать остальное (как фото/результаты выше).
+        fetchMyLabels(card.scan_id).catch((e) => { logError('card.myLabel', e); return [] as MyLabelRow[]; }),
       ]);
       if (!isAlive()) return;
       setData({
         card, photos, history: versionHistory(rows),
         identification: cardIdentification(card, rows), identificationBefore: identificationBefore(rows),
         split: card.split_recommended ?? splitRecommended(rows), age, parent,
+        myLabel: latestLabel(myLabels),
       });
       setError(null);
     } catch (e) {
@@ -210,6 +224,41 @@ export function CardScreen({ navigation, route }: Props) {
     }
   };
 
+  // T7.1, поток B: своя метка (lithos.labels через lib/labels.ts) — личная отметка, не меняет card.verification
+  // (сервер, 0014). labelAction гейтит обе кнопки разом, чтобы двойной тап не отправил вторую запись, пока
+  // первая летит; сервер и так идемпотентен (upsert по scan_id+source+author_id), но незачем платить дважды.
+  const confirmVerdict = async () => {
+    if (!data || labelAction) return;
+    setLabelAction('confirm');
+    try {
+      await recordLabel(data.card.scan_id, 'user_confirm', data.card.rock_class as RockClass);
+      setData((d) => (d ? { ...d, myLabel: { source: 'user_confirm', rockClass: d.card.rock_class as RockClass, matchedModel: true, createdAt: new Date().toISOString() } } : d));
+      Alert.alert(LABEL_FEEDBACK.confirmTitle, LABEL_FEEDBACK.confirmBody, [{ text: LABEL_FEEDBACK.ok }]);
+    } catch (e) {
+      logError('card.label.confirm', e);
+      Alert.alert('Не получилось', toUserMessage(e, MSG.saveFailed));
+    } finally {
+      setLabelAction(null);
+    }
+  };
+
+  const selectCorrection = async (rockClass: RockClass) => {
+    if (!data || labelAction) return;
+    setPickerOpen(false);
+    setPickerQuery('');
+    setLabelAction('correct');
+    try {
+      const result = await recordLabel(data.card.scan_id, 'user_correct', rockClass);
+      setData((d) => (d ? { ...d, myLabel: { source: 'user_correct', rockClass, matchedModel: result.matchedModel, createdAt: new Date().toISOString() } } : d));
+      Alert.alert(LABEL_FEEDBACK.correctTitle, LABEL_FEEDBACK.correctBody, [{ text: LABEL_FEEDBACK.ok }]);
+    } catch (e) {
+      logError('card.label.correct', e);
+      Alert.alert('Не получилось', toUserMessage(e, MSG.saveFailed));
+    } finally {
+      setLabelAction(null);
+    }
+  };
+
   const goBack = () => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Tabs', { screen: 'Collection' }));
 
   if (error && !data) {
@@ -229,7 +278,7 @@ export function CardScreen({ navigation, route }: Props) {
     );
   }
 
-  const { card, photos, history, identification, identificationBefore: wasBefore, split, age, parent } = data;
+  const { card, photos, history, identification, identificationBefore: wasBefore, split, age, parent, myLabel } = data;
   const pending = card.verification === 'pending_review';
   const accent = pending ? colors.textFaint : tierColor(card.tier);
   const shape = shapeSummary(card.shape);
@@ -238,13 +287,18 @@ export function CardScreen({ navigation, route }: Props) {
   const canSplit = split && card.state === 'closed' && !card.hidden;
   // Публикация: сервер (lithos.publish_card) заведомо отклонит hidden (раскол) и pending_review — не предлагаем.
   const canPublish = !card.hidden && !pending;
+  // Своя метка (T7.1): сервер (lithos.record_label) отклоняет ту же пару hidden/pending_review — не предлагаем.
+  const canLabel = !card.hidden && !pending;
   const autoName = card.name?.trim() || rockClassRu(card.rock_class);
   const lines = historyLines({
     history, before: wasBefore, provisional: card.provisional, verification: card.verification,
     parent: parent ? { id: parent.id, name: displayName(parent), score: parent.score } : null,
   });
 
+  const closePicker = () => { setPickerOpen(false); setPickerQuery(''); };
+
   return (
+    <>
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: insets.top, paddingBottom: insets.bottom + 30 }]}>
       {error && (
         <Pressable onPress={() => { void load(); }} accessibilityRole="button" style={styles.pad}>
@@ -343,6 +397,36 @@ export function CardScreen({ navigation, route }: Props) {
           {shape.surface && <KeyValue k="Поверхность" v={shape.surface} />}
           {shape.naturalHole && <KeyValue k="Форма" v="Сквозное отверстие" />}
           {identification && <IdentificationNote />}
+
+          {/* T7.1, поток B: своя метка — личная отметка, отдельно от строки статуса проверки выше (VERIFICATION_RU). */}
+          {canLabel && (
+            <View style={styles.labelBlock}>
+              {myLabel && (
+                <Note tone="neutral">
+                  {(myLabel.source === 'user_confirm' ? LABEL_STATUS.confirmedPrefix : LABEL_STATUS.correctedPrefix) + rockClassRu(myLabel.rockClass)}
+                </Note>
+              )}
+              <View style={styles.labelButtons}>
+                <BigButton
+                  label={LABEL_ACTIONS.confirm}
+                  variant="secondary"
+                  onPress={() => { void confirmVerdict(); }}
+                  disabled={labelAction !== null}
+                  loading={labelAction === 'confirm'}
+                  style={styles.labelBtn}
+                />
+                <BigButton
+                  label={LABEL_ACTIONS.correct}
+                  variant="ghost"
+                  onPress={() => setPickerOpen(true)}
+                  disabled={labelAction !== null}
+                  loading={labelAction === 'correct'}
+                  style={styles.labelBtn}
+                />
+              </View>
+              <Text style={styles.labelHint}>{LABEL_ACTIONS.hint}</Text>
+            </View>
+          )}
         </Section>
 
         <Section title="Состав">
@@ -400,6 +484,50 @@ export function CardScreen({ navigation, route }: Props) {
         </View>
       </View>
     </ScrollView>
+
+    {/* Пикер породы («Это другая порода») — шторка снизу, тот же паттерн, что MapScreen/PublicFindScreen. */}
+    <Modal visible={pickerOpen} transparent animationType="fade" onRequestClose={closePicker}>
+      <Pressable style={styles.sheetBackdrop} onPress={closePicker} accessibilityRole="button" accessibilityLabel="Закрыть выбор породы" />
+      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View style={styles.sheetGrip} />
+        <Text style={styles.sheetTitle}>{LABEL_PICKER.title}</Text>
+        <TextInput
+          value={pickerQuery}
+          onChangeText={setPickerQuery}
+          placeholder={LABEL_PICKER.searchPlaceholder}
+          placeholderTextColor={colors.textDim}
+          style={styles.pickerInput}
+          autoCorrect={false}
+          autoCapitalize="none"
+        />
+        <ScrollView style={styles.sheetList} contentContainerStyle={styles.sheetListContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          {filteredPickerGroups.length === 0 ? (
+            <Text style={styles.pickerEmpty}>{LABEL_PICKER.empty}</Text>
+          ) : (
+            filteredPickerGroups.map((g) => (
+              <View key={g.key} style={styles.pickerGroup}>
+                <SectionLabel>{g.title}</SectionLabel>
+                {g.items.map((it) => (
+                  <Pressable
+                    key={it.code}
+                    onPress={() => { void selectCorrection(it.code); }}
+                    accessibilityRole="button"
+                    style={({ pressed }) => [styles.sheetRow, pressed && styles.sheetRowPressed]}
+                  >
+                    <Text style={[styles.pickerItemText, myLabel?.rockClass === it.code && { color: colors.accentBright }]}>{it.nameRu}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ))
+          )}
+        </ScrollView>
+        <Text style={styles.pickerFootnote}>{LABEL_PICKER.footnote}</Text>
+        <Pressable onPress={closePicker} accessibilityRole="button" style={styles.sheetCancel}>
+          <Text style={styles.link}>{LABEL_PICKER.cancel}</Text>
+        </Pressable>
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -451,4 +579,24 @@ const styles = StyleSheet.create({
   versionMeta: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 17, color: colors.textDim },
   buttons: { gap: 9 },
   noteCenter: { alignItems: 'center' },
+  // T7.1, поток B: своя метка (Подтвердить вердикт / Это другая порода) + шторка выбора породы.
+  labelBlock: { gap: 9, paddingTop: 2 },
+  labelButtons: { flexDirection: 'row', gap: 9 },
+  labelBtn: { flex: 1 },
+  labelHint: { fontFamily: fonts.sans, fontSize: 12, lineHeight: 16, color: colors.textDim },
+  sheetBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11,15,20,0.6)' },
+  sheet: { position: 'absolute', left: 0, right: 0, bottom: 0, maxHeight: '80%', backgroundColor: colors.surface, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, borderTopWidth: 1, borderColor: colors.divider, paddingTop: 10, paddingHorizontal: 16, gap: 10 },
+  sheetGrip: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, backgroundColor: colors.borderStrong },
+  sheetTitle: { fontFamily: fonts.serif, fontSize: 18, lineHeight: 22, color: colors.text },
+  pickerInput: { paddingVertical: 11, paddingHorizontal: 13, borderRadius: 12, backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.divider, color: colors.text, fontFamily: fonts.sans, fontSize: 14 },
+  sheetList: { flexGrow: 0 },
+  sheetListContent: { gap: 4, paddingBottom: 4 },
+  pickerGroup: { gap: 6, marginBottom: 10 },
+  sheetRow: { paddingVertical: 11, paddingHorizontal: 13, borderRadius: radius.md, backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.divider },
+  sheetRowPressed: { opacity: 0.8 },
+  pickerItemText: { fontFamily: fonts.sans, fontSize: 14.5, lineHeight: 18, color: colors.text },
+  pickerEmpty: { fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 18, color: colors.textMuted, paddingVertical: 20, textAlign: 'center' },
+  pickerFootnote: { fontFamily: fonts.sans, fontSize: 12, lineHeight: 16, color: colors.textDim },
+  sheetCancel: { alignSelf: 'center', paddingVertical: 12 },
+  link: { fontFamily: fonts.sansSemi, fontSize: 14, lineHeight: 18, color: colors.accentBright },
 });
