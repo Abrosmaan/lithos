@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { completedCells, diaryProgress, isCountableRock, parseDiaryRow, parseExpectedRocks } from './diary';
+import { completedCells, diaryProgress, isCountableRock, parseDiaryRow, parseExpectedRocks, visitedCells } from './diary';
 
 describe('diaryProgress', () => {
   it('приёмка T3.1: три скана в одной точке закрывают 3 позиции из N', () => {
@@ -56,5 +56,31 @@ describe('completedCells', () => {
     ];
     const cards = [{ rock_class: 'tuff', cell_id: 'cccccc' }, { rock_class: 'granite', cell_id: 'zzzzzz' }, { rock_class: 'basalt', cell_id: null }];
     expect(completedCells(diary, cards)).toEqual(['aaaaaa', 'cccccc']);
+  });
+});
+
+describe('visitedCells', () => {
+  it('T6.1-B 3b: показывает и закрытые, и просто посещённые ячейки, с прогрессом; ноль находок — не «посещена»', () => {
+    const diary = [
+      { cell_id: 'szrv5f', expected: ['basalt', 'granite', 'tuff'], found: [], updated_at: '' }, // 2 из 3, как у пользователя
+      { cell_id: 'aaaaaa', expected: ['basalt'], found: ['basalt'], updated_at: '' }, // закрыта
+      { cell_id: 'bbbbbb', expected: ['tuff'], found: [], updated_at: '' }, // ничего не найдено — не посещена
+      { cell_id: 'cccccc', expected: [], found: [], updated_at: '' }, // нет ожидаемых — total 0, не посещена
+    ];
+    const cards = [
+      { rock_class: 'basalt', cell_id: 'szrv5f' },
+      { rock_class: 'granite', cell_id: 'szrv5f' },
+      { rock_class: 'basalt', cell_id: 'aaaaaa' },
+    ];
+    const result = visitedCells(diary, cards);
+    expect(result).toEqual([
+      { cell_id: 'szrv5f', found: 2, total: 3, complete: false },
+      { cell_id: 'aaaaaa', found: 1, total: 1, complete: true },
+    ]);
+  });
+
+  it('пустой дневник или пустые карточки — пусто', () => {
+    expect(visitedCells([], [])).toEqual([]);
+    expect(visitedCells([{ cell_id: 'aaaaaa', expected: ['basalt'], found: [], updated_at: '' }], [])).toEqual([]);
   });
 });

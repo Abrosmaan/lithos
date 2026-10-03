@@ -3,6 +3,10 @@
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { PublicFindRow } from '../lib/publish';
+
+/** Документ политики (apps/mobile/src/legal/) — какой из двух показывает PolicyScreen. */
+export type LegalDoc = 'privacy' | 'terms';
 
 export type TabParamList = {
   /** parentCardId — раскол (T2.3): камера открыта для фото свежего скола. */
@@ -23,6 +27,14 @@ export type RootStackParamList = {
   Safety: { parentCardId: string };
   /** Дневник ячейки: cellId — geohash-6 (из карточки); без него — по текущей геопозиции. */
   Diary: { cellId?: string } | undefined;
+  /** Политика конфиденциальности / пользовательское соглашение — офлайн-текст из apps/mobile/src/legal/. */
+  Policy: { doc: LegalDoc };
+  /**
+   * Чужая находка (T6.1-E2, публичная витрина): только чтение, без действий владельца. Параметр — уже
+   * загруженная строка lithos.public_finds (с карты или из дневника места), а не id: отдельного запроса
+   * «получить находку по id» в lib/publish.ts нет — поверхность там сознательно узкая (T6.1-D).
+   */
+  PublicFind: { find: PublicFindRow };
 };
 
 export type RootScreenProps<T extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList, T>;
@@ -30,6 +42,25 @@ export type TabScreenProps<T extends keyof TabParamList> = CompositeScreenProps<
   BottomTabScreenProps<TabParamList, T>,
   NativeStackScreenProps<RootStackParamList>
 >;
+
+export interface InitialRouteInput {
+  welcomeSeen: boolean;
+}
+
+/**
+ * Стартовый маршрут корневого стека (RootNavigator): чистая функция, без AsyncStorage/навигации —
+ * покрывается тестом отдельно от рендера. Не видел приветствия → Welcome; иначе — сразу в табы.
+ *
+ * До T7.2 здесь была ещё ветка на экран пересогласия (consentVersion < CONSENT_VERSION → Consent):
+ * приложение ещё не выпущено, живых пользователей со старым согласием нет, поэтому отдельный экран перед
+ * релизом не нужен — то, что он объяснял, теперь в онбординге и в пользовательском соглашении
+ * (docs/legal/consent-copy.md §1, §2 помечен неиспользуемым). Версия согласия (prefs.CONSENT_VERSION)
+ * продолжает записываться — если условия поменяются уже после релиза, эта ветка вернётся.
+ */
+export function initialRoute({ welcomeSeen }: InitialRouteInput): 'Welcome' | 'Tabs' {
+  if (!welcomeSeen) return 'Welcome';
+  return 'Tabs';
+}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

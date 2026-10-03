@@ -1,4 +1,10 @@
-// Витрина (spec §8): до 12 карточек, выбор локальный (AsyncStorage), без шеринга в прототипе.
+// Витрина (spec §8, историческая): раньше — до 12 карточек локально в AsyncStorage. T6.1 поток E: витрина
+// стала публикацией (lib/publish.ts, setPublished, cards.published) — CardScreen больше не пишет в этот
+// локальный список. Он остаётся только на чтение (readShowcase) — как источник для разового переноса ниже
+// (planShowcaseMigration) и как чистая функция toggleShowcase, которую использует lib/stats.test.ts (вне
+// границ этой задачи — не трогать). writeShowcase/pruneShowcase/toggleShowcaseCard удалены в T6.1-E3: экраны
+// на них больше не ссылались (ProfileScreen читал их только для витрины, которая стала «Мои публикации» —
+// docs/tasks/T6.1-E3-profile.md), а запись в локальный список никому больше не нужна.
 import { SHOWCASE_MAX } from '@lithos/shared';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -22,19 +28,52 @@ export async function readShowcase(): Promise<string[]> {
   } catch { return []; }
 }
 
-export async function writeShowcase(list: readonly string[]): Promise<void> {
-  try { await AsyncStorage.setItem(SHOWCASE_KEY, JSON.stringify(list.slice(0, SHOWCASE_MAX))); } catch { /* локальная витрина, не критично */ }
+// ---------------------------------------------------------------------------
+// T6.1 поток E: разовый перенос локальной витрины на сервер (T6.0 §2.2 — молча публиковать нельзя).
+// ---------------------------------------------------------------------------
+
+/** Минимум полей карточки, нужный, чтобы решить, можно ли предложить её к публикации. */
+interface MigratableCard {
+  id: string;
+  hidden: boolean;
+  verification: string;
+  published: boolean;
 }
 
-/** Убирает id карточек, которых больше нет среди видимых (удалены/скрыты); при изменении — перезаписывает. */
-export async function pruneShowcase(list: readonly string[], visibleIds: ReadonlySet<string>): Promise<string[]> {
-  const kept = list.filter((id) => visibleIds.has(id));
-  if (kept.length !== list.length) await writeShowcase(kept);
-  return kept;
+/**
+ * По старому локальному списку витрины и текущим карточкам решает, что можно предложить опубликовать:
+ * карточка должна существовать, не быть скрытой (раскол) или на проверке (pending_review) — сервер их всё
+ * равно отклонит (lithos.publish_card) — и ещё не быть опубликованной. Порядок — как в старом списке.
+ * Чистая функция, без AsyncStorage — побочный эффект «перенос выполнен» отмечает markShowcaseMigrationDone.
+ */
+export function planShowcaseMigration<T extends MigratableCard>(oldList: readonly string[], cards: readonly T[]): T[] {
+  const byId = new Map(cards.map((c) => [c.id, c] as const));
+  return oldList.flatMap((id) => {
+    const c = byId.get(id);
+    return c && !c.hidden && c.verification !== 'pending_review' && !c.published ? [c] : [];
+  });
 }
 
-export async function toggleShowcaseCard(cardId: string): Promise<ToggleResult> {
-  const res = toggleShowcase(await readShowcase(), cardId);
-  if (res.status !== 'full') await writeShowcase(res.list);
-  return res;
+const SHOWCASE_MIGRATION_DONE_KEY = 'lithos.showcase_migration_done';
+
+/** true — перенос старой витрины уже предложен (независимо от решения пользователя), больше не спрашивать. */
+export async function isShowcaseMigrationDone(): Promise<boolean> {
+  try { return (await AsyncStorage.getItem(SHOWCASE_MIGRATION_DONE_KEY)) === '1'; } catch { return false; }
+}
+export async function markShowcaseMigrationDone(): Promise<void> {
+  try { await AsyncStorage.setItem(SHOWCASE_MIGRATION_DONE_KEY, '1'); } catch { /* не критично: спросим ещё раз */ }
+}
+
+// ---------------------------------------------------------------------------
+// T6.1 поток E: «полное объяснение уже показывали» (consent-copy.md §3) — полный текст диалога публикации
+// один раз, дальше короткая версия. Отдельный ключ, не lib/prefs.ts (вне границ задачи).
+// ---------------------------------------------------------------------------
+
+const PUBLISH_EXPLAINED_KEY = 'lithos.publish_explained';
+
+export async function isPublishExplained(): Promise<boolean> {
+  try { return (await AsyncStorage.getItem(PUBLISH_EXPLAINED_KEY)) === '1'; } catch { return false; }
+}
+export async function markPublishExplained(): Promise<void> {
+  try { await AsyncStorage.setItem(PUBLISH_EXPLAINED_KEY, '1'); } catch { /* не критично: покажем полный текст ещё раз */ }
 }

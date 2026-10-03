@@ -11,10 +11,13 @@
     "dev": "pnpm -r --parallel --if-present dev",
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "eslint .",
+    "pretest": "node --test 'scripts/*.test.mjs'",
     "test": "pnpm -r --if-present test",
     "eval": "pnpm --filter worker eval",
     "db:migrate": "node scripts/db-migrate.mjs",
-    "db:migrate:status": "node scripts/db-migrate.mjs --status"
+    "db:migrate:status": "node scripts/db-migrate.mjs --status",
+    "dataset:export": "node scripts/dataset-export.mjs",
+    "dataset:readiness": "node scripts/dataset-export.mjs --readiness"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

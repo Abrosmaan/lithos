@@ -87,3 +87,30 @@ export function completedCells(diary: readonly DiaryRow[], cards: readonly Pick<
     .filter((d) => diaryProgress({ expected: d.expected, found: d.found, cards: byCell.get(d.cell_id) ?? [] }).complete)
     .map((d) => d.cell_id);
 }
+
+export interface VisitedCell {
+  cell_id: string;
+  found: number;
+  total: number;
+  /** 100 % — как в completedCells. */
+  complete: boolean;
+}
+
+/**
+ * Все посещённые ячейки (найдена хотя бы одна ожидаемая порода) с прогрессом — для карты (T6.1-B, 3b):
+ * `completedCells` показывает полигон только при 100 %, что на практике почти никогда не случается.
+ * Здесь — все ячейки с прогрессом, чтобы отрисовать градацию (закрыта золотом / посещена тускло).
+ */
+export function visitedCells(diary: readonly DiaryRow[], cards: readonly Pick<CardRow, 'rock_class' | 'cell_id'>[]): VisitedCell[] {
+  const byCell = new Map<string, Pick<CardRow, 'rock_class'>[]>();
+  for (const c of cards) {
+    if (!c.cell_id) continue;
+    const list = byCell.get(c.cell_id) ?? [];
+    list.push(c);
+    byCell.set(c.cell_id, list);
+  }
+  return diary.flatMap((d) => {
+    const p = diaryProgress({ expected: d.expected, found: d.found, cards: byCell.get(d.cell_id) ?? [] });
+    return p.foundCount > 0 ? [{ cell_id: d.cell_id, found: p.foundCount, total: p.total, complete: p.complete }] : [];
+  });
+}

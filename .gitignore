@@ -41,3 +41,7 @@ web-build/
 # Golden set: сырые ответы моделей и per-item метрики прогонов не в git, только report.md (T2.4)
 supabase/seed/golden/runs/*/*
 !supabase/seed/golden/runs/*/report.md
+
+# T7.1 поток C: выгрузка обучающего набора (scripts/dataset-export.mjs) — персональные данные
+# (фотографии пользователей и их метки), в репозиторий не попадает никогда.
+/training-export/

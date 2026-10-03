@@ -4,7 +4,6 @@ import { FALLBACK_MAX_TIER, TIER_RU } from '@lithos/shared';
 import { describeBreakdown, formatDateRu } from './card-facts';
 import type { CardRow, CardVerification } from './card-types';
 import type { DiaryProgress } from './diary';
-import type { LatLng } from './geohash';
 import { pluralRu } from './text';
 
 // ---------------------------------------------------------------------------
@@ -44,12 +43,16 @@ export function cellTitle(cellId: string): string {
   return `Ячейка ${cellId}`;
 }
 
-/** «ячейка ≈1 км · 44.79 N, 37.36 E» — geohash-6 ≈ 1.2 × 0.6 км. */
-export function cellCoordsText(center: LatLng | null): string {
-  if (!center) return 'ячейка ≈1 км';
-  const lat = `${Math.abs(center.latitude).toFixed(2)} ${center.latitude >= 0 ? 'N' : 'S'}`;
-  const lng = `${Math.abs(center.longitude).toFixed(2)} ${center.longitude >= 0 ? 'E' : 'W'}`;
-  return `ячейка ≈1 км · ${lat}, ${lng}`;
+/**
+ * «41.67401 N, 44.82298 E» — точные координаты опубликованной находки (T7.3, решение владельца 2026-10-03:
+ * показываем ровно то, что отдаёт сервер, не округляем до километра ячейки и не завышаем точность сверх
+ * присланных координат). 5 знаков после запятой ≈ 1 м — то же разрешение, что у группировки маркеров на
+ * карте (GROUP_PRECISION в lib/geo-math.ts).
+ */
+export function exactCoordsText(lat: number, lng: number): string {
+  const latText = `${Math.abs(lat).toFixed(5)} ${lat >= 0 ? 'N' : 'S'}`;
+  const lngText = `${Math.abs(lng).toFixed(5)} ${lng >= 0 ? 'E' : 'W'}`;
+  return `${latText}, ${lngText}`;
 }
 
 export const DIARY_NO_GEO_NOTE = 'Нет геопозиции — показана ячейка последней находки. Включите геопозицию, чтобы видеть дневник места, где вы стоите.';

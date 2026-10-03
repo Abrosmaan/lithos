@@ -4,6 +4,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigButton } from '../components/BigButton';
 import { CardTile } from '../components/CardTile';
 import { Chip } from '../components/Chip';
@@ -30,6 +31,7 @@ export function CollectionScreen({ navigation }: Props) {
   const [sort, setSort] = useState<SortMode>('newest');
   const [filter, setFilter] = useState<TierFilter>(null);
   const seq = useRef(0);
+  const insets = useSafeAreaInsets(); // вкладка без хедера: верх контента ушёл бы под Dynamic Island
 
   const load = useCallback(async (isFocused: () => boolean = () => true) => {
     const my = ++seq.current; // параллельные load (фокус + pull-to-refresh): побеждает последний
@@ -126,7 +128,7 @@ export function CollectionScreen({ navigation }: Props) {
   return (
     <FlatList
       style={styles.screen}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 8 }]}
       columnWrapperStyle={styles.column}
       numColumns={2}
       data={grid}

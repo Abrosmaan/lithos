@@ -46,7 +46,9 @@
           "locationWhenInUsePermission": "Геопозиция нужна, чтобы сопоставить камень с геологией места."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-image",
+      "expo-status-bar"
     ]
   }
 }

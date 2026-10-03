@@ -103,6 +103,8 @@ export const tierColors = {
 export const mapColors = {
   cellFill: 'rgba(224,165,38,0.14)',
   cellStroke: 'rgba(224,165,38,0.45)',
+  /** Заливка метки чужой опубликованной находки: textMuted с альфой, нейтральный серый против цветов тиров. */
+  otherFill: 'rgba(154,165,177,0.26)',
 } as const;
 
 export function tierColor(tier: keyof typeof tierColors | null | undefined): string {

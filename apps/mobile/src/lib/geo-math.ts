@@ -61,11 +61,20 @@ export interface Region {
 export const MAX_LAT_DELTA = 150;
 export const MAX_LNG_DELTA = 360;
 
+interface Bounds {
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+}
+
 /**
- * Регион карты, вмещающий все точки с запасом; одна точка — окно ~2 км; нет точек — null.
- * Антимеридиан: если разброс долгот > 180°, точки с отрицательной долготой сдвигаются на +360, центр нормализуется.
+ * Габариты набора точек — общая основа `boundingRegion` и `fitSpan` (раньше каждая считала их сама, и
+ * обработка антимеридиана была продублирована). Антимеридиан: если разброс долгот > 180°, точки с
+ * отрицательной долготой сдвигаются на +360 и берётся тот вариант, где обхват уже — Чукотка и Аляска
+ * соседи, а не половина глобуса. Из-за сдвига `maxLng` может выйти за 180°: центр нормализует вызывающий.
  */
-export function boundingRegion(points: readonly { lat: number; lng: number }[], paddingFactor = 1.4, minDelta = 0.02): Region | null {
+function bounds(points: readonly { lat: number; lng: number }[]): Bounds | null {
   const first = points[0];
   if (!first) return null;
   let minLat = first.lat, maxLat = first.lat, minLng = first.lng, maxLng = first.lng;
@@ -78,12 +87,88 @@ export function boundingRegion(points: readonly { lat: number; lng: number }[], 
     const sMin = Math.min(...shifted), sMax = Math.max(...shifted);
     if (sMax - sMin < maxLng - minLng) { minLng = sMin; maxLng = sMax; }
   }
-  let longitude = (minLng + maxLng) / 2;
+  return { minLat, maxLat, minLng, maxLng };
+}
+
+/**
+ * Регион карты, вмещающий все точки с запасом; одна точка — окно ~2 км; нет точек — null.
+ */
+export function boundingRegion(points: readonly { lat: number; lng: number }[], paddingFactor = 1.4, minDelta = 0.02): Region | null {
+  const b = bounds(points);
+  if (!b) return null;
+  let longitude = (b.minLng + b.maxLng) / 2;
   if (longitude > 180) longitude -= 360;
   return {
-    latitude: (minLat + maxLat) / 2,
+    latitude: (b.minLat + b.maxLat) / 2,
     longitude,
-    latitudeDelta: Math.min(MAX_LAT_DELTA, Math.max(minDelta, (maxLat - minLat) * paddingFactor)),
-    longitudeDelta: Math.min(MAX_LNG_DELTA, Math.max(minDelta, (maxLng - minLng) * paddingFactor)),
+    latitudeDelta: Math.min(MAX_LAT_DELTA, Math.max(minDelta, (b.maxLat - b.minLat) * paddingFactor)),
+    longitudeDelta: Math.min(MAX_LNG_DELTA, Math.max(minDelta, (b.maxLng - b.minLng) * paddingFactor)),
   };
+}
+
+/**
+ * Порог охвата (T6.1-B, дефект 3a): ниже него `fitToCoordinates` подгоняет карту под бокс без запаса
+ * (в отличие от `boundingRegion`, у него нет `minDelta`) и уводит зум туда, где Apple Maps не отдаёт тайлы —
+ * пустой серый экран. ≈ 400 м на средних широтах.
+ */
+export const MIN_FIT_SPAN = 0.004;
+
+/**
+ * Наибольший разброс координат набора точек (широта или долгота) — мера того, стоит ли вызывать
+ * `fitToCoordinates` или лучше свести к `boundingRegion` (одна точка / несколько точек в одном месте).
+ * Меньше двух точек → 0.
+ */
+export function fitSpan(points: readonly { lat: number; lng: number }[]): number {
+  if (points.length < 2) return 0;
+  const b = bounds(points)!;
+  return Math.max(b.maxLat - b.minLat, b.maxLng - b.minLng);
+}
+
+export interface RegionBounds {
+  minLat: number;
+  maxLat: number;
+  /** Может быть больше maxLng — это не ошибка, а область, пересекающая антимеридиан (-180/+180);
+   *  вызывающий код обязан обработать оба случая (см. fetchPublicFindsInBounds в lib/public-map.ts). */
+  minLng: number;
+  maxLng: number;
+}
+
+/**
+ * Прямоугольник видимой области карты по региону (T7.3-C) — обратная операция к `boundingRegion`, нужна
+ * для подгрузки чужих находок по видимой области, а не целиком (iNaturalist-style). `padding` расширяет
+ * область перед запросом (грузим чуть за край экрана, чтобы не дёргать сеть на каждый мелкий сдвиг карты).
+ * Охват шире 360° по долготе — это весь земной шар, антимеридиан обсуждать не о чём.
+ */
+export function regionBounds(region: Region, padding = 1): RegionBounds {
+  const latSpan = Math.min(MAX_LAT_DELTA, region.latitudeDelta * padding);
+  const minLat = Math.max(-90, region.latitude - latSpan / 2);
+  const maxLat = Math.min(90, region.latitude + latSpan / 2);
+  const lngSpan = Math.min(MAX_LNG_DELTA, region.longitudeDelta * padding);
+  if (lngSpan >= 360) return { minLat, maxLat, minLng: -180, maxLng: 180 };
+  const wrap = (v: number) => (((v + 180) % 360 + 360) % 360) - 180;
+  return { minLat, maxLat, minLng: wrap(region.longitude - lngSpan / 2), maxLng: wrap(region.longitude + lngSpan / 2) };
+}
+
+/** Знаков после запятой при группировке маркеров: 5 ≈ 1 м, ближе точки на карте физически неразличимы. */
+export const GROUP_PRECISION = 5;
+
+/**
+ * Группировка точек с (почти) совпадающими координатами в один маркер (T6.1-B, дефект 3c): два скана
+ * одного камня приходят с разницей в единицы миллиметров и иначе рисуются как один кружок, второй
+ * недостижим. Порядок групп — по первому вхождению, внутри группы — исходный порядок: список выбора
+ * не должен переставляться между рендерами.
+ */
+export function groupByLocation<T extends { lat: number; lng: number }>(points: readonly T[], precision = GROUP_PRECISION): T[][] {
+  const factor = 10 ** precision;
+  // Math.round перед toFixed убирает «-0.00000» у точек чуть западнее нулевого меридиана: иначе соседи
+  // по разные стороны от нуля получили бы разные ключи.
+  const q = (v: number) => (Math.round(v * factor) / factor).toFixed(precision);
+  const groups = new Map<string, T[]>();
+  for (const p of points) {
+    const key = `${q(p.lat)}|${q(p.lng)}`;
+    const list = groups.get(key);
+    if (list) list.push(p);
+    else groups.set(key, [p]);
+  }
+  return [...groups.values()];
 }

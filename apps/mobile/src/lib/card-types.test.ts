@@ -4,7 +4,13 @@ import { parseBreakdown, parseCardRow, parseIdentificationMeta, parseScanRow } f
 describe('parseCardRow', () => {
   it('минимальная строка: null tier/score, пустые jsonb, verification по умолчанию', () => {
     const c = parseCardRow({ id: 'c', scan_id: 's', rock_class: 'basalt', tier: null, score: null, score_breakdown: null, inclusions: null, shape: null, state: 'closed', verification: 'weird' });
-    expect(c).toMatchObject({ id: 'c', tier: null, score: null, score_breakdown: null, inclusions: [], shape: {}, verification: 'ai', hidden: false, provisional: false });
+    expect(c).toMatchObject({ id: 'c', tier: null, score: null, score_breakdown: null, inclusions: [], shape: {}, verification: 'ai', hidden: false, provisional: false, published: false, published_at: null });
+  });
+  it('published/published_at (T6.1, миграция 0007): читаются как есть, отсутствие → false/null', () => {
+    const base = { id: 'c', scan_id: 's', rock_class: 'basalt' };
+    expect(parseCardRow({ ...base })).toMatchObject({ published: false, published_at: null });
+    expect(parseCardRow({ ...base, published: true, published_at: '2026-09-10T10:00:00Z' })).toMatchObject({ published: true, published_at: '2026-09-10T10:00:00Z' });
+    expect(parseCardRow({ ...base, published: 'yes' })).toMatchObject({ published: false });
   });
   it('мусор → null; неизвестный тир → null', () => {
     expect(parseCardRow(null)).toBeNull();

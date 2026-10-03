@@ -10,7 +10,7 @@ import { supabase } from './supabase';
 const SIGNED_URL_TTL_S = 60 * 60;
 
 const CARD_COLUMNS =
-  'id, scan_id, rock_class, tier, score, score_breakdown, inclusions, shape, lore, name, user_name, state, parent_card_id, verification, provisional, hidden, cell_id, lat, lng, created_at, updated_at';
+  'id, scan_id, rock_class, tier, score, score_breakdown, inclusions, shape, lore, name, user_name, state, parent_card_id, verification, provisional, hidden, cell_id, lat, lng, published, published_at, created_at, updated_at';
 const SCAN_COLUMNS = 'id, stage, error, parent_card_id, lat, lng, created_at, updated_at';
 
 function fail(cause: unknown, message: string = MSG.loadFailed): never {
