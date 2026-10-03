@@ -125,10 +125,16 @@ export function CardScreen({ navigation, route }: Props) {
         const candidates = planShowcaseMigration(oldList, cards);
         await markShowcaseMigrationDone();
         if (!alive || candidates.length === 0) return;
+        // Имя обещаем только если оно есть — как в диалоге одиночной публикации. Неизвестность (сеть)
+        // трактуем как «имени нет»: лучше не пообещать подпись, чем пообещать несуществующую.
+        let hasName = false;
+        try { hasName = Boolean((await fetchProfile()).displayName); } catch (e) { logError('showcase.migration.profile', e); }
+        if (!alive) return;
         Alert.alert(
           'Перенести старую витрину?',
           `В старой локальной витрине: ${cardsCountText(candidates.length)}. Опубликовать их сейчас — ` +
-            'другие увидят фото, породу, тир, ваше имя и место с точностью до километра. Убрать можно в любой момент.',
+            `другие увидят фото, породу, тир${hasName ? ', ваше имя' : ''} и точное место каждой находки. ` +
+            'Убрать можно в любой момент, но то, что уже увидели, не отменить.',
           [
             { text: 'Не сейчас', style: 'cancel' },
             { text: 'Опубликовать', onPress: () => { void publishMigrated(candidates.map((c) => c.id)); } },

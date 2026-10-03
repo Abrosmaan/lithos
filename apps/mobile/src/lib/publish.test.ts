@@ -1,5 +1,10 @@
-// Поток D (T6.1): парсинг публичной витрины + инвариант «в public_finds нет точных координат» —
+// Поток D (T6.1) + T7.3-A (2026-10-03): парсинг публичной витрины + инварианты по тексту миграций —
 // по образцу apps/worker/src/limits/limits-migration.test.ts (текст миграции, не сеть/БД).
+//
+// T7.3: решение владельца от 2026-10-03 отменяет прежнее правило «точные координаты наружу не отдаём
+// никогда» (T6.0-fixes-and-social.md §2.1, миграция 0007) — теперь lat/lng публикуются намеренно
+// (миграция 0016_public_exact_coords.sql). Инвариант «нет lat/lng» ниже заменён на противоположный:
+// координаты в представлении ЕСТЬ, и это осознанный выбор, а не дефект.
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { REPORT_AUTOHIDE_THRESHOLD } from '@lithos/shared';
@@ -16,12 +21,15 @@ vi.mock('./auth', () => ({ ensureUser: async () => ({ userId: 'test-user', devic
 const { decodeCursor, normalizeReportReason, parsePublicFindRow, REPORT_REASON_MAX } = await import('./publish');
 
 const MIGRATIONS_DIR = resolve(import.meta.dirname, '../../../../supabase/migrations');
-const MIGRATION = resolve(MIGRATIONS_DIR, '0007_public_showcase.sql');
+// Представление пересоздано в 0016 (T7.3, 2026-10-03) — именно этот файл теперь источник истины для
+// текста view/grant. 0007 остаётся на диске (править применённые миграции нельзя), но его текст view
+// больше не действует: 0016 делает `drop view` + `create view` заново.
+const MIGRATION = resolve(MIGRATIONS_DIR, '0016_public_exact_coords.sql');
 
-describe('lithos.public_finds — колонки по тексту миграции', () => {
+describe('lithos.public_finds — колонки по тексту миграции (0016, T7.3)', () => {
   const sql = readFileSync(MIGRATION, 'utf8');
-  // Тело "select … from lithos.cards c" внутри "create or replace view lithos.public_finds as".
-  const viewMatch = sql.match(/create\s+or\s+replace\s+view\s+lithos\.public_finds\s+as\s*([\s\S]*?);/i);
+  // Тело "select … from lithos.cards c" внутри "create view lithos.public_finds as".
+  const viewMatch = sql.match(/create\s+view\s+lithos\.public_finds\s+as\s*([\s\S]*?);/i);
 
   it('миграция содержит представление public_finds', () => {
     expect(viewMatch).not.toBeNull();
@@ -29,7 +37,7 @@ describe('lithos.public_finds — колонки по тексту миграц�
 
   const body = viewMatch![1]!;
 
-  it('отдаёт только согласованный набор колонок (data-map.md «видно другим»)', () => {
+  it('отдаёт согласованный набор колонок, включая lat/lng рядом с cell_id (T7.3)', () => {
     // Верхнеуровневые элементы select (без вложенных скобок — их тут и нет), последний идентификатор в каждом.
     const selectPart = body.match(/select([\s\S]*?)from\s+lithos\.cards/i)![1]!;
     const columns = selectPart
@@ -42,14 +50,18 @@ describe('lithos.public_finds — колонки по тексту миграц�
         const parts = c.split('.');
         return parts[parts.length - 1]!;
       });
-    expect(columns).toEqual(['id', 'rock_class', 'tier', 'score', 'lore', 'name', 'user_name', 'cell_id', 'created_at', 'published_at', 'author_name']);
+    expect(columns).toEqual([
+      'id', 'rock_class', 'tier', 'score', 'lore', 'name', 'user_name', 'cell_id', 'lat', 'lng', 'created_at', 'published_at', 'author_name',
+    ]);
   });
 
-  it('НИКОГДА не содержит lat/lng — точные координаты наружу не отдаются (правило владельца)', () => {
-    expect(/\blat\b/i.test(body)).toBe(false);
-    expect(/\blng\b/i.test(body)).toBe(false);
-    expect(/latitude/i.test(body)).toBe(false);
-    expect(/longitude/i.test(body)).toBe(false);
+  it('ТЕПЕРЬ содержит lat/lng намеренно — решение владельца 2026-10-03 отменяет старый запрет (T7.3)', () => {
+    // Старый инвариант (до 0016) требовал обратного: отсутствия lat/lng. Решение владельца от 2026-10-03
+    // (см. шапку 0016_public_exact_coords.sql) отменяет прежнее правило T6.0-fixes-and-social.md §2.1 —
+    // находка на карте показывается точными координатами, как в iNaturalist. Этот тест ловит обратное:
+    // если lat/lng из представления исчезнут, это откат модели, а не наведение порядка.
+    expect(/\blat\b/i.test(body)).toBe(true);
+    expect(/\blng\b/i.test(body)).toBe(true);
   });
 
   it('исключает скрытые и pending_review (сверка с WHERE-условием)', () => {
@@ -74,16 +86,20 @@ describe('parsePublicFindRow', () => {
     name: 'Гранит',
     user_name: 'Мой камень',
     cell_id: 'szrv5f',
+    lat: 41.674,
+    lng: 44.823,
     created_at: '2026-09-01T10:00:00Z',
     published_at: '2026-09-02T10:00:00Z',
     author_name: 'Игорь',
   };
 
-  it('парсит валидную строку и считает центр ячейки на клиенте', () => {
+  it('парсит валидную строку, несёт точные lat/lng и считает центр ячейки отдельно (T7.3)', () => {
     const row = parsePublicFindRow(base);
     expect(row).not.toBeNull();
     expect(row!.id).toBe('c1');
     expect(row!.tier).toBe('rare');
+    expect(row!.lat).toBe(41.674);
+    expect(row!.lng).toBe(44.823);
     expect(row!.center).toEqual(cellCenter('szrv5f'));
   });
 
@@ -98,10 +114,19 @@ describe('parsePublicFindRow', () => {
     expect(row!.tier).toBeNull();
   });
 
-  it('нет cell_id → center = null (карта не рисует точку без ячейки)', () => {
-    const row = parsePublicFindRow({ ...base, cell_id: null });
+  it('нет гео (cell_id/lat/lng = null) → валидная карточка без места на карте', () => {
+    const row = parsePublicFindRow({ ...base, cell_id: null, lat: null, lng: null });
+    expect(row).not.toBeNull();
     expect(row!.cell_id).toBeNull();
+    expect(row!.lat).toBeNull();
+    expect(row!.lng).toBeNull();
     expect(row!.center).toBeNull();
+  });
+
+  it('битые lat/lng (не число) → null, а не мусор', () => {
+    const row = parsePublicFindRow({ ...base, lat: 'x', lng: undefined });
+    expect(row!.lat).toBeNull();
+    expect(row!.lng).toBeNull();
   });
 
   it('автор без имени — author_name = null, текст «Без имени» решает экран, не клиент-lib', () => {

@@ -1,10 +1,16 @@
 // Карта (spec §8, T3.2; DESIGN_SYSTEM.md экран 12): точки сканов цветом тира, тап → карточка, ячейки с
 // закрытым дневником подсвечены. react-native-maps: Apple Maps на iOS без ключа; Android требует Google Maps
 // API key (см. docs/tasks/T3.2.md). Офлайн — точки из кэша AsyncStorage. Логика загрузки не менялась при рестайле.
-// T6.1-E2 (поток E): слой чужих опубликованных находок — маркеры и ячейки по центру geohash-6 (~1,2 км),
-// оформлены иначе, чем свои (пунктир, нейтральный серый, без цвета тира): центр ячейки — не место находки,
-// маркер должен честно читаться как «примерно здесь, где-то в этой ячейке». Грузится отдельным запросом от
-// своих карточек и не должен ронять карту при ошибке (T6.0-fixes-and-social.md §2.2, п.6).
+// T6.1-E2 → T7.3-C (решение владельца, 2026-10-03, отменяет прежнее): слой чужих опубликованных находок
+// ставится по точным lat/lng, как в iNaturalist, а не по центру ячейки geohash-6 — ни пунктирной ячейки
+// «примерно здесь», ни оговорок про километр больше нет, это настоящая точка. С ростом числа находок
+// простая группировка по совпадающим координатам (groupByLocation) не спасает от каши маркеров — здесь
+// используется зависящая от масштаба кластеризация (lib/map-cluster.ts): далеко — кластеры крупнее, при
+// приближении распадаются на отдельные точки. Чужие находки грузятся по видимой области карты
+// (lib/public-map.ts#fetchPublicFindsInBounds), а не целиком страницами: сдвинули/масштабировали карту —
+// подгружается область, с порогом на мелкие сдвиги (shouldReloadOthers), чтобы не слать запрос на каждый
+// пиксель. Отдельный запрос от своих карточек — ошибка (нет сети, RLS) не должна портить свою карту
+// (T6.0-fixes-and-social.md §2.2, п.6).
 import { TIER_RU, TIERS } from '@lithos/shared';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -17,11 +23,12 @@ import { displayName, tierLabel } from '../lib/card-facts';
 import type { CardRow } from '../lib/card-types';
 import { visitedCells, type DiaryRow } from '../lib/diary';
 import { logError, MSG, toUserMessage } from '../lib/errors';
-import { boundingRegion, fitSpan, groupByLocation, MIN_FIT_SPAN } from '../lib/geo-math';
-import { cellPolygon, type LatLng } from '../lib/geohash';
+import { boundingRegion, fitSpan, groupByLocation, MIN_FIT_SPAN, regionBounds, type Region } from '../lib/geo-math';
+import { cellPolygon } from '../lib/geohash';
+import { clusterByZoom, type ClusterGroup } from '../lib/map-cluster';
 import { loadCards, loadDiary } from '../lib/offline-cache';
-import { otherFindPoints, type OtherFindPoint } from '../lib/public-map';
-import { listPublicFinds, type PublicFindRow } from '../lib/publish';
+import { fetchPublicFindsInBounds, otherFindPoints, shouldReloadOthers, type OtherFindPoint } from '../lib/public-map';
+import type { PublicFindRow } from '../lib/publish';
 import { pluralRu } from '../lib/text';
 import type { TabScreenProps } from '../navigation/types';
 import { colors, fonts, mapColors, placeholderStripes, radius, tierColor } from '../theme';
@@ -33,16 +40,12 @@ type Point = CardRow & { lat: number; lng: number };
 /** Стартовый регион без точек: Черноморское побережье (spec §16 — фокус прототипа). */
 const DEFAULT_REGION = { latitude: 44.6, longitude: 37.9, latitudeDelta: 6, longitudeDelta: 6 };
 const FIT_PADDING = { top: 80, right: 40, bottom: 160, left: 40 };
-/**
- * Чужим находкам на карте нужен весь набор сразу (это точки на карте, а не порционный список под скролл),
- * поэтому листаем страницы, а не берём только первую. Потолок страниц — инженерная защита от бесконечного
- * цикла при большом объёме публикаций, не балансовое число (CLAUDE.md — про score/тиры).
- */
-const OTHER_FINDS_PAGE_LIMIT = 100;
-const OTHER_FINDS_MAX_PAGES = 10;
-/** rgb(154,165,177) = colors.textMuted — нейтральный серый для чужих находок, не занятый другими смыслами легенды. */
-const OTHER_CELL_FILL = 'rgba(154,165,177,0.10)';
-const OTHER_CELL_STROKE = 'rgba(154,165,177,0.38)';
+/** Область подгрузки чужих находок шире видимой на этот множитель — лёгкий запас на панорамирование,
+ *  чтобы не дёргать сеть при каждом мелком сдвиге (вместе с shouldReloadOthers). */
+const OTHER_FINDS_PADDING = 1.3;
+/** Debounce подгрузки по области: карта шлёт onRegionChangeComplete не на каждый пиксель, но запас не лишний
+ *  (защита от частых программных смещений, напр. анимированной подгонки под свои точки). Не балансовое число. */
+const OTHER_FINDS_DEBOUNCE_MS = 400;
 
 const hasGeo = (c: CardRow): c is Point => !c.hidden && c.lat !== null && c.lng !== null;
 
@@ -87,31 +90,58 @@ export function MapScreen({ navigation }: Props) {
     }
   }, []);
 
-  // Чужие находки — отдельный запрос от своей карты: ошибка (нет сети, RLS) не должна портить свою карту,
-  // она просто останется без чужого слоя (T6.0-fixes-and-social.md §2.2, п.6). Листаем до потолка страниц —
-  // карте нужны все точки сразу, а не порция под «показать ещё».
-  const loadOthers = useCallback(async (isFocused: () => boolean = () => true) => {
+  // Чужие находки по видимой области карты (T7.3-C, п.5), не целиком страницами: lib/publish.ts фильтра по
+  // области не умеет и его трогать нельзя (вне границ задачи) — fetchPublicFindsInBounds в lib/public-map.ts
+  // запрашивает lithos.public_finds по диапазону lat/lng напрямую (колонки уже отданы наружу, T7.3-A).
+  // Отдельный запрос от своей карты: ошибка (нет сети, RLS) не должна портить свою карту, область просто
+  // останется с прежним (или пустым) чужим слоем (T6.0-fixes-and-social.md §2.2, п.6).
+  const region = useRef<Region | null>(null);
+  const lastOtherRegion = useRef<Region | null>(null);
+  const otherDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [otherSpan, setOtherSpan] = useState(0);
+
+  // Побеждает последний запрос, как и у своей карты выше. Без счётчика быстрое панорамирование оставляло
+  // в полёте два запроса сразу (ретраи и таймаут дают до десятков секунд), и ответ по старой области,
+  // пришедший позже, откатывал бы чужой слой на устаревшие точки.
+  const othersSeq = useRef(0);
+
+  const loadOthersForRegion = useCallback(async (r: Region, isFocused: () => boolean = () => true) => {
+    const my = ++othersSeq.current;
     try {
-      const all: PublicFindRow[] = [];
-      let cursor: string | null = null;
-      for (let page = 0; page < OTHER_FINDS_MAX_PAGES; page++) {
-        const res = await listPublicFinds({ limit: OTHER_FINDS_PAGE_LIMIT, cursor });
-        all.push(...res.items);
-        cursor = res.nextCursor;
-        if (!cursor) break;
-      }
-      if (isFocused()) setOtherFinds(all);
+      const rows = await fetchPublicFindsInBounds(regionBounds(r, OTHER_FINDS_PADDING));
+      if (isFocused() && my === othersSeq.current) setOtherFinds(rows);
     } catch (e) {
       logError('map.others', e);
     }
   }, []);
 
+  // Порог на мелкие сдвиги/зум (shouldReloadOthers) + debounce — запрос не должен лететь на каждый пиксель
+  // панорамирования, а только когда область заметно изменилась и движение карты остановилось.
+  const scheduleOthersLoad = useCallback((r: Region, isFocused: () => boolean = () => true) => {
+    if (!shouldReloadOthers(lastOtherRegion.current, r)) return;
+    lastOtherRegion.current = r;
+    if (otherDebounce.current) clearTimeout(otherDebounce.current);
+    otherDebounce.current = setTimeout(() => { void loadOthersForRegion(r, isFocused); }, OTHER_FINDS_DEBOUNCE_MS);
+  }, [loadOthersForRegion]);
+
+  const handleRegionChange = useCallback((r: Region) => {
+    region.current = r;
+    setOtherSpan(Math.max(r.latitudeDelta, r.longitudeDelta));
+    scheduleOthersLoad(r);
+  }, [scheduleOthersLoad]);
+
   useFocusEffect(useCallback(() => {
     let alive = true;
     void load(() => alive);
-    void loadOthers(() => alive);
-    return () => { alive = false; };
-  }, [load, loadOthers]));
+    // При возврате на экран область могла измениться (сканы в другом месте) — форсируем перезапрос чужого
+    // слоя для текущей/стартовой области, не дожидаясь очередного сдвига карты.
+    lastOtherRegion.current = null;
+    scheduleOthersLoad(region.current ?? DEFAULT_REGION, () => alive);
+    return () => {
+      alive = false;
+      if (otherDebounce.current) clearTimeout(otherDebounce.current);
+    };
+  }, [load, scheduleOthersLoad]));
 
   const points = useMemo(() => (cards ?? []).filter(hasGeo), [cards]);
   const ownCardIds = useMemo(() => new Set((cards ?? []).map((c) => c.id)), [cards]);
@@ -127,23 +157,12 @@ export function MapScreen({ navigation }: Props) {
   // живёт в lib/geo-math и покрыта тестами.
   const markerGroups = useMemo(() => groupByLocation(points), [points]);
 
-  // Чужие находки: без гео и свои собственные публикации отсеиваются в otherFindPoints (иначе своя
-  // находка нарисовалась бы дважды — своим маркером и «чужим», T6.0-fixes-and-social.md §2.2 п.4/5).
-  // Группировка по ячейке использует тот же groupByLocation: центр одной ячейки детерминирован (cellCenter),
-  // так что все находки одной ячейки получают одинаковый lat/lng и естественно склеиваются в одну группу.
+  // Чужие находки: без гео и свои собственные публикации отсеиваются в otherFindPoints (иначе своя находка
+  // нарисовалась бы дважды — своим маркером и «чужим», T6.0-fixes-and-social.md §2.2 п.4/5). Группировка —
+  // кластеризация по масштабу (T7.3-C, lib/map-cluster.ts), не по совпадающим координатам: с точными lat/lng
+  // находки почти никогда не совпадут физически, нужна сетка, зависящая от текущего охвата карты.
   const otherPoints = useMemo(() => otherFindPoints(otherFinds, ownCardIds), [otherFinds, ownCardIds]);
-  const otherGroups = useMemo(() => groupByLocation(otherPoints), [otherPoints]);
-  const otherCells = useMemo(() => {
-    const seen = new Set<string>();
-    const list: { cell_id: string; coords: LatLng[] }[] = [];
-    for (const p of otherPoints) {
-      if (seen.has(p.cell_id)) continue;
-      seen.add(p.cell_id);
-      const coords = cellPolygon(p.cell_id);
-      if (coords) list.push({ cell_id: p.cell_id, coords });
-    }
-    return list;
-  }, [otherPoints]);
+  const otherClusters = useMemo(() => clusterByZoom(otherPoints, otherSpan), [otherPoints, otherSpan]);
 
   const openCard = useCallback((cardId: string) => navigation.navigate('Card', { cardId }), [navigation]);
   const openPublicFind = useCallback((find: PublicFindRow) => navigation.navigate('PublicFind', { find }), [navigation]);
@@ -169,7 +188,8 @@ export function MapScreen({ navigation }: Props) {
     });
   }, [openCard, closeSheet]);
 
-  const handleOtherMarkerPress = useCallback((group: OtherFindPoint[]) => {
+  const handleOtherMarkerPress = useCallback((cluster: ClusterGroup<OtherFindPoint>) => {
+    const group = cluster.items;
     if (group.length === 1) { openPublicFind(group[0]!); return; }
     setSheet({
       title: `${group.length} ${pluralRu(group.length, 'чужая находка', 'чужие находки', 'чужих находок')} здесь`,
@@ -215,6 +235,7 @@ export function MapScreen({ navigation }: Props) {
         style={StyleSheet.absoluteFill}
         initialRegion={initialRegion}
         onMapReady={() => setReady(true)}
+        onRegionChangeComplete={handleRegionChange}
         showsUserLocation
         showsCompass={false}
         userInterfaceStyle="dark"
@@ -228,16 +249,6 @@ export function MapScreen({ navigation }: Props) {
             strokeColor={c.complete ? mapColors.cellStroke : colors.accentBorder}
             strokeWidth={2}
             lineDashPattern={c.complete ? undefined : [6, 4]}
-          />
-        ))}
-        {otherCells.map((c) => (
-          <Polygon
-            key={`other-${c.cell_id}`}
-            coordinates={c.coords}
-            fillColor={OTHER_CELL_FILL}
-            strokeColor={OTHER_CELL_STROKE}
-            strokeWidth={1.5}
-            lineDashPattern={[3, 5]}
           />
         ))}
         {markerGroups.map((group) => {
@@ -265,18 +276,18 @@ export function MapScreen({ navigation }: Props) {
             </Marker>
           );
         })}
-        {otherGroups.map((group) => {
-          const first = group[0]!;
-          const count = group.length;
+        {otherClusters.map((cluster) => {
+          const first = cluster.items[0]!;
+          const count = cluster.items.length;
           return (
             <Marker
-              key={`other-${group.map((g) => g.id).join('+')}`}
-              coordinate={{ latitude: first.lat, longitude: first.lng }}
-              title={`${count} ${pluralRu(count, 'чужая находка', 'чужие находки', 'чужих находок')}`}
-              description="Примерное место — центр ячейки, не точная точка находки"
+              key={`other-${cluster.items.map((g) => g.id).join('+')}`}
+              coordinate={{ latitude: cluster.lat, longitude: cluster.lng }}
+              title={count > 1 ? `${count} ${pluralRu(count, 'чужая находка', 'чужие находки', 'чужих находок')}` : displayName(first)}
+              description={count === 1 ? `${tierLabel(first.tier)} · ${first.author_name ?? 'Без имени'}` : undefined}
               anchor={{ x: 0.5, y: 0.5 }}
               tracksViewChanges={false}
-              onPress={() => handleOtherMarkerPress(group)}
+              onPress={() => handleOtherMarkerPress(cluster)}
             >
               <View style={styles.otherMarker}>
                 <Text style={styles.otherMarkerText}>{count}</Text>
@@ -328,7 +339,7 @@ export function MapScreen({ navigation }: Props) {
       <View style={[styles.legend, { bottom: insets.bottom > 0 ? 10 : 16 }]}>
         {cards === null ? (
           <ActivityIndicator color={colors.accent} />
-        ) : points.length === 0 && otherGroups.length === 0 ? (
+        ) : points.length === 0 && otherClusters.length === 0 ? (
           <View style={styles.legendEmpty}>
             <View style={styles.legendStone} />
             <Text style={styles.legendTitle}>Пока нет точек</Text>
@@ -343,7 +354,7 @@ export function MapScreen({ navigation }: Props) {
               {points.length} {pluralRu(points.length, 'точка', 'точки', 'точек')}
               {completedCount > 0 ? ` · ${completedCount} ${pluralRu(completedCount, 'ячейка закрыта', 'ячейки закрыты', 'ячеек закрыто')}` : ''}
               {partialCount > 0 ? ` · ${partialCount} ${pluralRu(partialCount, 'ячейка посещена', 'ячейки посещены', 'ячеек посещено')}` : ''}
-              {otherPoints.length > 0 ? ` · ${otherPoints.length} ${pluralRu(otherPoints.length, 'чужая находка', 'чужие находки', 'чужих находок')}` : ''}
+              {otherPoints.length > 0 ? ` · ${otherPoints.length} ${pluralRu(otherPoints.length, 'чужая находка', 'чужие находки', 'чужих находок')} в этой области` : ''}
             </Text>
             <View style={styles.legendRow}>
               {[...TIERS].reverse().map((t) => (
@@ -364,10 +375,10 @@ export function MapScreen({ navigation }: Props) {
                   <Text style={styles.legendText}>есть находки</Text>
                 </View>
               )}
-              {otherGroups.length > 0 && (
+              {otherClusters.length > 0 && (
                 <View style={styles.legendItem}>
                   <View style={styles.otherMarkerLegend} />
-                  <Text style={styles.legendText}>чужие (примерно)</Text>
+                  <Text style={styles.legendText}>чужие находки</Text>
                 </View>
               )}
             </View>
@@ -385,12 +396,13 @@ const styles = StyleSheet.create({
   markerRing: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: colors.bg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   dot: { width: 14, height: 14, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
   dotMark: { fontFamily: fonts.monoBold, fontSize: 9, lineHeight: 10, color: colors.bg },
-  // Чужой маркер: пунктирная рамка вместо заливки цветом тира — тот же язык, что у «посещённых» ячеек
-  // (пунктир = приблизительно/не полностью своё). Нейтральный серый — золотой и бирюзовый уже заняты
-  // своими значениями в легенде (дневник закрыт / есть находки).
-  otherMarker: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderStyle: 'dashed', borderColor: colors.textMuted, backgroundColor: 'rgba(154,165,177,0.22)', alignItems: 'center', justifyContent: 'center' },
+  // Чужой маркер (T7.3-C): это настоящая точка находки, не приблизительная ячейка — рамка сплошная, не
+  // пунктирная (пунктир на этой карте читается как «приблизительно», врать в обратную сторону не стоит).
+  // Нейтральный серый, не цвет тира — отличает чужую находку от своей на взгляд; золотой и бирюзовый уже
+  // заняты своими значениями в легенде (дневник закрыт / есть находки).
+  otherMarker: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: colors.textMuted, backgroundColor: mapColors.otherFill, alignItems: 'center', justifyContent: 'center' },
   otherMarkerText: { fontFamily: fonts.monoBold, fontSize: 9, lineHeight: 10, color: colors.text },
-  otherMarkerLegend: { width: 9, height: 9, borderRadius: 4.5, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.textMuted, backgroundColor: 'rgba(154,165,177,0.22)' },
+  otherMarkerLegend: { width: 9, height: 9, borderRadius: 4.5, borderWidth: 1, borderColor: colors.textMuted, backgroundColor: mapColors.otherFill },
   banner: { position: 'absolute', left: 16, right: 16 },
   legend: { position: 'absolute', left: 16, right: 16, backgroundColor: 'rgba(22,28,36,0.94)', borderRadius: radius.md, padding: 16, gap: 11, borderWidth: 1, borderColor: colors.divider },
   legendEmpty: { gap: 8, alignItems: 'flex-start' },

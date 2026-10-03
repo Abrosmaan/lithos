@@ -1,10 +1,12 @@
-// Чужая находка (T6.1-E2, поток E): только чтение — фото, порода, тир, score, лор, автор, ячейка и дата.
-// Никаких действий владельца (раскол/публикация/переименование/удаление) — это не карточка смотрящего.
-// Данные приходят параметром экрана: карта и дневник места уже держат нужную строку lithos.public_finds
-// (из listPublicFinds), а отдельного запроса «получить находку по id» lib/publish.ts не предоставляет —
-// заводить его ради одного read-only экрана незачем (T6.1-D сознательно держит поверхность узкой).
-// Точных координат здесь нет по построению — только центр ячейки geohash-6 (~1,2 км), и текст честно
-// это объясняет, а не выглядит как точная точка.
+// Чужая находка (T6.1-E2, поток E; T7.3-C — точные координаты): только чтение — фото, порода, тир, score,
+// лор, автор, место и дата. Никаких действий владельца (раскол/публикация/переименование/удаление) — это
+// не карточка смотрящего. Данные приходят параметром экрана: карта и дневник места уже держат нужную строку
+// lithos.public_finds (из listPublicFinds), а отдельного запроса «получить находку по id» lib/publish.ts не
+// предоставляет — заводить его ради одного read-only экрана незачем (T6.1-D сознательно держит поверхность
+// узкой).
+// T7.3 (решение владельца, 2026-10-03, отменяет прежнее): место находки — точные lat/lng, как в iNaturalist,
+// не центр ячейки geohash-6. Находка без гео (lat/lng = null) — валидна, место показывается как «без
+// геопозиции», экран не ломается.
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -18,7 +20,7 @@ import { displayName, formatDateRu, rockClassRu, tierLabel } from '../lib/card-f
 import { REPORT_DIALOG } from '../lib/consent';
 import { logError, MSG, toUserMessage } from '../lib/errors';
 import { fetchPublicPhotoUrl, reportCard, REPORT_REASON_MAX } from '../lib/publish';
-import { cellCoordsText } from '../lib/screen-text';
+import { exactCoordsText } from '../lib/screen-text';
 import type { RootScreenProps } from '../navigation/types';
 import { colors, density, fonts, placeholderStripes, radius, spacing, tierColor, type } from '../theme';
 
@@ -69,7 +71,7 @@ export function PublicFindScreen({ route }: Props) {
   const name = displayName(find);
   const author = find.author_name ?? 'Без имени';
   const accent = tierColor(find.tier);
-  const place = find.cell_id ? cellCoordsText(find.center) : 'Без геопозиции';
+  const place = typeof find.lat === 'number' && typeof find.lng === 'number' ? exactCoordsText(find.lat, find.lng) : 'Без геопозиции';
   const date = formatDateRu(find.published_at ?? find.created_at) ?? '—';
 
   return (
@@ -106,10 +108,6 @@ export function PublicFindScreen({ route }: Props) {
           <KeyValue k="Место" v={place} />
           <KeyValue k="Дата" v={date} />
         </Section>
-
-        <Text style={styles.honesty}>
-          Место — центр ячейки геопозиции (~1,2 км), а не точная точка находки: её автор не показывает никому.
-        </Text>
 
         <BigButton label="Пожаловаться" variant="secondary" onPress={() => setReportOpen(true)} />
       </View>
@@ -154,7 +152,6 @@ const styles = StyleSheet.create({
   name: { ...type.h2, fontSize: 25, lineHeight: 30 },
   author: { fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 18, color: colors.textMuted },
   tierBlock: { gap: 12, padding: 15, borderRadius: radius.lg, backgroundColor: colors.surface, borderWidth: 1 },
-  honesty: { fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 17, color: colors.textDim },
   sheetBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11,15,20,0.6)' },
   sheet: { position: 'absolute', left: 0, right: 0, bottom: 0, maxHeight: '80%', backgroundColor: colors.surface, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, borderTopWidth: 1, borderColor: colors.divider, paddingTop: 10, paddingHorizontal: 16, gap: 12 },
   sheetGrip: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, backgroundColor: colors.borderStrong },

@@ -1,6 +1,11 @@
 // Публичная витрина — сервер (T6.1, поток D; миграция 0007_public_showcase.sql).
 // Стиль как в lib/cards.ts: withRetry, abortSignal, ошибки через UserError/MSG, без текста сервера.
-// Координаты чужой находки клиенту не приходят — только cell_id; центр ячейки считаем сами (cellCenter).
+//
+// T7.3 (решение владельца, 2026-10-03, отменяет прежнее): опубликованная находка показывается на карте
+// точными координатами (lat/lng из lithos.public_finds, миграция 0016), как в iNaturalist, а не центром
+// ячейки geohash-6. `center` (через cellCenter(cell_id)) оставлен как есть — его продолжают читать
+// lib/public-map.ts и PublicFindScreen.tsx (вне границ этой задачи), а cell_id всё ещё нужен дневнику
+// места («здесь находили другие»). lat/lng — новые, самостоятельные поля, не замена center.
 import type { Tier } from '@lithos/shared';
 import { isTier } from './card-types';
 import { ensureUser } from './auth';
@@ -14,7 +19,12 @@ const SIGNED_URL_TTL_S = 60 * 60;
 const DEFAULT_PAGE_SIZE = 30;
 const MAX_PAGE_SIZE = 100;
 
-const PUBLIC_FIND_COLUMNS = 'id, rock_class, tier, score, lore, name, user_name, cell_id, created_at, published_at, author_name';
+/**
+ * Колонки представления, которые читает клиент. Экспортируется, потому что по области карту грузит
+ * lib/public-map.ts своим запросом: без общей константы появилось бы второе место, которое надо помнить
+ * при каждой смене схемы (находка ревью T7.3-C).
+ */
+export const PUBLIC_FIND_COLUMNS = 'id, rock_class, tier, score, lore, name, user_name, cell_id, lat, lng, created_at, published_at, author_name';
 
 /** Тексты, которые сервер сам не присылает — только коды ошибок RPC (без сырого текста postgres, CLAUDE.md). */
 const PUBLISH_MSG = {
@@ -31,7 +41,12 @@ const str = (v: unknown): string | null => (typeof v === 'string' ? v : null);
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 const bool = (v: unknown, fallback = false): boolean => (typeof v === 'boolean' ? v : fallback);
 
-/** Строка представления lithos.public_finds. lat/lng сюда сознательно не входят (T6.0 §2.1) — только center, посчитанный на клиенте. */
+/**
+ * Строка представления lithos.public_finds. T7.3 (2026-10-03): lat/lng теперь отдаются наружу намеренно —
+ * точные координаты опубликованной находки, видны всем (решение владельца, см. шапку миграции 0016).
+ * `center` оставлен рядом ради обратной совместимости с lib/public-map.ts и PublicFindScreen.tsx (эти файлы
+ * вне границ задачи T7.3-A) — он всё ещё центр ячейки geohash-6, а не производная от lat/lng.
+ */
 export interface PublicFindRow {
   id: string;
   rock_class: string;
@@ -41,11 +56,19 @@ export interface PublicFindRow {
   name: string | null;
   user_name: string | null;
   cell_id: string | null;
+  /**
+   * Точные координаты опубликованной карточки. null — находка без гео (валидна, просто не на карте).
+   * Поле необязательно в типе (а не `lat: number | null`) специально: public-map.test.ts (вне границ этой
+   * задачи, T7.3-A) строит фикстуры PublicFindRow без lat/lng — делать их обязательными сломало бы typecheck
+   * в файле, который нельзя трогать. parsePublicFindRow всегда возвращает конкретное значение (число или null).
+   */
+  lat?: number | null;
+  lng?: number | null;
   created_at: string;
   published_at: string | null;
   /** «Без имени», если владелец не задал display_name — решает экран (T6.0 §2.1), здесь — как есть (null). */
   author_name: string | null;
-  /** Центр ячейки geohash-6 (~1,2 км) — единственная гео-подсказка, которую видят другие пользователи. */
+  /** Центр ячейки geohash-6 (~1,2 км) — для старых потребителей (public-map.ts, PublicFindScreen.tsx); не замена lat/lng. */
   center: LatLng | null;
 }
 
@@ -64,6 +87,8 @@ export function parsePublicFindRow(raw: unknown): PublicFindRow | null {
     name: str(raw.name),
     user_name: str(raw.user_name),
     cell_id,
+    lat: num(raw.lat),
+    lng: num(raw.lng),
     created_at: str(raw.created_at) ?? '',
     published_at: str(raw.published_at),
     author_name: str(raw.author_name),

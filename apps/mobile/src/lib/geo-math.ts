@@ -124,6 +124,31 @@ export function fitSpan(points: readonly { lat: number; lng: number }[]): number
   return Math.max(b.maxLat - b.minLat, b.maxLng - b.minLng);
 }
 
+export interface RegionBounds {
+  minLat: number;
+  maxLat: number;
+  /** Может быть больше maxLng — это не ошибка, а область, пересекающая антимеридиан (-180/+180);
+   *  вызывающий код обязан обработать оба случая (см. fetchPublicFindsInBounds в lib/public-map.ts). */
+  minLng: number;
+  maxLng: number;
+}
+
+/**
+ * Прямоугольник видимой области карты по региону (T7.3-C) — обратная операция к `boundingRegion`, нужна
+ * для подгрузки чужих находок по видимой области, а не целиком (iNaturalist-style). `padding` расширяет
+ * область перед запросом (грузим чуть за край экрана, чтобы не дёргать сеть на каждый мелкий сдвиг карты).
+ * Охват шире 360° по долготе — это весь земной шар, антимеридиан обсуждать не о чём.
+ */
+export function regionBounds(region: Region, padding = 1): RegionBounds {
+  const latSpan = Math.min(MAX_LAT_DELTA, region.latitudeDelta * padding);
+  const minLat = Math.max(-90, region.latitude - latSpan / 2);
+  const maxLat = Math.min(90, region.latitude + latSpan / 2);
+  const lngSpan = Math.min(MAX_LNG_DELTA, region.longitudeDelta * padding);
+  if (lngSpan >= 360) return { minLat, maxLat, minLng: -180, maxLng: 180 };
+  const wrap = (v: number) => (((v + 180) % 360 + 360) % 360) - 180;
+  return { minLat, maxLat, minLng: wrap(region.longitude - lngSpan / 2), maxLng: wrap(region.longitude + lngSpan / 2) };
+}
+
 /** Знаков после запятой при группировке маркеров: 5 ≈ 1 м, ближе точки на карте физически неразличимы. */
 export const GROUP_PRECISION = 5;
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { boundingRegion, farthestFind, fitSpan, formatDistance, groupByLocation, haversineKm, MAX_LAT_DELTA, MAX_LNG_DELTA, MIN_FIT_SPAN } from './geo-math';
+import { boundingRegion, farthestFind, fitSpan, formatDistance, groupByLocation, haversineKm, MAX_LAT_DELTA, MAX_LNG_DELTA, MIN_FIT_SPAN, regionBounds } from './geo-math';
 
 const card = (id: string, lat: number | null, lng: number | null, day: number) => ({ id, lat, lng, created_at: `2026-09-${String(day).padStart(2, '0')}T10:00:00Z` });
 
@@ -83,6 +83,38 @@ describe('fitSpan', () => {
   it('антимеридиан: Чукотка и Аляска — узкий реальный разброс, а не ~343°', () => {
     const span = fitSpan([{ lat: 64.7, lng: 177.5 }, { lat: 64.5, lng: -165.4 }]);
     expect(span).toBeLessThan(20);
+  });
+});
+
+describe('regionBounds', () => {
+  it('простой прямоугольник без антимеридиана', () => {
+    const b = regionBounds({ latitude: 10, longitude: 20, latitudeDelta: 2, longitudeDelta: 4 });
+    expect(b).toEqual({ minLat: 9, maxLat: 11, minLng: 18, maxLng: 22 });
+  });
+
+  it('padding расширяет область пропорционально', () => {
+    const b = regionBounds({ latitude: 0, longitude: 0, latitudeDelta: 2, longitudeDelta: 2 }, 1.5);
+    expect(b).toEqual({ minLat: -1.5, maxLat: 1.5, minLng: -1.5, maxLng: 1.5 });
+  });
+
+  it('антимеридиан: долгота заворачивается, minLng > maxLng сигналит разрыв', () => {
+    const b = regionBounds({ latitude: 64.6, longitude: 179, latitudeDelta: 1, longitudeDelta: 4 });
+    expect(b.minLng).toBeCloseTo(177, 5);
+    expect(b.maxLng).toBeCloseTo(-179, 5);
+    expect(b.minLng).toBeGreaterThan(b.maxLng);
+  });
+
+  it('дельты шире потолков обрезаются; долгота ≥360° — весь земной шар', () => {
+    const b = regionBounds({ latitude: 0, longitude: 0, latitudeDelta: 300, longitudeDelta: 500 });
+    expect(b.minLat).toBe(-75);
+    expect(b.maxLat).toBe(75);
+    expect(b.minLng).toBe(-180);
+    expect(b.maxLng).toBe(180);
+  });
+
+  it('широта не выходит за полюса', () => {
+    const b = regionBounds({ latitude: 89, longitude: 0, latitudeDelta: 10, longitudeDelta: 10 });
+    expect(b.maxLat).toBe(90);
   });
 });
 
