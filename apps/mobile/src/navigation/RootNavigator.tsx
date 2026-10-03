@@ -1,9 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { getConsentVersion, isWelcomeSeen } from '../lib/prefs';
+import { isWelcomeSeen } from '../lib/prefs';
 import { CardScreen } from '../screens/CardScreen';
-import { ConsentScreen } from '../screens/ConsentScreen';
 import { DiaryScreen } from '../screens/DiaryScreen';
 import { PolicyScreen } from '../screens/PolicyScreen';
 import { PublicFindScreen } from '../screens/PublicFindScreen';
@@ -18,15 +17,15 @@ import { initialRoute as computeInitialRoute, type RootStackParamList } from './
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  // Приветствие/пересогласие — читаются один раз при старте (prefs.isWelcomeSeen, prefs.getConsentVersion),
-  // маршрут считает чистая initialRoute (navigation/types.ts, покрыта тестом). Пока не прочитано, держим
-  // пустой тёмный экран: мигания между экранами заметнее, чем 20–30 мс задержки на AsyncStorage.
-  const [route, setRoute] = useState<'Welcome' | 'Consent' | 'Tabs' | null>(null);
+  // Приветствие — читается один раз при старте (prefs.isWelcomeSeen), маршрут считает чистая initialRoute
+  // (navigation/types.ts, покрыта тестом). Пока не прочитано, держим пустой тёмный экран: мигания между
+  // экранами заметнее, чем 20–30 мс задержки на AsyncStorage.
+  const [route, setRoute] = useState<'Welcome' | 'Tabs' | null>(null);
 
   useEffect(() => {
     let alive = true;
-    Promise.all([isWelcomeSeen(), getConsentVersion()]).then(([welcomeSeen, consentVersion]) => {
-      if (alive) setRoute(computeInitialRoute({ welcomeSeen, consentVersion }));
+    isWelcomeSeen().then((welcomeSeen) => {
+      if (alive) setRoute(computeInitialRoute({ welcomeSeen }));
     });
     return () => { alive = false; };
   }, []);
@@ -45,7 +44,6 @@ export function RootNavigator() {
       }}
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
-      <Stack.Screen name="Consent" component={ConsentScreen} options={{ headerShown: false, gestureEnabled: false }} />
       <Stack.Screen name="Tabs" component={TabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="Review" component={ReviewScreen} options={{ title: 'Проверка', headerBackTitle: 'Камера' }} />
       <Stack.Screen name="Result" component={ResultScreen} options={{ title: 'Результат', headerBackVisible: false, gestureEnabled: false }} />

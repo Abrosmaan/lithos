@@ -3,7 +3,6 @@
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CONSENT_VERSION } from '../lib/prefs';
 import type { PublicFindRow } from '../lib/publish';
 
 /** Документ политики (apps/mobile/src/legal/) — какой из двух показывает PolicyScreen. */
@@ -20,8 +19,6 @@ export type TabParamList = {
 export type RootStackParamList = {
   /** Приветствие (T5.2): один раз, до первого входа в табы (флаг prefs.isWelcomeSeen). */
   Welcome: undefined;
-  /** Пересогласие (T6.1, docs/legal/consent-copy.md §2): welcomeSeen=true, но consentVersion устарела. */
-  Consent: undefined;
   Tabs: NavigatorScreenParams<TabParamList> | undefined;
   Review: undefined;
   Result: { scanId: string };
@@ -48,18 +45,20 @@ export type TabScreenProps<T extends keyof TabParamList> = CompositeScreenProps<
 
 export interface InitialRouteInput {
   welcomeSeen: boolean;
-  /** Версия согласия, сохранённая на устройстве (prefs.getConsentVersion(), 0 если не читалась). */
-  consentVersion: number;
 }
 
 /**
  * Стартовый маршрут корневого стека (RootNavigator): чистая функция, без AsyncStorage/навигации —
- * покрывается тестом отдельно от рендера. Не видел приветствия → Welcome; видел, но согласие устарело
- * (consentVersion < CONSENT_VERSION) → Consent; иначе — сразу в табы.
+ * покрывается тестом отдельно от рендера. Не видел приветствия → Welcome; иначе — сразу в табы.
+ *
+ * До T7.2 здесь была ещё ветка на экран пересогласия (consentVersion < CONSENT_VERSION → Consent):
+ * приложение ещё не выпущено, живых пользователей со старым согласием нет, поэтому отдельный экран перед
+ * релизом не нужен — то, что он объяснял, теперь в онбординге и в пользовательском соглашении
+ * (docs/legal/consent-copy.md §1, §2 помечен неиспользуемым). Версия согласия (prefs.CONSENT_VERSION)
+ * продолжает записываться — если условия поменяются уже после релиза, эта ветка вернётся.
  */
-export function initialRoute({ welcomeSeen, consentVersion }: InitialRouteInput): 'Welcome' | 'Consent' | 'Tabs' {
+export function initialRoute({ welcomeSeen }: InitialRouteInput): 'Welcome' | 'Tabs' {
   if (!welcomeSeen) return 'Welcome';
-  if (consentVersion < CONSENT_VERSION) return 'Consent';
   return 'Tabs';
 }
 
