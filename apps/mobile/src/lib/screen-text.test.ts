@@ -3,7 +3,7 @@ import { exactCoordsText } from './screen-text';
 
 describe('exactCoordsText', () => {
   it('формат «N/S, E/W» с пятью знаками — честная точность, не округление до ячейки (T7.3)', () => {
-    expect(exactCoordsText(41.674009, 44.822981)).toBe('41.67401 N, 44.82298 E');
+    expect(exactCoordsText(46.558012, 7.981234)).toBe('46.55801 N, 7.98123 E');
   });
 
   it('отрицательные координаты — S/W', () => {

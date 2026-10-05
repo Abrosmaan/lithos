@@ -19,11 +19,11 @@ describe('clusterByZoom', () => {
   });
 
   it('две точки рядом при широком охвате карты — один кластер, координата — центроид', () => {
-    const groups = clusterByZoom([at('a', 41.6700, 44.8200), at('a2', 41.6705, 44.8203)], 1);
+    const groups = clusterByZoom([at('a', 46.5500, 7.9800), at('a2', 46.5505, 7.9803)], 1);
     expect(groups).toHaveLength(1);
     expect(groups[0]!.items.map((p) => p.id).sort()).toEqual(['a', 'a2']);
-    expect(groups[0]!.lat).toBeCloseTo((41.6700 + 41.6705) / 2, 5);
-    expect(groups[0]!.lng).toBeCloseTo((44.8200 + 44.8203) / 2, 5);
+    expect(groups[0]!.lat).toBeCloseTo((46.5500 + 46.5505) / 2, 5);
+    expect(groups[0]!.lng).toBeCloseTo((7.9800 + 7.9803) / 2, 5);
   });
 
   it('две далёкие точки — разные кластеры даже при широком охвате', () => {
@@ -32,7 +32,7 @@ describe('clusterByZoom', () => {
   });
 
   it('распад кластера при приближении: те же точки, слипшиеся на широком охвате, расходятся на узком', () => {
-    const points = [at('a', 41.6700, 44.8200), at('a2', 41.6705, 44.8203)];
+    const points = [at('a', 46.5500, 7.9800), at('a2', 46.5505, 7.9803)];
     expect(clusterByZoom(points, 1)).toHaveLength(1);
     expect(clusterByZoom(points, 0.001)).toHaveLength(2);
   });
